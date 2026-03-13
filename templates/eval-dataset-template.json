@@ -1,0 +1,14 @@
+[
+  {
+    "id": "q1",
+    "question": "What documents define the deployment approval process?",
+    "expected_contains": ["approval", "deployment"],
+    "notes": "Basic retrieval case"
+  },
+  {
+    "id": "q2",
+    "question": "Which tool is allowed for analysts?",
+    "expected_contains": ["read-only", "SQL"],
+    "notes": "Policy answer case"
+  }
+]
