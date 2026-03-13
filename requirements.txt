@@ -1,0 +1,17 @@
+fastapi
+uvicorn
+pydantic
+pytest
+httpx
+ruff
+
+# Optional AI libraries (useful for Phase 4)
+openai
+tiktoken
+langchain
+langgraph
+chromadb
+sentence-transformers
+
+# Observability / utilities
+python-dotenv
