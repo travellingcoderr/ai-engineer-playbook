@@ -1,7 +1,4 @@
 
-def check_prompt(prompt):
-    banned = ["ignore instructions", "bypass safety"]
-    for b in banned:
-        if b in prompt.lower():
-            return False
-    return True
+def detect_prompt_injection(text):
+    patterns = ["ignore previous instructions","reveal system prompt"]
+    return any(p in text.lower() for p in patterns)

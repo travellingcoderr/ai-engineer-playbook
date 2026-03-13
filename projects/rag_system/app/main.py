@@ -1,10 +1,11 @@
 
 from fastapi import FastAPI
+
 app = FastAPI()
 
 docs = [
-    "AI is transforming software development",
-    "Vector databases enable semantic search"
+    "AI systems rely on embeddings and vector search.",
+    "RAG combines retrieval with generation."
 ]
 
 @app.get("/ask")

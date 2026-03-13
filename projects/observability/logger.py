@@ -1,9 +1,9 @@
 
 import time
 
-def log_call(prompt, response):
-    print({
+def log(prompt, response):
+    return {
         "prompt": prompt,
         "response": response,
         "timestamp": time.time()
-    })
+    }

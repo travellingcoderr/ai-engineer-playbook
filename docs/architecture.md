@@ -1,12 +1,12 @@
 
-# Enterprise AI Architecture (2025)
+# Enterprise AI Architecture
 
-Typical layers used inside companies:
+Typical stack:
 
-1. Interface Layer (Web / Slack / API)
-2. AI Orchestration Layer (LangChain / LangGraph)
-3. Agent Layer
-4. MCP Gateway
-5. Tool Layer
-6. Memory Layer (Vector DB)
-7. Observability & Evals
+1. Interface Layer
+2. Agent / Orchestration Layer
+3. Retrieval Layer
+4. Tool Gateway Layer
+5. Guardrails Layer
+6. Observability Layer
+7. Cloud Infrastructure
