@@ -5,13 +5,20 @@ pytest
 httpx
 ruff
 
-# Optional AI libraries (useful for Phase 4)
+# Optional AI libraries
 openai
 tiktoken
 langchain
 langgraph
 chromadb
 sentence-transformers
+pypdf
+langchain-openai
+langchain-community
+langchain-chroma
+langchain-qdrant
+qdrant-client
+pydantic-settings
 
 # Observability / utilities
 python-dotenv

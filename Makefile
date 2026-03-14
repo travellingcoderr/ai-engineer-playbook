@@ -44,6 +44,14 @@ run-rag:
 	--reload \
 	--reload-dir projects/rag_system
 
+run-docker-rag:
+	@echo "Starting RAG system via Docker Compose..."
+	cd projects/rag_system && docker-compose up -d --build
+
+stop-docker-rag:
+	@echo "Stopping RAG system Docker containers..."
+	cd projects/rag_system && docker-compose down
+
 run-gateway:
 	@$(ACTIVATE) && uvicorn projects.mcp_gateway.app.main:app \
 	--host 127.0.0.1 \
