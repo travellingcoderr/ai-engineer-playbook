@@ -4,16 +4,13 @@ FROM python:3.12-slim
 # Set working directory in the container
 WORKDIR /app
 
-# Install build dependencies (sometimes needed for certain ML packages)
+# Install build dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy the requirements file into the container
-# Note: Since the context will be the projects/rag_system directory,
-# we need to copy a requirements file. For simplicity, we create one inline
-# or copy the global one if run from the project root.
 # We will assume this Dockerfile is run from ai-engineer-playbook root
 COPY requirements.txt .
 
@@ -28,16 +25,17 @@ COPY packages /app/packages
 RUN pip install -e .
 
 # Copy the current directory contents into the container at /app
-COPY projects/rag_system/app /app/projects/rag_system/app
+COPY projects/research_agent/app /app/projects/research_agent/app
+COPY projects/research_agent/agent.py /app/projects/research_agent/agent.py
 
 # Set PYTHONPATH so absolute imports work
-ENV PYTHONPATH="/app:/app/projects/rag_system"
+ENV PYTHONPATH="/app:/app/projects/research_agent"
 
-# Set the port the application should run on (defaults to 8000)
-ENV RAG_PORT=8000
+# Set the port the application should run on (defaults to 8003)
+ENV RESEARCH_PORT=8003
 
 # Expose the port the app runs on
-EXPOSE ${RAG_PORT}
+EXPOSE ${RESEARCH_PORT}
 
 # Command to run the application using uvicorn
-CMD ["sh", "-c", "uvicorn projects.rag_system.app.main:app --host 0.0.0.0 --port ${RAG_PORT}"]
+CMD ["sh", "-c", "uvicorn projects.research_agent.app.main:app --host 0.0.0.0 --port ${RESEARCH_PORT}"]

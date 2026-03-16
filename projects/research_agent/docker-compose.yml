@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  research_api:
+    build:
+      context: ../../
+      dockerfile: projects/research_agent/Dockerfile
+    container_name: research_api
+    ports:
+      - "${RESEARCH_PORT:-8003}:${RESEARCH_PORT:-8003}"
+    env_file:
+      - ../../.env
+    environment:
+      - RESEARCH_PORT=${RESEARCH_PORT:-8003}
+    volumes:
+      - ../../packages:/app/packages
+      - ./app:/app/projects/research_agent/app
+      - ./agent.py:/app/projects/research_agent/agent.py
+    networks:
+      - research_network
+
+networks:
+  research_network:
+    driver: bridge

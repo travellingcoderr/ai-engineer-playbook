@@ -4,7 +4,7 @@ from langchain_classic.chains import create_retrieval_chain
 from langchain_classic.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import ChatPromptTemplate
 
-from app.core.config import get_config
+from packages.core.config import get_config
 from app.services.llm_factory import LLMFactory
 from app.services.embedding_factory import EmbeddingFactory
 from app.services.vector_factory import VectorStoreFactory

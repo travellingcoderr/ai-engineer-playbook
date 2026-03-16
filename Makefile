@@ -11,6 +11,7 @@ ACTIVATE := . $(VENV)/bin/activate
 RAG_PORT ?= 8000
 GATEWAY_PORT ?= 8001
 OBS_PORT ?= 8002
+RESEARCH_PORT ?= 8003
 
 # ==============================
 # Environment Setup
@@ -65,6 +66,28 @@ run-observe:
 	--port $(OBS_PORT) \
 	--reload \
 	--reload-dir projects/observability
+
+run-research:
+	@$(ACTIVATE) && PYTHONPATH=$(PWD)/projects/research_agent uvicorn projects.research_agent.app.main:app \
+	--host 127.0.0.1 \
+	--port $(RESEARCH_PORT) \
+	--reload \
+	--reload-dir projects/research_agent
+
+run-docker-research:
+	@echo "Starting Research Agent via Docker Compose..."
+	cd projects/research_agent && docker-compose up -d --build
+
+stop-docker-research:
+	@echo "Stopping Research Agent Docker containers..."
+	cd projects/research_agent && docker-compose down
+
+run-dashboard:
+	@$(ACTIVATE) && PYTHONPATH=$(PWD) uvicorn dashboard.main:app \
+	--host 127.0.0.1 \
+	--port 8080 \
+	--reload \
+	--reload-dir dashboard
 
 # ==============================
 # Run All Services
@@ -140,7 +163,11 @@ kill-gateway:
 kill-observe:
 	@make kill-port PORT=$(OBS_PORT)
 
+kill-research:
+	@make kill-port PORT=$(RESEARCH_PORT)
+
 kill-all:
 	@make kill-rag
 	@make kill-gateway
 	@make kill-observe
+	@make kill-research
