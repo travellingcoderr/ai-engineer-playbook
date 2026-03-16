@@ -1,11 +1,12 @@
-from typing import List
+from typing import List, Dict, Any, Optional
 from langchain_core.documents import Document
-from langchain_classic.chains import create_retrieval_chain
-from langchain_classic.chains.combine_documents import create_stuff_documents_chain
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import PromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.runnables import RunnablePassthrough
+from qdrant_client.http.models import Filter, FieldCondition, MatchValue
 
 from packages.core.config import get_config
-from app.services.llm_factory import LLMFactory
+from packages.core.llm_factory import LLMFactory
 from app.services.embedding_factory import EmbeddingFactory
 from app.services.vector_factory import VectorStoreFactory
 from app.services.loader_factory import LoaderFactory

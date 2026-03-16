@@ -1,7 +1,7 @@
 from langchain_core.messages import HumanMessage
 from langgraph.prebuilt import create_react_agent
-from ...services.llm_factory import LLMFactory
-from ...tools.factory import ToolFactory
+from packages.core.llm_factory import LLMFactory
+from packages.core.tool_factory import ToolFactory
 
 def researcher_node(state: dict):
     """

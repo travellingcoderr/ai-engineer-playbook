@@ -1,6 +1,6 @@
 from langchain_core.messages import HumanMessage
 from langgraph.prebuilt import create_react_agent
-from ...services.llm_factory import LLMFactory
+from packages.core.llm_factory import LLMFactory
 
 def coder_node(state: dict):
     """
