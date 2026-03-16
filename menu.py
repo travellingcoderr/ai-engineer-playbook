@@ -24,6 +24,8 @@ def main():
         ("Stop RAG System (Docker)", "make stop-docker-rag"),
         ("Start Research Agent (Docker)", "make run-docker-research"),
         ("Stop Research Agent (Docker)", "make stop-docker-research"),
+        ("Start Multi-Agent Team (Docker)", "make run-docker-multi-agent"),
+        ("Stop Multi-Agent Team (Docker)", "make stop-docker-multi-agent"),
         ("Start MCP Gateway (Local)", "make run-gateway"),
         ("Start Observability (Local)", "make run-observe"),
         ("Stop All Services", "make stop-all"),

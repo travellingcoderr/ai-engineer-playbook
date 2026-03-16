@@ -82,6 +82,14 @@ stop-docker-research:
 	@echo "Stopping Research Agent Docker containers..."
 	cd projects/research_agent && docker-compose down
 
+run-docker-multi-agent:
+	@echo "Starting Multi-Agent Orchestrator via Docker Compose..."
+	cd projects/multi_agent && docker-compose up -d --build
+
+stop-docker-multi-agent:
+	@echo "Stopping Multi-Agent Orchestrator Docker containers..."
+	cd projects/multi_agent && docker-compose down
+
 run-dashboard:
 	@$(ACTIVATE) && PYTHONPATH=$(PWD) uvicorn dashboard.main:app \
 	--host 127.0.0.1 \

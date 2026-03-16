@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  multi_agent:
+    build:
+      context: ../../  # Context at root to access unified requirements and packages
+      dockerfile: projects/multi_agent/Dockerfile
+    ports:
+      - "8004:8000" # Expose the Multi-Agent Orchestrator on Standard Port 8004
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_API_BASE=${OPENAI_API_BASE}
+      - OPENAI_MODEL=${OPENAI_MODEL}
+      - TAVILY_API_KEY=${TAVILY_API_KEY} # Required by the Researcher Worker
+    volumes:
+      # Mount the current directory for live hot-reloading
+      - .:/app/projects/multi_agent
+      # Mount the universally shared core packages
+      - ../../packages:/app/packages
+    command: uvicorn projects.multi_agent.app.main:app --host 0.0.0.0 --port 8000 --reload --reload-dir projects/multi_agent
