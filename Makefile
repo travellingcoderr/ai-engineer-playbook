@@ -12,6 +12,8 @@ RAG_PORT ?= 8000
 GATEWAY_PORT ?= 8001
 OBS_PORT ?= 8002
 RESEARCH_PORT ?= 8003
+MULTI_AGENT_PORT ?= 8004
+DASHBOARD_PORT ?= 8080
 
 # ==============================
 # Environment Setup
@@ -38,6 +40,7 @@ install: setup
 # Run Services
 # ==============================
 
+# Rag System
 run-rag:
 	@$(ACTIVATE) && PYTHONPATH=$(PWD)/projects/rag_system uvicorn projects.rag_system.app.main:app \
 	--host 127.0.0.1 \
@@ -53,6 +56,7 @@ stop-docker-rag:
 	@echo "Stopping RAG system Docker containers..."
 	cd projects/rag_system && docker-compose down
 
+# MCP Gateway
 run-gateway:
 	@$(ACTIVATE) && PYTHONPATH=$(PWD)/projects/mcp_gateway uvicorn projects.mcp_gateway.app.main:app \
 	--host 127.0.0.1 \
@@ -60,6 +64,15 @@ run-gateway:
 	--reload \
 	--reload-dir projects/mcp_gateway
 
+run-docker-gateway:
+	@echo "Starting MCP Gateway via Docker Compose..."
+	cd projects/mcp_gateway && docker-compose up -d --build
+
+stop-docker-gateway:
+	@echo "Stopping MCP Gateway Docker containers..."
+	cd projects/mcp_gateway && docker-compose down
+
+# Observability
 run-observe:
 	@$(ACTIVATE) && PYTHONPATH=$(PWD)/projects/observability uvicorn projects.observability.api:app \
 	--host 127.0.0.1 \
@@ -67,6 +80,15 @@ run-observe:
 	--reload \
 	--reload-dir projects/observability
 
+run-docker-observe:
+	@echo "Starting Observability via Docker Compose..."
+	cd projects/observability && docker-compose up -d --build
+
+stop-docker-observe:
+	@echo "Stopping Observability Docker containers..."
+	cd projects/observability && docker-compose down
+
+# Research Agent
 run-research:
 	@$(ACTIVATE) && PYTHONPATH=$(PWD)/projects/research_agent uvicorn projects.research_agent.app.main:app \
 	--host 127.0.0.1 \
@@ -82,6 +104,14 @@ stop-docker-research:
 	@echo "Stopping Research Agent Docker containers..."
 	cd projects/research_agent && docker-compose down
 
+# Multi-Agent Orchestrator
+run-multi-agent:
+	@$(ACTIVATE) && PYTHONPATH=$(PWD)/projects/multi_agent uvicorn projects.multi_agent.app.main:app \
+	--host 127.0.0.1 \
+	--port $(MULTI_AGENT_PORT) \
+	--reload \
+	--reload-dir projects/multi_agent
+
 run-docker-multi-agent:
 	@echo "Starting Multi-Agent Orchestrator via Docker Compose..."
 	cd projects/multi_agent && docker-compose up -d --build
@@ -90,10 +120,11 @@ stop-docker-multi-agent:
 	@echo "Stopping Multi-Agent Orchestrator Docker containers..."
 	cd projects/multi_agent && docker-compose down
 
+# Dashboard
 run-dashboard:
 	@$(ACTIVATE) && PYTHONPATH=$(PWD) uvicorn dashboard.main:app \
 	--host 127.0.0.1 \
-	--port 8080 \
+	--port $(DASHBOARD_PORT) \
 	--reload \
 	--reload-dir dashboard
 
@@ -174,8 +205,16 @@ kill-observe:
 kill-research:
 	@make kill-port PORT=$(RESEARCH_PORT)
 
+kill-multi-agent:
+	@make kill-port PORT=$(MULTI_AGENT_PORT)
+
+kill-dashboard:
+	@make kill-port PORT=$(DASHBOARD_PORT)
+
 kill-all:
 	@make kill-rag
 	@make kill-gateway
 	@make kill-observe
+	@make kill-multi-agent
+	@make kill-dashboard
 	@make kill-research

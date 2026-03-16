@@ -20,7 +20,7 @@ async def stop_service(service_name: str):
     """
     allowed_services = {
         "rag": {"cmd": "make stop-docker-rag", "fallback": "make kill-rag"},
-        "mcp": {"cmd": "make kill-gateway", "fallback": None},
+        "mcp": {"cmd": "make stop-docker-gateway", "fallback": "make kill-gateway"},
         "observe": {"cmd": "make kill-observe", "fallback": None},
         "research": {"cmd": "make stop-docker-research", "fallback": "make kill-research"}
     }

@@ -1,0 +1,21 @@
+services:
+  # The FastAPI MCP Gateway Application
+  api:
+    build:
+      context: ../../
+      dockerfile: projects/mcp_gateway/Dockerfile
+    container_name: mcp_gateway_api
+    ports:
+      - "${GATEWAY_PORT:-8001}:${GATEWAY_PORT:-8001}"
+    env_file:
+      - ../../.env
+    environment:
+      - GATEWAY_PORT=${GATEWAY_PORT:-8001}
+    volumes:
+      - ../../:/app:ro  # Mount the whole repo as read-only for tools like read_repo_file
+    networks:
+      - mcp_network
+
+networks:
+  mcp_network:
+    driver: bridge
