@@ -24,7 +24,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY projects/rag_system/app /app/projects/rag_system/app
 
 # Set PYTHONPATH so absolute imports like 'app.services.x' work
-ENV PYTHONPATH="/"
+ENV PYTHONPATH="/app/projects/rag_system"
 
 # Set the port the application should run on (defaults to 8000)
 ENV RAG_PORT=8000

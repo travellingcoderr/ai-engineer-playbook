@@ -7,6 +7,7 @@ ruff
 
 # Optional AI libraries
 openai
+python-multipart
 tiktoken
 langchain
 langgraph
@@ -16,6 +17,15 @@ pypdf
 langchain-openai
 langchain-community
 langchain-chroma
+unstructured
+unstructured[md]
+langchain-qdrant
+langchain-text-splitters
+langchain-core
+langchain
+langchain-qdrant
+langchain-text-splitters
+langchain-core
 langchain-qdrant
 qdrant-client
 pydantic-settings

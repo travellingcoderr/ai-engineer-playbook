@@ -1,4 +1,4 @@
-version: '3.8'
+#version: '3.8'
 
 services:
   # The FastAPI RAG Application
@@ -14,12 +14,12 @@ services:
       # In production, use an .env file instead of hardcoding keys here.
       - LLM_PROVIDER=openai
       - EMBEDDING_PROVIDER=openai
-      - VECTOR_STORE_PROVIDER=chroma
+      - VECTOR_STORE_PROVIDER=qdrant
       # Wait for the DB to start
-      - VECTOR_STORE_HOST=chroma_db
-      - VECTOR_STORE_PORT=8000
+      - VECTOR_STORE_HOST=qdrant_db
+      - VECTOR_STORE_PORT=6333
     depends_on:
-      - chroma_db
+      # - chroma_db
       - qdrant_db
     env_file:
       - ../../.env  # Load API keys from the root .env file
@@ -27,15 +27,15 @@ services:
       - rag_network
 
   # ChromaDB Server
-  chroma_db:
-    image: chromadb/chroma:latest
-    container_name: rag_chroma_db
-    volumes:
-      - chroma_data:/chroma/chroma
-    ports:
-      - "8001:8000" # Expose to host on 8001
-    networks:
-      - rag_network
+  # chroma_db:
+  #   image: chromadb/chroma:latest
+  #   container_name: rag_chroma_db
+  #   volumes:
+  #     - chroma_data:/chroma/chroma
+  #   ports:
+  #     - "8001:8000" # Expose to host on 8001
+  #   networks:
+  #     - rag_network
 
   # Qdrant Server (Alternative Vector DB Example)
   qdrant_db:

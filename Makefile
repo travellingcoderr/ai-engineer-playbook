@@ -38,7 +38,7 @@ install: setup
 # ==============================
 
 run-rag:
-	@$(ACTIVATE) && uvicorn projects.rag_system.app.main:app \
+	@$(ACTIVATE) && PYTHONPATH=$(PWD)/projects/rag_system uvicorn projects.rag_system.app.main:app \
 	--host 127.0.0.1 \
 	--port $(RAG_PORT) \
 	--reload \
@@ -53,14 +53,14 @@ stop-docker-rag:
 	cd projects/rag_system && docker-compose down
 
 run-gateway:
-	@$(ACTIVATE) && uvicorn projects.mcp_gateway.app.main:app \
+	@$(ACTIVATE) && PYTHONPATH=$(PWD)/projects/mcp_gateway uvicorn projects.mcp_gateway.app.main:app \
 	--host 127.0.0.1 \
 	--port $(GATEWAY_PORT) \
 	--reload \
 	--reload-dir projects/mcp_gateway
 
 run-observe:
-	@$(ACTIVATE) && uvicorn projects.observability.api:app \
+	@$(ACTIVATE) && PYTHONPATH=$(PWD)/projects/observability uvicorn projects.observability.api:app \
 	--host 127.0.0.1 \
 	--port $(OBS_PORT) \
 	--reload \
@@ -72,17 +72,17 @@ run-observe:
 
 run-all:
 	@echo "Starting RAG service..."
-	@$(ACTIVATE) && uvicorn projects.rag_system.app.main:app \
+	@$(ACTIVATE) && PYTHONPATH=$(PWD)/projects/rag_system uvicorn projects.rag_system.app.main:app \
 	--port $(RAG_PORT) --reload --reload-dir projects/rag_system \
 	> rag.log 2>&1 & echo $$! > rag.pid
 
 	@echo "Starting MCP gateway..."
-	@$(ACTIVATE) && uvicorn projects.mcp_gateway.app.main:app \
+	@$(ACTIVATE) && PYTHONPATH=$(PWD)/projects/mcp_gateway uvicorn projects.mcp_gateway.app.main:app \
 	--port $(GATEWAY_PORT) --reload --reload-dir projects/mcp_gateway \
 	> gateway.log 2>&1 & echo $$! > gateway.pid
 
 	@echo "Starting Observability service..."
-	@$(ACTIVATE) && uvicorn projects.observability.api:app \
+	@$(ACTIVATE) && PYTHONPATH=$(PWD)/projects/observability uvicorn projects.observability.api:app \
 	--port $(OBS_PORT) --reload --reload-dir projects/observability \
 	> observe.log 2>&1 & echo $$! > observe.pid
 

@@ -60,10 +60,23 @@ class VectorStoreFactory:
         try:
             from langchain_qdrant import QdrantVectorStore
             from qdrant_client import QdrantClient
+            from qdrant_client.http.models import Distance, VectorParams
         except ImportError:
             raise ImportError("Please install qdrant-client and langchain-qdrant to use the Qdrant provider.")
             
         client = QdrantClient(host=host, port=port)
+        
+        # Qdrant strictly requires the collection to exist before use
+        if not client.collection_exists(collection_name):
+            # We need to know the vector size. As a workaround during an empty init,
+            # we'll generate a dummy embedding to find the correct dimension size.
+            dummy_vector = embeddings.embed_query("dummy")
+            vector_size = len(dummy_vector)
+            
+            client.create_collection(
+                collection_name=collection_name,
+                vectors_config=VectorParams(size=vector_size, distance=Distance.COSINE),
+            )
             
         return QdrantVectorStore(
             client=client,

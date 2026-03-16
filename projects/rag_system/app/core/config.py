@@ -1,12 +1,13 @@
 import os
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field
 from functools import lru_cache
+from dotenv import load_dotenv
 
 class LLMConfiguration(BaseSettings):
     provider: str = Field(default="openai", description="The LLM provider (e.g., openai, gemini, anthropic)")
-    model: str = Field(default="gpt-4o", description="The specific model name for the provider")
-    openai_api_key: str | None = Field(default=None, description="OpenAI API Key")
+    model: str = Field(default="gpt-4o", description="The specific model name for the provider", alias="OPENAI_MODEL")
+    openai_api_key: str | None = Field(default=None, description="OpenAI API Key", alias="OPENAI_API_KEY")
     gemini_api_key: str | None = Field(default=None, description="Google Gemini API Key")
 
 class EmbeddingConfiguration(BaseSettings):
@@ -38,13 +39,23 @@ class AppConfig(BaseSettings):
     loader: LoaderConfiguration = LoaderConfiguration()
     splitter: SplitterConfiguration = SplitterConfiguration()
 
-    class Config:
-        env_file = ".env"
-        # Since these are nested, Pydantic needs to know how to map ENV vars
-        # like LLM_PROVIDER to AppConfig.llm.provider
-        env_nested_delimiter = '_'
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_nested_delimiter="_",
+        extra="ignore"
+    )
 
 @lru_cache()
 def get_config() -> AppConfig:
     """Returns a cached instance of the application configuration."""
-    return AppConfig()
+    load_dotenv() # Force load the root .env file
+    
+    config = AppConfig()
+    
+    # Manually patch keys that pydantic-settings might miss due to nesting discrepancies
+    if os.getenv("OPENAI_API_KEY"):
+        config.llm.openai_api_key = os.getenv("OPENAI_API_KEY")
+    if os.getenv("OPENAI_MODEL"):
+        config.llm.model = os.getenv("OPENAI_MODEL")
+        
+    return config
