@@ -3,6 +3,7 @@ uvicorn
 pydantic
 pytest
 httpx
+PyJWT
 ruff
 
 # Optional AI libraries

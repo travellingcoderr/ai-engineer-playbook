@@ -10,11 +10,10 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy the requirements file into the container
-# This Dockerfile is run from the project root (ai-engineer-playbook)
+# Copy the requirements files into the container
 COPY requirements.txt .
 
-# Install dependencies
+# Install dependencies from both root and project
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the shared core packages and config

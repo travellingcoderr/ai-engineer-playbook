@@ -1,7 +1,9 @@
 import time
 import json
 from datetime import timedelta
+from typing import Annotated
 from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
 
 from app.auth import get_role_from_auth_header, create_access_token
@@ -33,12 +35,12 @@ async def audit_logging_middleware(request: Request, call_next):
     return response
 
 @app.post("/login")
-def login(request: LoginRequest):
+def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
     # Stub login: map any username to a role for demo
     role_map = {"admin": "admin", "analyst": "analyst", "engineer": "engineer"}
-    role = role_map.get(request.username, "analyst")
+    role = role_map.get(form_data.username, "analyst")
     
-    access_token = create_access_token(data={"sub": request.username, "role": role})
+    access_token = create_access_token(data={"sub": form_data.username, "role": role})
     return {"access_token": access_token, "token_type": "bearer"}
 
 

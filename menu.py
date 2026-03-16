@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import socket
 import subprocess
 import sys
 
@@ -14,24 +15,40 @@ class Colors:
     ENDC = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
+    GRAY = '\033[90m'
+
+def is_port_open(port):
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.settimeout(0.1)
+        return s.connect_ex(('127.0.0.1', port)) == 0
 
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
 def main():
+    # Service port mapping for status checks
+    services = {
+        "RAG System": 8000,
+        "MCP Gateway": 8001,
+        "Observability": 8002,
+        "Research Agent": 8003,
+        "Multi-Agent": 8004,
+        "Dashboard": 8080
+    }
+
     options = [
-        ("Start RAG System (Docker)", "make run-docker-rag"),
-        ("Stop RAG System (Docker)", "make stop-docker-rag"),
-        ("Start MCP Gateway (Docker)", "make run-docker-gateway"),
-        ("Stop MCP Gateway (Docker)", "make stop-docker-gateway"),
-        ("Start Research Agent (Docker)", "make run-docker-research"),
-        ("Stop Research Agent (Docker)", "make stop-docker-research"),
-        ("Start Multi-Agent Team (Docker)", "make run-docker-multi-agent"),
-        ("Stop Multi-Agent Team (Docker)", "make stop-docker-multi-agent"),
-        ("Start Observability (Local)", "make run-observe"),
-        ("Stop All Services", "make stop-all"),
-        ("Kill All Stray Ports", "make kill-all"),
-        ("Exit", "exit"),
+        ("Start RAG System (Docker)", "make run-docker-rag", "RAG System"),
+        ("Stop RAG System (Docker)", "make stop-docker-rag", "RAG System"),
+        ("Start MCP Gateway (Docker)", "make run-docker-gateway", "MCP Gateway"),
+        ("Stop MCP Gateway (Docker)", "make stop-docker-gateway", "MCP Gateway"),
+        ("Start Research Agent (Docker)", "make run-docker-research", "Research Agent"),
+        ("Stop Research Agent (Docker)", "make stop-docker-research", "Research Agent"),
+        ("Start Multi-Agent Team (Docker)", "make run-docker-multi-agent", "Multi-Agent"),
+        ("Stop Multi-Agent Team (Docker)", "make stop-docker-multi-agent", "Multi-Agent"),
+        ("Start Observability (Local)", "make run-observe", "Observability"),
+        ("Stop All Services", "make stop-all", None),
+        ("Kill All Stray Ports", "make kill-all", None),
+        ("Exit", "exit", None),
     ]
     
     while True:
@@ -40,13 +57,26 @@ def main():
         print(f"{Colors.OKCYAN}{Colors.BOLD}   🤖 AI Engineer Playbook - Command Menu 🤖   {Colors.ENDC}")
         print(f"{Colors.HEADER}{Colors.BOLD}================================================={Colors.ENDC}\n")
         
-        for i, (label, cmd) in enumerate(options, 1):
+        # Determine status of each unique service
+        status_map = {}
+        for name, port in services.items():
+            status_map[name] = is_port_open(port)
+
+        for i, (label, cmd, service_name) in enumerate(options, 1):
+            status_indicator = ""
+            if service_name and service_name in status_map:
+                is_running = status_map[service_name]
+                if is_running:
+                    status_indicator = f"{Colors.OKGREEN}[RUNNING]{Colors.ENDC}"
+                else:
+                    status_indicator = f"{Colors.GRAY}[OFF]{Colors.ENDC}"
+
             if label == "Exit":
                 print(f" {Colors.FAIL}[{i}]{Colors.ENDC} {label}")
             elif "Start" in label:
-                print(f" {Colors.OKGREEN}[{i}]{Colors.ENDC} {label:<35}")
+                print(f" {Colors.OKGREEN}[{i}]{Colors.ENDC} {label:<35} {status_indicator}")
             elif "Stop" in label or "Kill" in label:
-                print(f" {Colors.WARNING}[{i}]{Colors.ENDC} {label:<35}")
+                print(f" {Colors.WARNING}[{i}]{Colors.ENDC} {label:<35} {status_indicator}")
             else:
                 print(f" {Colors.OKBLUE}[{i}]{Colors.ENDC} {label:<35}")
             
