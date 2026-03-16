@@ -387,6 +387,25 @@
                     </div>
                 </div>
             </div>
+
+            <div class="card" id="card-guardrails" data-port="8005" onclick="if(event.target.tagName !== 'BUTTON' && event.target.tagName !== 'A') window.open('http://localhost:8005/docs', '_blank');">
+                <div class="card-header-row">
+                    <div class="icon-wrapper"><span>🛡️</span></div>
+                    <div class="status-badge" id="status-8005">
+                        <div class="status-dot"></div>
+                        <span class="status-text">Checking...</span>
+                    </div>
+                </div>
+                <h2>LLM Guardrails</h2>
+                <p>Security & Compliance layer. Inspect prompts for injection, PII, and secrets before they reach the model.</p>
+                <div class="card-footer">
+                    <div class="port-tag">PORT 8005</div>
+                    <div class="action-container">
+                        <button class="stop-btn" onclick="stopService('guardrails', 8005, this)">Stop 🛑</button>
+                        <a href="http://localhost:8005/docs" target="_blank" class="docs-link">View Docs ↗</a>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="footer-note">
@@ -453,7 +472,8 @@
             [8001, 'mcp'], 
             [8002, 'observe'], 
             [8003, 'research'],
-            [8004, 'multi']
+            [8004, 'multi'],
+            [8005, 'guardrails']
         ];
         
         services.forEach(([port, key]) => checkStatus(port, key));

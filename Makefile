@@ -13,6 +13,7 @@ GATEWAY_PORT ?= 8001
 OBS_PORT ?= 8002
 RESEARCH_PORT ?= 8003
 MULTI_AGENT_PORT ?= 8004
+GUARD_PORT ?= 8005
 DASHBOARD_PORT ?= 8080
 
 # ==============================
@@ -120,6 +121,22 @@ stop-docker-multi-agent:
 	@echo "Stopping Multi-Agent Orchestrator Docker containers..."
 	cd projects/multi_agent && docker-compose down
 
+# Guardrails
+run-guardrails:
+	@$(ACTIVATE) && PYTHONPATH=$(PWD)/projects/guardrails uvicorn projects.guardrails.app.main:app \
+	--host 127.0.0.1 \
+	--port $(GUARD_PORT) \
+	--reload \
+	--reload-dir projects/guardrails
+
+run-docker-guardrails:
+	@echo "Starting Guardrails via Docker Compose..."
+	cd projects/guardrails && docker-compose up -d --build
+
+stop-docker-guardrails:
+	@echo "Stopping Guardrails Docker containers..."
+	cd projects/guardrails && docker-compose down
+
 # Dashboard
 run-dashboard:
 	@$(ACTIVATE) && PYTHONPATH=$(PWD) uvicorn dashboard.main:app \
@@ -210,6 +227,9 @@ kill-multi-agent:
 
 kill-dashboard:
 	@make kill-port PORT=$(DASHBOARD_PORT)
+
+kill-guardrails:
+	@make kill-port PORT=$(GUARD_PORT)
 
 kill-all:
 	@make kill-rag

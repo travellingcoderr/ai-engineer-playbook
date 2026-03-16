@@ -33,6 +33,7 @@ def main():
         "Observability": 8002,
         "Research Agent": 8003,
         "Multi-Agent": 8004,
+        "Guardrails": 8005,
         "Dashboard": 8080
     }
 
@@ -45,6 +46,8 @@ def main():
         ("Stop Research Agent (Docker)", "make stop-docker-research", "Research Agent"),
         ("Start Multi-Agent Team (Docker)", "make run-docker-multi-agent", "Multi-Agent"),
         ("Stop Multi-Agent Team (Docker)", "make stop-docker-multi-agent", "Multi-Agent"),
+        ("Start Guardrails (Docker)", "make run-docker-guardrails", "Guardrails"),
+        ("Stop Guardrails (Docker)", "make stop-docker-guardrails", "Guardrails"),
         ("Start Observability (Local)", "make run-observe", "Observability"),
         ("Stop All Services", "make stop-all", None),
         ("Kill All Stray Ports", "make kill-all", None),
