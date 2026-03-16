@@ -8,6 +8,7 @@ from .embeddings import EmbeddingConfiguration
 from .vector_store import VectorStoreConfiguration
 from .loader import LoaderConfiguration
 from .splitter import SplitterConfiguration
+from .tools import ToolConfiguration
 
 class AppConfig(BaseSettings):
     """
@@ -19,6 +20,7 @@ class AppConfig(BaseSettings):
     vector_store: VectorStoreConfiguration = VectorStoreConfiguration()
     loader: LoaderConfiguration = LoaderConfiguration()
     splitter: SplitterConfiguration = SplitterConfiguration()
+    tools: ToolConfiguration = ToolConfiguration()
 
     # The config doesn't hardcode the path here; pydantic will search the current directory.
     # We will enforce finding the root .env in get_config()

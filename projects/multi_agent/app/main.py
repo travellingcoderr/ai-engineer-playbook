@@ -1,7 +1,9 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from packages.core.config import get_config
-import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Create the standard FastAPI app
 app = FastAPI(
@@ -14,7 +16,7 @@ app = FastAPI(
 try:
     settings = get_config()
 except Exception as e:
-    print(f"FAILED TO LOAD SHARED APP CONFIG: {e}")
+    logger.exception("FAILED TO LOAD SHARED APP CONFIG")
 
 class TaskRequest(BaseModel):
     task: str
@@ -31,6 +33,7 @@ async def run_team(request: TaskRequest):
     from .agent.graph import agent_team
     
     try:
+        logger.info("Starting /team/run task")
         # LangGraph inputs require a 'messages' list for state
         # The thread config allows us to track state iteratively if we added checkpointer memory
         result = agent_team.invoke(
@@ -48,4 +51,5 @@ async def run_team(request: TaskRequest):
             "full_state": str(result)
         }
     except Exception as e:
+        logger.exception("Multi-agent team execution failed")
         raise HTTPException(status_code=500, detail=str(e))

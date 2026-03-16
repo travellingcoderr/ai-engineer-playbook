@@ -8,10 +8,11 @@ services:
       dockerfile: projects/rag_system/Dockerfile
     container_name: rag_api
     ports:
-      - "8000:8000"
+      - "${RAG_PORT:-8000}:${RAG_PORT:-8000}"
+    env_file:
+      - ../../.env  # Load API keys from the root .env file
     environment:
-      # Inject necessary environment variables. 
-      # In production, use an .env file instead of hardcoding keys here.
+      - RAG_PORT=${RAG_PORT:-8000}
       - LLM_PROVIDER=openai
       - EMBEDDING_PROVIDER=openai
       - VECTOR_STORE_PROVIDER=qdrant
@@ -21,8 +22,8 @@ services:
     depends_on:
       # - chroma_db
       - qdrant_db
-    env_file:
-      - ../../.env  # Load API keys from the root .env file
+    volumes:
+      - ../../.env:/app/.env:ro
     networks:
       - rag_network
 

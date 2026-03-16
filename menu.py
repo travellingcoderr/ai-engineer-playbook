@@ -55,21 +55,22 @@ def main():
             choice_str = input(f"\n{Colors.BOLD}Enter a number to execute (1-{len(options)}): {Colors.ENDC}")
             choice_idx = int(choice_str) - 1
             
-            if 0 <= choice_idx < len(options):
-                cmd = options[choice_idx][1]
-                if cmd == "exit":
-                    clear_screen()
-                    print(f"{Colors.OKGREEN}Goodbye!{Colors.ENDC}")
-                    sys.exit(0)
-                    
-                print(f"\n{Colors.OKBLUE}🚀 Executing: {cmd}{Colors.ENDC}\n")
-                
-                # Execute the command natively, streaming output to the terminal!
-                subprocess.run(cmd, shell=True)
-                
-                input(f"\n{Colors.BOLD}Press Enter to return to menu...{Colors.ENDC}")
-            else:
+            if not (0 <= choice_idx < len(options)):
                 input(f"\n{Colors.FAIL}Invalid option. Press Enter to try again.{Colors.ENDC}")
+                continue
+
+            cmd = options[choice_idx][1]
+            if cmd == "exit":
+                clear_screen()
+                print(f"{Colors.OKGREEN}Goodbye!{Colors.ENDC}")
+                sys.exit(0)
+
+            print(f"\n{Colors.OKBLUE}🚀 Executing: {choice_str}: {cmd}{Colors.ENDC}\n")
+
+            # Execute the command natively, streaming output to the terminal!
+            subprocess.run(cmd, shell=True)
+
+            input(f"\n{Colors.BOLD}Press Enter to return to menu...{Colors.ENDC}")
         except ValueError:
             input(f"\n{Colors.FAIL}Please enter a valid number. Press Enter to try again.{Colors.ENDC}")
         except KeyboardInterrupt:
