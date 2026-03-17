@@ -95,8 +95,19 @@ class RAGService:
         retriever = self.vector_store.as_retriever(search_kwargs={"k": 3})
         
         # LCEL Chain
+        # This is a simple RAG chain that uses the retriever to get the context
+        # and then passes it to the LLM to generate the answer.
+        # The retriever is a Runnable that returns a list of Documents.
+        # The format_docs function is a Runnable that takes a list of Documents
+        # and returns a string of context.
+        # The prompt is a ChatPromptTemplate that takes the context and the question.
+        # The LLM is a Runnable that takes the prompt and returns the answer.
+        # The StrOutputParser is a Runnable that takes the LLM's answer and returns a string.
         rag_chain = (
-            {"context": retriever | format_docs, "input": RunnablePassthrough()}
+            {
+                "context": retriever | format_docs, 
+                "input": RunnablePassthrough()
+            }
             | prompt
             | self.llm
             | StrOutputParser()

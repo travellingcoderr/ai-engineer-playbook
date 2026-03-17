@@ -1,0 +1,20 @@
+[
+  {
+    "id": "q1",
+    "question": "What is the primary goal of the AI Engineer Playbook?",
+    "expected_keywords": ["patterns", "best practices", "engineering", "AI"],
+    "notes": "Testing general knowledge of the playbook purpose."
+  },
+  {
+    "id": "q2",
+    "question": "How do you run the research agent?",
+    "expected_keywords": ["research", "topic", "langgraph", "autonomous"],
+    "notes": "Testing technical instruction retrieval."
+  },
+  {
+    "id": "q3",
+    "question": "What are the core components of the RAG system?",
+    "expected_keywords": ["vector", "embedding", "llm", "retriever", "context"],
+    "notes": "Testing architectural knowledge."
+  }
+]

@@ -202,6 +202,10 @@ test:
 lint:
 	@$(ACTIVATE) && ruff check .
 
+eval:
+	@echo "Running AI Evaluations for RAG System..."
+	@$(ACTIVATE) && PYTHONPATH=$(PWD):$(PWD)/projects/rag_system python3 projects/rag_system/evals/eval_runner.py
+
 clean:
 	rm -rf $(VENV) __pycache__ .pytest_cache rag.pid gateway.pid observe.pid
 

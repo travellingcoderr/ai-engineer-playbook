@@ -1,0 +1,27 @@
+{
+  "average_score": 0.31666666666666665,
+  "total_evaluated": 3,
+  "results": [
+    {
+      "id": "q1",
+      "question": "What is the primary goal of the AI Engineer Playbook?",
+      "answer": "The primary goal of the AI Engineer Playbook is to provide practical guidance and best practices for AI engineers to design, build, and deploy AI solutions effectively. It aims to help engineers navigate the complexities of AI projects and deliver reliable, scalable, and ethical AI systems.",
+      "score": 0.5,
+      "status": "FAIL"
+    },
+    {
+      "id": "q2",
+      "question": "How do you run the research agent?",
+      "answer": "To run the research agent, you typically need to follow the setup instructions provided in its documentation, which often involves installing dependencies and running a command like python run.py or a similar script. Make sure you have the required environment variables and API keys configured. For specific steps, refer to the official repository or documentation for the research agent you are using.",
+      "score": 0.25,
+      "status": "FAIL"
+    },
+    {
+      "id": "q3",
+      "question": "What are the core components of the RAG system?",
+      "answer": "The core components of the Retrieval-Augmented Generation (RAG) system are a retriever and a generator. The retriever searches a large knowledge base to find relevant documents or passages based on a query. The generator, typically a language model, then uses the retrieved information to generate a coherent and informed response.",
+      "score": 0.2,
+      "status": "FAIL"
+    }
+  ]
+}
