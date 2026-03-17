@@ -1,6 +1,8 @@
-# AI Engineer Playbook (Phase 3)
+Welcome to the AI Engineer Playbook! This repository serves as a practical guide and template for implementing modern AI engineering patterns.
 
-Welcome to the AI Engineer Playbook! This repository serves as a practical guide and template for implementing modern AI engineering patterns. Below is an expanded overview of the core patterns demonstrated in this playbook:
+🚀 **[Open Hub Dashboard](http://localhost:8080)** - Command Center for all services.
+
+Below is an expanded overview of the core patterns demonstrated in this playbook:
 
 ## 🏛 Core AI Patterns
 

@@ -1,5 +1,6 @@
 import os
 from langchain_core.embeddings import Embeddings
+from packages.core.enums import EmbeddingProvider
 
 class EmbeddingFactory:
     """
@@ -7,7 +8,7 @@ class EmbeddingFactory:
     """
     
     @staticmethod
-    def create_embeddings(provider: str, model_name: str, **kwargs) -> Embeddings:
+    def create_embeddings(provider: EmbeddingProvider, model_name: str, **kwargs) -> Embeddings:
         """
         Creates and returns a LangChain Embeddings instance.
         
@@ -16,12 +17,10 @@ class EmbeddingFactory:
             model_name: The specific model to use (e.g., 'text-embedding-3-small')
             **kwargs: Extra arguments like api_keys.
         """
-        provider = provider.lower().strip()
-        
-        if provider == "openai":
+        if provider == EmbeddingProvider.OPENAI:
             return EmbeddingFactory._create_openai(model_name, kwargs.get("openai_api_key"))
             
-        elif provider == "huggingface":
+        elif provider == EmbeddingProvider.HUGGINGFACE:
             return EmbeddingFactory._create_huggingface(model_name)
             
         else:

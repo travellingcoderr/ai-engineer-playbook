@@ -15,8 +15,28 @@ HTML_FILE_PATH = os.path.join(os.path.dirname(__file__), "index.html")
 
 @app.get("/", response_class=HTMLResponse)
 async def serve_dashboard():
+    # Centralized port configuration matching the Makefile
+    config = {
+        "RAG_PORT": 8000,
+        "GATEWAY_PORT": 8001,
+        "OBS_PORT": 8002,
+        "RESEARCH_PORT": 8003,
+        "MULTI_AGENT_PORT": 8004,
+        "GUARD_PORT": 8005,
+        "RESILIENT_GATEWAY_PORT": 8006,
+        "N8N_PORT": 5678,
+        "PERF_EVAL_PORT": 8007,
+        "QDRANT_PORT": 6333,
+        "MONGO_PORT": 27017,
+        "REDIS_PORT": 6379,
+    }
+    
     with open(HTML_FILE_PATH, "r") as f:
-        return f.read()
+        html_content = f.read()
+        # Simple string replacement for dynamic ports
+        for key, value in config.items():
+            html_content = html_content.replace(f"{{{{{key}}}}}", str(value))
+        return html_content
 
 @app.post("/api/stop/{service_name}")
 async def stop_service(service_name: str):
@@ -30,7 +50,9 @@ async def stop_service(service_name: str):
         "research": {"cmd": "make stop-docker-research", "fallback": "make kill-research"},
         "guardrails": {"cmd": "make stop-docker-guardrails", "fallback": "make kill-guardrails"},
         "resilient": {"cmd": "make stop-docker-resilient-gateway", "fallback": "make kill-resilient-gateway"},
-        "n8n": {"cmd": "make stop-n8n", "fallback": None}
+        "n8n": {"cmd": "make stop-n8n", "fallback": None},
+        "perf": {"cmd": "make stop-docker-perf-eval", "fallback": "make kill-perf-eval"},
+        "infra": {"cmd": "make stop-infra", "fallback": "make kill-infra"}
     }
     
     if service_name not in allowed_services:

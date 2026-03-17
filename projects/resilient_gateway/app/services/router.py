@@ -1,7 +1,7 @@
-import random
 from typing import List, Optional
 from app.models.gateway_models import LLMRequest, LLMResponse
 from app.services.providers.base import BaseLLMProvider
+from packages.core.enums import RoutingStrategy
 
 class ResilientRouter:
     """
@@ -9,24 +9,33 @@ class ResilientRouter:
     resiliency logic.
     """
     
-    def __init__(self, providers: List[BaseLLMProvider]):
+    def __init__(self, providers: List[BaseLLMProvider], strategy: RoutingStrategy = RoutingStrategy.PRIORITY):
         self.providers = providers
+        self.strategy = strategy
         self._current_index = 0
 
     async def route_request(self, request: LLMRequest) -> LLMResponse:
+        """Dispatches to the configured routing strategy."""
+        if self.strategy == RoutingStrategy.ROUND_ROBIN:
+            return await self.route_request_round_robin(request)
+        
+        # Default to Priority
+        return await self.route_request_priority(request)
+
+    async def route_request_priority(self, request: LLMRequest) -> LLMResponse:
         """Priority-based failover (Always starts with the first provider)."""
         last_exception = None
         
         for provider in self.providers:
             try:
-                print(f"DEBUG: Attempting request with provider: {provider.get_name()}")
+                print(f"DEBUG: Attempting priority request with provider: {provider.get_name()}")
                 return await provider.complete(request)
             except Exception as e:
                 print(f"WARNING: Provider {provider.get_name()} failed: {str(e)}")
                 last_exception = e
                 continue
         
-        raise Exception(f"All providers failed. Last error: {str(last_exception)}")
+        raise Exception(f"All providers failed in Priority mode. Last error: {str(last_exception)}")
 
     async def route_request_round_robin(self, request: LLMRequest) -> LLMResponse:
         """Round-robin routing with failover support."""

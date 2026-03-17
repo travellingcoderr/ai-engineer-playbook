@@ -1,0 +1,17 @@
+services:
+  ai_perf_eval:
+    build:
+      context: ../..
+      dockerfile: projects/ai_perf_eval/Dockerfile
+    container_name: ai_perf_eval_api
+    ports:
+      - "8007:8007"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app:/app/projects/ai_perf_eval
+    networks:
+      - ai_network
+
+networks:
+  ai_network:
+    external: true

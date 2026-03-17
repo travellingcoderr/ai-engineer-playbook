@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
+from packages.core.enums import GatewayMode, RoutingStrategy
 
 class LLMRequest(BaseModel):
     prompt: str
@@ -25,6 +26,6 @@ class ProviderConfig(BaseModel):
     settings: Dict[str, Any] = {}
 
 class GatewayConfig(BaseModel):
-    mode: str = "simulation" # simulation or production
-    strategy: str = "priority" # priority, random, weighted
+    mode: GatewayMode = GatewayMode.SIMULATION # simulation or production
+    strategy: RoutingStrategy = RoutingStrategy.PRIORITY # priority, random, weighted
     providers: List[ProviderConfig] = []

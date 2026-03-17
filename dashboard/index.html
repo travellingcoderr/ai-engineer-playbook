@@ -400,11 +400,11 @@
                 <p>Retrieval-Augmented Generation system. Ingest documents and query the indexed vector database
                     natively.</p>
                 <div class="card-footer">
-                    <div class="port-tag">PORT 8000</div>
+                    <div class="port-tag">PORT {{RAG_PORT}}</div>
                     <div class="action-container">
                         <a href="/projects/rag_system/docs/services.md" target="_blank" class="docs-link" title="View Project Docs">📁</a>
-                        <a href="http://localhost:8002/dashboard?service=rag_system" target="_blank" class="obs-link" title="View Observability">📊</a>
-                        <a href="http://localhost:8000/docs" target="_blank" class="docs-link" title="View Swagger API Docs">📖</a>
+                        <a href="http://localhost:{{OBS_PORT}}/dashboard?service=rag_system" target="_blank" class="obs-link" title="View Observability">📊</a>
+                        <a href="http://localhost:{{RAG_PORT}}/docs" target="_blank" class="docs-link" title="View Swagger API Docs">📖</a>
                     </div>
                 </div>
             </div>
@@ -422,11 +422,11 @@
                 <p>Micro-service Control Proxy. Handles routing, authentication, and standardization for model-tool
                     interactions.</p>
                 <div class="card-footer">
-                    <div class="port-tag">PORT 8001</div>
+                    <div class="port-tag">PORT {{GATEWAY_PORT}}</div>
                     <div class="action-container">
                         <a href="/projects/mcp_gateway/docs/services.md" target="_blank" class="docs-link" title="View Project Docs">📁</a>
-                        <a href="http://localhost:8002/dashboard?service=mcp_gateway" target="_blank" class="obs-link" title="View Observability">📊</a>
-                        <a href="http://localhost:8001/docs" target="_blank" class="docs-link" title="View Swagger API Docs">📖</a>
+                        <a href="http://localhost:{{OBS_PORT}}/dashboard?service=mcp_gateway" target="_blank" class="obs-link" title="View Observability">📊</a>
+                        <a href="http://localhost:{{GATEWAY_PORT}}/docs" target="_blank" class="docs-link" title="View Swagger API Docs">📖</a>
                     </div>
                 </div>
             </div>
@@ -444,11 +444,11 @@
                 <p>Centralized telemetry collector. Visualize logs, metrics, and traces from all microservices in
                     real-time.</p>
                 <div class="card-footer">
-                    <div class="port-tag">PORT 8002</div>
+                    <div class="port-tag">PORT {{OBS_PORT}}</div>
                     <div class="action-container">
                         <a href="/projects/observability/docs/services.md" target="_blank" class="docs-link" title="View Project Docs">📁</a>
-                        <a href="http://localhost:8002/dashboard" target="_blank" class="obs-link" title="View Full Dashboard">📊</a>
-                        <a href="http://localhost:8002/docs" target="_blank" class="docs-link" title="View Swagger API Docs">📖</a>
+                        <a href="http://localhost:{{OBS_PORT}}/dashboard" target="_blank" class="obs-link" title="View Full Dashboard">📊</a>
+                        <a href="http://localhost:{{OBS_PORT}}/docs" target="_blank" class="docs-link" title="View Swagger API Docs">📖</a>
                     </div>
                 </div>
             </div>
@@ -466,11 +466,11 @@
                 <p>Autonomous LangGraph agent. Provide a topic and it autonomously searches, scrapes, and synthesizes a
                     final report.</p>
                 <div class="card-footer">
-                    <div class="port-tag">PORT 8003</div>
+                    <div class="port-tag">PORT {{RESEARCH_PORT}}</div>
                     <div class="action-container">
                         <a href="/projects/research_agent/docs/services.md" target="_blank" class="docs-link" title="View Project Docs">📁</a>
-                        <a href="http://localhost:8002/dashboard?service=research_agent" target="_blank" class="obs-link" title="View Observability">📊</a>
-                        <a href="http://localhost:8003/docs" target="_blank" class="docs-link" title="View Swagger API Docs">📖</a>
+                        <a href="http://localhost:{{OBS_PORT}}/dashboard?service=research_agent" target="_blank" class="obs-link" title="View Observability">📊</a>
+                        <a href="http://localhost:{{RESEARCH_PORT}}/docs" target="_blank" class="docs-link" title="View Swagger API Docs">📖</a>
                     </div>
                 </div>
             </div>
@@ -488,11 +488,11 @@
                 <p>LangGraph Supervisor orchestrator managing specialized Researcher and Coder workers using shared
                     context.</p>
                 <div class="card-footer">
-                    <div class="port-tag">PORT 8004</div>
+                    <div class="port-tag">PORT {{MULTI_AGENT_PORT}}</div>
                     <div class="action-container">
                         <a href="/projects/multi_agent/docs/services.md" target="_blank" class="docs-link" title="View Project Docs">📁</a>
-                        <a href="http://localhost:8002/dashboard?service=multi_agent" target="_blank" class="obs-link" title="View Observability">📊</a>
-                        <a href="http://localhost:8004/docs" target="_blank" class="docs-link" title="View Swagger API Docs">📖</a>
+                        <a href="http://localhost:{{OBS_PORT}}/dashboard?service=multi_agent" target="_blank" class="obs-link" title="View Observability">📊</a>
+                        <a href="http://localhost:{{MULTI_AGENT_PORT}}/docs" target="_blank" class="docs-link" title="View Swagger API Docs">📖</a>
                     </div>
                 </div>
             </div>
@@ -510,11 +510,11 @@
                 <p>Security & Compliance layer. Inspect prompts for injection, PII, and secrets before they reach the
                     model.</p>
                 <div class="card-footer">
-                    <div class="port-tag">PORT 8005</div>
+                    <div class="port-tag">PORT {{GUARD_PORT}}</div>
                     <div class="action-container">
                         <a href="/projects/guardrails/docs/services.md" target="_blank" class="docs-link" title="View Project Docs">📁</a>
-                        <a href="http://localhost:8002/dashboard?service=guardrails" target="_blank" class="obs-link" title="View Observability">📊</a>
-                        <a href="http://localhost:8005/docs" target="_blank" class="docs-link" title="View Swagger API Docs">📖</a>
+                        <a href="http://localhost:{{OBS_PORT}}/dashboard?service=guardrails" target="_blank" class="obs-link" title="View Observability">📊</a>
+                        <a href="http://localhost:{{GUARD_PORT}}/docs" target="_blank" class="docs-link" title="View Swagger API Docs">📖</a>
                     </div>
                 </div>
             </div>
@@ -531,21 +531,21 @@
                 <h2>Resilient AI Gateway</h2>
                 <p>Enterprise-grade routing and failover proxy. Handles regional outages and rate limits with simulation mode.</p>
                 <div class="card-footer">
-                    <div class="port-tag">PORT 8006</div>
+                    <div class="port-tag">PORT {{RESILIENT_GATEWAY_PORT}}</div>
                     <div class="action-container">
                         <a href="/projects/resilient_gateway/docs/services.md" target="_blank" class="docs-link" title="View Project Docs">📁</a>
-                        <a href="http://localhost:8002/dashboard?service=resilient_gateway" target="_blank" class="obs-link" title="View Observability">📊</a>
-                        <a href="http://localhost:8006/docs" target="_blank" class="docs-link" title="View Swagger API Docs">📖</a>
+                        <a href="http://localhost:{{OBS_PORT}}/dashboard?service=resilient_gateway" target="_blank" class="obs-link" title="View Observability">📊</a>
+                        <a href="http://localhost:{{RESILIENT_GATEWAY_PORT}}/docs" target="_blank" class="docs-link" title="View Swagger API Docs">📖</a>
                     </div>
                 </div>
             </div>
 
             <!-- n8n Workflow Card -->
-            <div class="card" id="card-n8n" data-port="5678"
-                onclick="if(event.target.tagName !== 'BUTTON' && event.target.tagName !== 'A') window.open('http://localhost:5678', '_blank');">
+            <div class="card" id="card-n8n" data-port="{{N8N_PORT}}"
+                onclick="if(event.target.tagName !== 'BUTTON' && event.target.tagName !== 'A') window.open('http://localhost:{{N8N_PORT}}', '_blank');">
                 <div class="card-header-row">
                     <div class="icon-wrapper"><span>🐙</span></div>
-                    <div class="status-badge" id="status-5678">
+                    <div class="status-badge" id="status-{{N8N_PORT}}">
                         <div class="status-dot"></div>
                         <span class="status-text">Checking...</span>
                     </div>
@@ -553,10 +553,82 @@
                 <h2>n8n Workflow</h2>
                 <p>Low-code visually orchestrated AI pipelines.</p>
                 <div class="card-footer">
-                    <div class="port-tag">PORT 5678</div>
+                    <div class="port-tag">PORT {{N8N_PORT}}</div>
                     <div class="action-container">
-                        <a href="http://localhost:5678" target="_blank" class="docs-link" title="Open n8n">🔗</a>
+                        <a href="http://localhost:{{N8N_PORT}}" target="_blank" class="docs-link" title="Open n8n">🔗</a>
                     </div>
+                </div>
+            </div>
+
+            <!-- AI Perf & Eval Card (Phase 4) -->
+            <div class="card" id="card-perf" data-port="{{PERF_EVAL_PORT}}"
+                onclick="if(event.target.tagName !== 'BUTTON' && event.target.tagName !== 'A') window.open('http://localhost:{{PERF_EVAL_PORT}}/docs', '_blank');">
+                <div class="card-header-row">
+                    <div class="icon-wrapper"><span>📈</span></div>
+                    <div class="status-badge" id="status-{{PERF_EVAL_PORT}}">
+                        <div class="status-dot"></div>
+                        <span class="status-text">Checking...</span>
+                    </div>
+                </div>
+                <h2>AI Perf & Eval</h2>
+                <p>Accuracy, Cost, and Performance monitoring for production-grade AI systems.</p>
+                <div class="card-footer">
+                    <div class="port-tag">PORT {{PERF_EVAL_PORT}}</div>
+                    <div class="action-container">
+                        <a href="http://localhost:{{PERF_EVAL_PORT}}/docs" target="_blank" class="docs-link" title="View Swagger API Docs">📖</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Qdrant Core DB Card -->
+            <div class="card" id="card-qdrant" data-port="{{QDRANT_PORT}}"
+                onclick="if(event.target.tagName !== 'BUTTON' && event.target.tagName !== 'A') window.open('http://localhost:{{QDRANT_PORT}}/dashboard', '_blank');">
+                <div class="card-header-row">
+                    <div class="icon-wrapper"><span>💎</span></div>
+                    <div class="status-badge" id="status-{{QDRANT_PORT}}">
+                        <div class="status-dot"></div>
+                        <span class="status-text">Checking...</span>
+                    </div>
+                </div>
+                <h2>Qdrant DB</h2>
+                <p>High-performance vector database for RAG applications.</p>
+                <div class="card-footer">
+                    <div class="port-tag">PORT {{QDRANT_PORT}}</div>
+                    <div class="action-container">
+                        <a href="http://localhost:{{QDRANT_PORT}}/dashboard" target="_blank" class="docs-link" title="Open Dashboard">🔗</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MongoDB Card -->
+            <div class="card" id="card-mongo" data-port="{{MONGO_PORT}}">
+                <div class="card-header-row">
+                    <div class="icon-wrapper"><span>🍃</span></div>
+                    <div class="status-badge" id="status-{{MONGO_PORT}}">
+                        <div class="status-dot"></div>
+                        <span class="status-text">Checking...</span>
+                    </div>
+                </div>
+                <h2>MongoDB</h2>
+                <p>Flexible document store for persistent agent memory and metadata.</p>
+                <div class="card-footer">
+                    <div class="port-tag">PORT {{MONGO_PORT}}</div>
+                </div>
+            </div>
+
+            <!-- Redis Card -->
+            <div class="card" id="card-redis" data-port="{{REDIS_PORT}}">
+                <div class="card-header-row">
+                    <div class="icon-wrapper"><span>⚡</span></div>
+                    <div class="status-badge" id="status-{{REDIS_PORT}}">
+                        <div class="status-dot"></div>
+                        <span class="status-text">Checking...</span>
+                    </div>
+                </div>
+                <h2>Redis</h2>
+                <p>Low-latency cache and pub-sub for agent communication.</p>
+                <div class="card-footer">
+                    <div class="port-tag">PORT {{REDIS_PORT}}</div>
                 </div>
             </div>
         </div>
@@ -621,13 +693,18 @@
 
         // Tuples of [TargetPort, ServiceId]
         const services = [
-            [8000, 'rag'],
-            [8001, 'mcp'],
-            [8002, 'observe'],
-            [8003, 'research'],
-            [8004, 'multi'],
-            [8005, 'guardrails'],
-            [8006, 'resilient']
+            [{{RAG_PORT}}, 'rag'],
+            [{{GATEWAY_PORT}}, 'mcp'],
+            [{{OBS_PORT}}, 'observe'],
+            [{{RESEARCH_PORT}}, 'research'],
+            [{{MULTI_AGENT_PORT}}, 'multi'],
+            [{{GUARD_PORT}}, 'guardrails'],
+            [{{RESILIENT_GATEWAY_PORT}}, 'resilient'],
+            [{{N8N_PORT}}, 'n8n'],
+            [{{PERF_EVAL_PORT}}, 'perf'],
+            [{{QDRANT_PORT}}, 'qdrant'],
+            [{{MONGO_PORT}}, 'mongo'],
+            [{{REDIS_PORT}}, 'redis']
         ];
 
         services.forEach(([port, key]) => checkStatus(port, key));

@@ -17,37 +17,18 @@ services:
       - EMBEDDING_PROVIDER=openai
       - VECTOR_STORE_PROVIDER=qdrant
       # Wait for the DB to start
-      - VECTOR_STORE_HOST=qdrant_db
+      - VECTOR_STORE_HOST=ai_infra_qdrant
       - VECTOR_STORE_PORT=6333
     depends_on:
-      # - chroma_db
-      - qdrant_db
+      # Use external qdrant starts with run-infra
+      []
     volumes:
       - ../../.env:/app/.env:ro
     networks:
       - ai_network
 
-  # ChromaDB Server
-  # chroma_db:
-  #   image: chromadb/chroma:latest
-  #   container_name: rag_chroma_db
-  #   volumes:
-  #     - chroma_data:/chroma/chroma
-  #   ports:
-  #     - "8001:8000" # Expose to host on 8001
-  #   networks:
-  #     - ai_network
-
-  # Qdrant Server (Alternative Vector DB Example)
-  qdrant_db:
-    image: qdrant/qdrant:latest
-    container_name: rag_qdrant_db
-    volumes:
-      - qdrant_data:/qdrant/storage
-    ports:
-      - "6333:6333" # Expose to host on 6333
-    networks:
-      - ai_network
+# Qdrant is now managed in projects/infrastructure/docker-compose.yml
+# Start it with 'make run-infra'
 
 volumes:
   chroma_data:

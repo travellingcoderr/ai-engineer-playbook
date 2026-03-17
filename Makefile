@@ -16,7 +16,13 @@ MULTI_AGENT_PORT ?= 8004
 GUARD_PORT ?= 8005
 RESILIENT_GATEWAY_PORT ?= 8006
 N8N_PORT ?= 5678
+PERF_EVAL_PORT ?= 8007
 DASHBOARD_PORT ?= 8080
+
+# Infrastructure Ports
+QDRANT_PORT ?= 6333
+MONGO_PORT ?= 27017
+REDIS_PORT ?= 6379
 
 # ==============================
 # Environment Setup
@@ -165,6 +171,28 @@ stop-n8n:
 	@echo "Stopping n8n Workflow Orchestrator..."
 	@cd projects/workflow_orchestrator && docker-compose down
 
+# ai_perf_eval
+run-perf-eval:
+	@echo "Starting AI Performance & Evaluation Service..."
+	@cd projects/ai_perf_eval && PYTHONPATH=$(PWD):$(PWD)/projects/ai_perf_eval python3 app/main.py
+
+run-docker-perf-eval:
+	@echo "Starting AI Performance & Evaluation in Docker..."
+	@cd projects/ai_perf_eval && docker-compose up --build -d
+
+stop-docker-perf-eval:
+	@echo "Stopping AI Performance & Evaluation in Docker..."
+	@cd projects/ai_perf_eval && docker-compose down
+
+# Infrastructure (Qdrant, Mongo, Redis)
+run-infra:
+	@echo "Starting Shared Infrastructure (Qdrant, Mongo, Redis)..."
+	@cd projects/infrastructure && docker-compose up -d
+
+stop-infra:
+	@echo "Stopping Shared Infrastructure..."
+	@cd projects/infrastructure && docker-compose down
+
 # Observability Logs
 tail-observe-logs:
 	@docker logs -f observability_api
@@ -282,6 +310,14 @@ kill-resilient-gateway:
 
 kill-n8n:
 	@make kill-port PORT=$(N8N_PORT)
+
+kill-perf-eval:
+	@make kill-port PORT=$(PERF_EVAL_PORT)
+
+kill-infra:
+	@make kill-port PORT=$(QDRANT_PORT)
+	@make kill-port PORT=$(MONGO_PORT)
+	@make kill-port PORT=$(REDIS_PORT)
 
 kill-all:
 	@make kill-rag

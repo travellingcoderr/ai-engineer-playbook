@@ -36,6 +36,7 @@ def main():
         "Guardrails": 8005,
         "Resilient Gateway": 8006,
         "n8n Workflow": 5678,
+        "AI Perf & Eval": 8007,
         "Dashboard": 8080
     }
 
@@ -54,6 +55,10 @@ def main():
         ("Stop Resilient Gateway (Docker)", "make stop-docker-resilient-gateway", "Resilient Gateway"),
         ("Start n8n (Docker)", "make run-n8n", "n8n Workflow"),
         ("Stop n8n (Docker)", "make stop-n8n", "n8n Workflow"),
+        ("Start AI Perf & Eval", "make run-perf-eval", "AI Perf & Eval"),
+        ("Stop AI Perf & Eval (Docker)", "make stop-docker-perf-eval", "AI Perf & Eval"),
+        ("Start Core Infrastructure (Docker)", "make run-infra", "Infrastructure"),
+        ("Stop Core Infrastructure (Docker)", "make stop-infra", "Infrastructure"),
         ("Start Observability (Docker)", "make run-docker-observe", "Observability"),
         ("Stop Observability (Docker)", "make stop-docker-observe", "Observability"),
         ("View Observability Logs (Live)", "make tail-observe-logs", "Observability"),

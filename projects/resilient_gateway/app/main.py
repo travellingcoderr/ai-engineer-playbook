@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.models.gateway_models import LLMRequest, GatewayConfig
+from packages.core.enums import GatewayMode
 from app.services.factory import ProviderFactory
 from app.services.router import ResilientRouter
 from app.services.webhook_service import WebhookService
@@ -45,13 +46,13 @@ obs = ObservabilityClient("resilient_gateway")
 webhook = WebhookService()
 
 # Global router instance (initialized with simulation by default)
-default_config = GatewayConfig(mode="simulation")
+default_config = GatewayConfig(mode=GatewayMode.SIMULATION)
 providers = ProviderFactory.create_providers(default_config)
-router = ResilientRouter(providers)
+router = ResilientRouter(providers, strategy=default_config.strategy)
 
 @app.get("/health")
 async def health():
-    return {"status": "healthy", "mode": default_config.mode}
+    return {"status": "healthy", "mode": default_config.mode.value}
 
 @app.post("/v1/complete")
 async def complete(request: LLMRequest):

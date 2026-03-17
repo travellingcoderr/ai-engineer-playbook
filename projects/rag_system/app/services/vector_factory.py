@@ -1,5 +1,6 @@
 from langchain_core.embeddings import Embeddings
 from langchain_core.vectorstores import VectorStore
+from packages.core.enums import VectorStoreProvider
 
 class VectorStoreFactory:
     """
@@ -8,7 +9,7 @@ class VectorStoreFactory:
     
     @staticmethod
     def create_vector_store(
-        provider: str, 
+        provider: VectorStoreProvider, 
         collection_name: str, 
         embeddings: Embeddings,
         **kwargs
@@ -22,16 +23,14 @@ class VectorStoreFactory:
             embeddings: An instantiated Embeddings model to vectorize data
             **kwargs: Extra arguments for connection strings, etc.
         """
-        provider = provider.lower().strip()
-        
         # Ensure fallback to localhost if not specified
         host = kwargs.get("host", "localhost")
         port = kwargs.get("port", 8000)
         
-        if provider == "chroma":
+        if provider == VectorStoreProvider.CHROMA:
             return VectorStoreFactory._create_chroma(collection_name, embeddings, host, port)
             
-        elif provider == "qdrant":
+        elif provider == VectorStoreProvider.QDRANT:
             return VectorStoreFactory._create_qdrant(collection_name, embeddings, host, port)
             
         else:
