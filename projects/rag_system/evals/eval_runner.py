@@ -54,7 +54,7 @@ def run_eval():
         rag.vector_store = vector_store
         
         # Initialize LLM
-        from packages.core.llm_factory import LLMFactory
+        from packages.core.services import LLMFactory
         rag.llm = LLMFactory.create_llm(
             provider=config.llm.provider,
             model_name=config.llm.model,

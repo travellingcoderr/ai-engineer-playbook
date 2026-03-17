@@ -1,6 +1,6 @@
 from langchain_core.messages import HumanMessage
 from langgraph.prebuilt import create_react_agent
-from packages.core.llm_factory import LLMFactory
+from packages.core.services import LLMFactory
 import logging
 
 logger = logging.getLogger(__name__)

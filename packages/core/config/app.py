@@ -43,9 +43,14 @@ def get_config() -> AppConfig:
     config = AppConfig()
     
     # Manually patch keys that pydantic-settings might miss due to nesting discrepancies
+    from packages.core.enums import AIModel
     if os.getenv("OPENAI_API_KEY"):
         config.llm.openai_api_key = os.getenv("OPENAI_API_KEY")
     if os.getenv("OPENAI_MODEL"):
-        config.llm.model = os.getenv("OPENAI_MODEL")
+        try:
+            config.llm.model = AIModel(os.getenv("OPENAI_MODEL"))
+        except ValueError:
+            # If it's not a known model, we keep the default or let it be handled later
+            pass
         
     return config

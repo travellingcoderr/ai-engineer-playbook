@@ -2,7 +2,7 @@ import logging
 from typing import Optional
 from langchain_openai import AzureChatOpenAI
 from langchain_core.messages import HumanMessage
-from app.models.gateway_models import LLMRequest, LLMResponse
+from packages.core.models.ai import LLMRequest, LLMResponse
 from app.services.providers.base import BaseLLMProvider
 
 logger = logging.getLogger("azure-provider")

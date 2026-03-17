@@ -6,7 +6,7 @@ import uvicorn
 # We import the run function from the agent module
 from projects.research_agent.agent import run
 from packages.core.config import get_config
-from packages.core.observability import ObservabilityClient
+from packages.core.services import ObservabilityClient
 import time
 import uuid
 
@@ -52,8 +52,9 @@ async def perform_research(request: ResearchRequest):
         final_report = run(request.topic)
         
         end_time = time.time()
-        obs_client.metric("research_latency", (end_time - start_time), unit="seconds")
-        obs_client.metric("research_count", 1, unit="count")
+        from packages.core.enums import MetricUnit, LogLevel
+        obs_client.metric("research_latency", (end_time - start_time), unit=MetricUnit.SECONDS)
+        obs_client.metric("research_count", 1, unit=MetricUnit.COUNT)
         obs_client.trace("autonomous_research", start_time, end_time, trace_id, span_id)
         
         return ResearchResponse(
@@ -61,7 +62,8 @@ async def perform_research(request: ResearchRequest):
             report_markdown=final_report
         )
     except Exception as e:
-        obs_client.log(f"Research failed: {str(e)}", level="ERROR", trace_id=trace_id)
+        from packages.core.enums import LogLevel
+        obs_client.log(f"Research failed: {str(e)}", level=LogLevel.ERROR, trace_id=trace_id)
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":

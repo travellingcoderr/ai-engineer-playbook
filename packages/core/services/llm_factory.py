@@ -1,6 +1,6 @@
 import os
 from langchain_core.language_models.chat_models import BaseChatModel
-from .config import get_config
+from ..config import get_config
 
 class LLMFactory:
     """

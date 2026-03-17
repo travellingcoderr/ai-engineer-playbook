@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.models.eval_models import EvalRequest, LoadTestRequest, EvalType
-from packages.core.observability import ObservabilityClient
+from packages.core.services import ObservabilityClient
 
 # Setup Logging
 logging.basicConfig(level=logging.INFO)

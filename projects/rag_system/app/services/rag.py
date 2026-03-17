@@ -5,7 +5,7 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 
 from packages.core.config import get_config
-from packages.core.llm_factory import LLMFactory
+from packages.core.services import LLMFactory
 from app.services.embedding_factory import EmbeddingFactory
 from app.services.vector_factory import VectorStoreFactory
 from app.services.loader_factory import LoaderFactory

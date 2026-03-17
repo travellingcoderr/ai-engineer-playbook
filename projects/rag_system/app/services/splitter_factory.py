@@ -1,12 +1,14 @@
 from langchain_text_splitters import TextSplitter
 
+from packages.core.enums import SplitterStrategy
+
 class SplitterFactory:
     """
     Factory class to instantiate the correct document text splitter/chunker.
     """
     
     @staticmethod
-    def create_splitter(strategy: str, chunk_size: int, chunk_overlap: int) -> TextSplitter:
+    def create_splitter(strategy: SplitterStrategy, chunk_size: int, chunk_overlap: int) -> TextSplitter:
         """
         Creates and returns a LangChain TextSplitter instance.
         
@@ -15,9 +17,7 @@ class SplitterFactory:
             chunk_size: The target max size for every chunk.
             chunk_overlap: Shared characters between consecutive chunks.
         """
-        strategy = strategy.lower().strip()
-        
-        if strategy == "recursive_character":
+        if strategy == SplitterStrategy.RECURSIVE:
             try:
                 from langchain_text_splitters import RecursiveCharacterTextSplitter
                 return RecursiveCharacterTextSplitter(
@@ -28,7 +28,7 @@ class SplitterFactory:
             except ImportError:
                  raise ImportError("Please ensure langchain-text-splitters is installed.")
                  
-        elif strategy == "markdown":
+        elif strategy == SplitterStrategy.MARKDOWN:
             try:
                 from langchain_text_splitters import MarkdownTextSplitter
                 return MarkdownTextSplitter(

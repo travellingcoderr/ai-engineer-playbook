@@ -1,13 +1,15 @@
 import os
 from langchain_core.document_loaders import BaseLoader
 
+from packages.core.enums import LoaderStrategy
+
 class LoaderFactory:
     """
     Factory to instantiate the correct document loader based on file type or strategy.
     """
 
     @staticmethod
-    def create_loader(file_path: str, strategy: str = "auto") -> BaseLoader:
+    def create_loader(file_path: str, strategy: LoaderStrategy = LoaderStrategy.AUTO) -> BaseLoader:
         """
         Creates and returns a LangChain BaseLoader instance.
         
@@ -15,32 +17,30 @@ class LoaderFactory:
             file_path: The path or URL to the document to be loaded.
             strategy: 'auto' (guess by extension), 'pdf', 'markdown', or 'text'.
         """
-        if strategy == "auto":
+        if strategy == LoaderStrategy.AUTO:
             _, ext = os.path.splitext(file_path.lower())
             if ext == ".pdf":
-                strategy = "pdf"
+                strategy = LoaderStrategy.PDF
             elif ext in [".md", ".markdown"]:
-                strategy = "markdown"
+                strategy = LoaderStrategy.MARKDOWN
             else:
-                strategy = "text"
+                strategy = LoaderStrategy.TEXT
 
-        strategy = strategy.lower().strip()
-
-        if strategy == "pdf":
+        if strategy == LoaderStrategy.PDF:
             try:
                 from langchain_community.document_loaders import PyPDFLoader
                 return PyPDFLoader(file_path)
             except ImportError:
                 raise ImportError("Please install pypdf to use the PDF loader.")
 
-        elif strategy == "markdown":
+        elif strategy == LoaderStrategy.MARKDOWN:
             try:
                 from langchain_community.document_loaders import UnstructuredMarkdownLoader
                 return UnstructuredMarkdownLoader(file_path)
             except ImportError:
                 raise ImportError("Please install unstructured to use the Markdown loader.")
 
-        elif strategy == "text":
+        elif strategy == LoaderStrategy.TEXT:
             try:
                 from langchain_community.document_loaders import TextLoader
                 return TextLoader(file_path)

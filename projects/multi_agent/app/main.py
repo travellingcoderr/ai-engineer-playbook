@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 from contextlib import asynccontextmanager
 from pydantic import BaseModel
 from packages.core.config import get_config
-from packages.core.observability import ObservabilityClient
+from packages.core.services import ObservabilityClient
 import time
 import uuid
 import logging
@@ -58,8 +58,9 @@ async def run_team(request: TaskRequest):
         )
         
         end_time = time.time()
-        obs_client.metric("team_execution_latency", (end_time - start_time), unit="seconds")
-        obs_client.metric("team_task_count", 1, unit="count")
+        from packages.core.enums import MetricUnit, LogLevel
+        obs_client.metric("team_execution_latency", (end_time - start_time), unit=MetricUnit.SECONDS)
+        obs_client.metric("team_task_count", 1, unit=MetricUnit.COUNT)
         obs_client.trace("multi_agent_coordination", start_time, end_time, trace_id, span_id)
         
         # Last message in the state typically holds the finalized answer
@@ -72,6 +73,7 @@ async def run_team(request: TaskRequest):
             "full_state": str(result)
         }
     except Exception as e:
-        obs_client.log(f"Team execution failed: {str(e)}", level="ERROR", trace_id=trace_id)
+        from packages.core.enums import LogLevel
+        obs_client.log(f"Team execution failed: {str(e)}", level=LogLevel.ERROR, trace_id=trace_id)
         logger.exception("Multi-agent team execution failed")
         raise HTTPException(status_code=500, detail=str(e))

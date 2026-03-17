@@ -6,7 +6,7 @@ import time
 import uuid
 
 from app.services.rag import RAGService
-from packages.core.observability import ObservabilityClient
+from packages.core.services import ObservabilityClient
 
 # Create a global instances to hold our services
 rag_service = None
@@ -76,11 +76,13 @@ def ask(q: str):
         answer = rag_service.ask_question(q)
         
         end_time = time.time()
-        obs_client.metric("query_latency", (end_time - start_time), unit="seconds")
-        obs_client.metric("query_count", 1, unit="count")
+        from packages.core.enums import MetricUnit, LogLevel
+        obs_client.metric("query_latency", (end_time - start_time), unit=MetricUnit.SECONDS)
+        obs_client.metric("query_count", 1, unit=MetricUnit.COUNT)
         obs_client.trace("rag_query", start_time, end_time, trace_id, span_id)
         
         return {"answer": answer}
     except Exception as e:
-        obs_client.log(f"Error processing question: {str(e)}", level="ERROR", trace_id=trace_id)
+        from packages.core.enums import LogLevel
+        obs_client.log(f"Error processing question: {str(e)}", level=LogLevel.ERROR, trace_id=trace_id)
         raise HTTPException(status_code=500, detail=str(e))

@@ -2,7 +2,7 @@ import time
 import uuid
 import random
 from .base import BaseLLMProvider
-from app.models.gateway_models import LLMRequest, LLMResponse
+from packages.core.models.ai import LLMRequest, LLMResponse
 
 class MockAzureProvider(BaseLLMProvider):
     """

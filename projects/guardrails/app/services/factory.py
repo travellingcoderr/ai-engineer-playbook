@@ -1,41 +1,42 @@
 import re
 from typing import Protocol, List
-from ..models.guard_models import GuardResponse
+from packages.core.models.guardrails import GuardResponse
+from packages.core.enums import GuardAction, GuardCheckType
 
 class GuardEngine(Protocol):
-    def validate(self, text: str, checks: List[str]) -> GuardResponse:
+    def validate(self, text: str, checks: List[GuardCheckType]) -> GuardResponse:
         ...
 
 class SimpleRegexEngine:
-    def validate(self, text: str, checks: List[str]) -> GuardResponse:
+    def validate(self, text: str, checks: List[GuardCheckType]) -> GuardResponse:
         findings = []
         filtered_text = text
         safe = True
-        action = "allowed"
+        action = GuardAction.ALLOWED
 
-        if "pii" in checks:
+        if GuardCheckType.PII in checks:
             # Simple email check
             emails = re.findall(r'[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+', text)
             if emails:
                 findings.append(f"PII detected: {len(emails)} email(s)")
                 for email in emails:
                     filtered_text = filtered_text.replace(email, "[REDACTED_EMAIL]")
-                action = "redacted"
+                action = GuardAction.REDACTED
 
-        if "secrets" in checks:
+        if GuardCheckType.SECRETS in checks:
             # Simple API key pattern
             keys = re.findall(r'(sk-[a-zA-Z0-9]{32,})', text)
             if keys:
                 findings.append("Secret detected: OpenAI API Key pattern")
                 safe = False
-                action = "blocked"
+                action = GuardAction.BLOCKED
 
-        if "injection" in checks:
+        if GuardCheckType.INJECTION in checks:
             patterns = ["ignore previous instructions", "system prompt", "you are now"]
             if any(p in text.lower() for p in patterns):
                 findings.append("Potential prompt injection detected")
                 safe = False
-                action = "blocked"
+                action = GuardAction.BLOCKED
 
         return GuardResponse(
             safe=safe,

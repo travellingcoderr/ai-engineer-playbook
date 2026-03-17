@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from app.models.gateway_models import LLMRequest, LLMResponse
+from packages.core.models.ai import LLMRequest, LLMResponse
 
 class BaseLLMProvider(ABC):
     """Abstract base class for all LLM providers (Azure, OpenAI, Mock, etc.)"""

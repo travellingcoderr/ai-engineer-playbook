@@ -1,7 +1,7 @@
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from pydantic import BaseModel
 from typing import Literal
-from packages.core.llm_factory import LLMFactory
+from packages.core.services import LLMFactory
 
 # Defines our autonomous workforce
 MEMBERS = ["Researcher", "Coder"]

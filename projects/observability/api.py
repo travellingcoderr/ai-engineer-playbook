@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
-from app.models.obs_models import LogEntry, MetricEntry, TraceSpan
+from packages.core.models.observability import LogEntry, MetricEntry, TraceSpan
 from app.services.factory import ObservabilityFactory
 import time
 import json

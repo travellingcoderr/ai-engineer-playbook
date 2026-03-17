@@ -5,12 +5,13 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from app.models.gateway_models import LLMRequest, GatewayConfig
+from app.models.gateway_models import GatewayConfig
 from packages.core.enums import GatewayMode
+from packages.core.models.ai import LLMRequest, LLMResponse
 from app.services.factory import ProviderFactory
 from app.services.router import ResilientRouter
 from app.services.webhook_service import WebhookService
-from packages.core.observability import ObservabilityClient
+from packages.core.services import ObservabilityClient
 
 # Setup Logging
 logging.basicConfig(level=logging.INFO)
@@ -56,13 +57,13 @@ async def health():
 
 @app.post("/v1/complete")
 async def complete(request: LLMRequest):
-    obs.log(f"Handling completion request for model: {request.model}")
+    obs.log(f"Handling completion request for model: {request.model.value}")
     
     # Trigger n8n Webhook for enrichment
     # We await the response which might contain CRM context
     enrichment_data = await webhook.fire_event("request_received", {
         "prompt": request.prompt,
-        "model": request.model
+        "model": request.model.value
     })
 
     obs.log(f"Enrichment data: {enrichment_data}")
@@ -85,12 +86,14 @@ async def complete(request: LLMRequest):
         response = await router.route_request(request)
         
         duration = time.time() - start_time
-        obs.metric("completion_latency", duration, unit="seconds")
+        from packages.core.enums import MetricUnit, LogLevel
+        obs.metric("completion_latency", duration, unit=MetricUnit.SECONDS)
         
         return response
     except Exception as e:
         logger.error(f"Gateway Error: {str(e)}")
-        obs.log(f"Routing failure: {str(e)}", level="ERROR")
+        from packages.core.enums import LogLevel
+        obs.log(f"Routing failure: {str(e)}", level=LogLevel.ERROR)
         raise HTTPException(status_code=503, detail=str(e))
 
 if __name__ == "__main__":

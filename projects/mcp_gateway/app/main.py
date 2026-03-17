@@ -9,7 +9,7 @@ from pydantic import BaseModel
 from app.auth import get_role_from_auth_header, create_access_token
 from app.models import ToolRequest, ToolResponse
 from app.tools import invoke_tool
-from packages.core.observability import ObservabilityClient
+from packages.core.services import ObservabilityClient
 import uuid
 
 obs_client = ObservabilityClient(service_name="mcp_gateway")
@@ -71,12 +71,14 @@ def call_tool(request: ToolRequest, role: str = Depends(get_role_from_auth_heade
         result = invoke_tool(role=role, tool_name=request.tool_name, arguments=request.arguments)
         
         end_time = time.time()
-        obs_client.metric("tool_invocation_latency", (end_time - start_time), unit="seconds")
+        from packages.core.enums import MetricUnit, LogLevel
+        obs_client.metric("tool_invocation_latency", (end_time - start_time), unit=MetricUnit.SECONDS)
         obs_client.trace(f"tool_{request.tool_name}", start_time, end_time, trace_id, span_id)
         
         return ToolResponse(ok=True, tool_name=request.tool_name, result=result)
     except Exception as exc:
-        obs_client.log(f"Tool invocation failed: {str(exc)}", level="ERROR", trace_id=trace_id)
+        from packages.core.enums import LogLevel
+        obs_client.log(f"Tool invocation failed: {str(exc)}", level=LogLevel.ERROR, trace_id=trace_id)
         if isinstance(exc, PermissionError):
             raise HTTPException(status_code=403, detail=str(exc)) from exc
         if isinstance(exc, FileNotFoundError):

@@ -1,9 +1,9 @@
 import time
 import json
 from fastapi import FastAPI, Request, HTTPException
-from .models.guard_models import GuardRequest, GuardResponse
+from packages.core.models.guardrails import GuardRequest, GuardResponse
 from .services.factory import GuardrailFactory
-from packages.core.observability import ObservabilityClient
+from packages.core.services import ObservabilityClient
 import uuid
 
 obs_client = ObservabilityClient(service_name="guardrails")
@@ -39,15 +39,18 @@ async def validate_text(request: GuardRequest):
         latency = (time.time() - start_time)
         response.latency_ms = latency * 1000
         
-        obs_client.metric("validation_latency", latency, unit="seconds")
+        from packages.core.enums import MetricUnit, LogLevel
+        obs_client.metric("validation_latency", latency, unit=MetricUnit.SECONDS)
         if response.safe:
             obs_client.log("Text passed guardrails", trace_id=trace_id)
         else:
-            obs_client.log(f"Guardrail violation: {response.explanation}", level="WARNING", trace_id=trace_id)
+            from packages.core.enums import LogLevel
+            obs_client.log(f"Guardrail violation: {response.explanation}", level=LogLevel.WARNING, trace_id=trace_id)
             
         return response
     except Exception as e:
-        obs_client.log(f"Validation error: {str(e)}", level="ERROR", trace_id=trace_id)
+        from packages.core.enums import LogLevel
+        obs_client.log(f"Validation error: {str(e)}", level=LogLevel.ERROR, trace_id=trace_id)
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/health")

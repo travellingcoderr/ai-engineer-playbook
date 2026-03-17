@@ -2,17 +2,18 @@ import requests
 import time
 import uuid
 from typing import Optional, Dict
+from ..enums import LogLevel, MetricUnit
 
 class ObservabilityClient:
     def __init__(self, service_name: str, collector_url: str = "http://observability_api:8002"):
         self.service_name = service_name
         self.collector_url = collector_url
 
-    def log(self, message: str, level: str = "INFO", trace_id: Optional[str] = None):
+    def log(self, message: str, level: LogLevel = LogLevel.INFO, trace_id: Optional[str] = None):
         payload = {
             "service": self.service_name,
             "message": message,
-            "level": level,
+            "level": level.value if isinstance(level, LogLevel) else level,
             "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
             "trace_id": trace_id or str(uuid.uuid4())
         }
@@ -21,12 +22,12 @@ class ObservabilityClient:
         except Exception:
             pass # Fail silently in production, or log to console
 
-    def metric(self, name: str, value: float, unit: str = "count", tags: Optional[Dict[str, str]] = None):
+    def metric(self, name: str, value: float, unit: MetricUnit = MetricUnit.COUNT, tags: Optional[Dict[str, str]] = None):
         payload = {
             "service": self.service_name,
             "name": name,
             "value": value,
-            "unit": unit,
+            "unit": unit.value if isinstance(unit, MetricUnit) else unit,
             "tags": tags or {},
             "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
         }

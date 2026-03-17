@@ -1,8 +1,7 @@
 from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.graph import StateGraph, END
 from langgraph.prebuilt import ToolNode
-from packages.core.llm_factory import LLMFactory
-from packages.core.tool_factory import ToolFactory
+from packages.core.services import LLMFactory, ToolFactory
 from app.core.config import get_research_config
 from app.agent.state import ResearchState
 from app.agent.prompts import RESEARCHER_SYSTEM_PROMPT, WRITER_SYSTEM_PROMPT

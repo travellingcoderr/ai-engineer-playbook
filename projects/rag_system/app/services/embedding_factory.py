@@ -1,6 +1,6 @@
 import os
 from langchain_core.embeddings import Embeddings
-from packages.core.enums import EmbeddingProvider
+from packages.core.enums import EmbeddingProvider, EmbeddingModel
 
 class EmbeddingFactory:
     """
@@ -8,7 +8,7 @@ class EmbeddingFactory:
     """
     
     @staticmethod
-    def create_embeddings(provider: EmbeddingProvider, model_name: str, **kwargs) -> Embeddings:
+    def create_embeddings(provider: EmbeddingProvider, model_name: EmbeddingModel, **kwargs) -> Embeddings:
         """
         Creates and returns a LangChain Embeddings instance.
         
@@ -27,7 +27,7 @@ class EmbeddingFactory:
             raise ValueError(f"Unsupported Embedding provider: {provider}")
 
     @staticmethod
-    def _create_openai(model_name: str, api_key: str | None) -> Embeddings:
+    def _create_openai(model_name: EmbeddingModel, api_key: str | None) -> Embeddings:
         try:
             from langchain_openai import OpenAIEmbeddings
         except ImportError:
@@ -37,13 +37,13 @@ class EmbeddingFactory:
         if not key:
             raise ValueError("OpenAI API key is missing. Set it in .env or config.")
             
-        return OpenAIEmbeddings(model=model_name, api_key=key)
+        return OpenAIEmbeddings(model=model_name.value, api_key=key)
 
     @staticmethod
-    def _create_huggingface(model_name: str) -> Embeddings:
+    def _create_huggingface(model_name: EmbeddingModel) -> Embeddings:
         try:
             from langchain_community.embeddings import HuggingFaceEmbeddings
         except ImportError:
             raise ImportError("Please install langchain-community and sentence-transformers for HuggingFace embeddings.")
             
-        return HuggingFaceEmbeddings(model_name=model_name)
+        return HuggingFaceEmbeddings(model_name=model_name.value)

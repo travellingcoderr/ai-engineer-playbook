@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from ..models.obs_models import LogEntry, MetricEntry, TraceSpan
+from packages.core.models.observability import LogEntry, MetricEntry, TraceSpan
 
 class IngestionStrategy(ABC):
     @abstractmethod

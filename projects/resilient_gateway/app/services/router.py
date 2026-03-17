@@ -1,5 +1,5 @@
 from typing import List, Optional
-from app.models.gateway_models import LLMRequest, LLMResponse
+from packages.core.models.ai import LLMRequest, LLMResponse
 from app.services.providers.base import BaseLLMProvider
 from packages.core.enums import RoutingStrategy
 

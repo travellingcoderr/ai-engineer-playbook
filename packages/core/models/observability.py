@@ -1,10 +1,11 @@
 from pydantic import BaseModel, Field
 from typing import Dict, Any, Optional
 from datetime import datetime
+from packages.core.enums import LogLevel, MetricUnit
 
 class LogEntry(BaseModel):
     timestamp: datetime = Field(default_factory=datetime.utcnow)
-    level: str = "INFO"
+    level: LogLevel = LogLevel.INFO
     service: str
     message: str
     metadata: Dict[str, Any] = Field(default_factory=dict)
@@ -15,7 +16,7 @@ class MetricEntry(BaseModel):
     service: str
     name: str
     value: float
-    unit: str = "count"
+    unit: MetricUnit = MetricUnit.COUNT
     labels: Dict[str, str] = Field(default_factory=dict)
 
 class TraceSpan(BaseModel):

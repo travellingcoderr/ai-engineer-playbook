@@ -1,7 +1,7 @@
 import json
 from typing import Dict, Any
 from .base import IngestionStrategy
-from ..models.obs_models import LogEntry, MetricEntry, TraceSpan
+from packages.core.models.observability import LogEntry, MetricEntry, TraceSpan
 
 class FileIngestionStrategy(IngestionStrategy):
     """Corporate pattern: Buffer to file for later log-shipper (FluentBit/Filebeat) digestion."""
