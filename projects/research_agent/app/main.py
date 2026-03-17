@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from contextlib import asynccontextmanager
 from pydantic import BaseModel, Field
 import uvicorn
 
@@ -11,17 +12,22 @@ import uuid
 
 obs_client = ObservabilityClient(service_name="research_agent")
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    get_config()
+    obs_client.log("Research Agent Service started")
+    yield
+
 app = FastAPI(
     title="Autonomous Research Agent API",
     description="An API to trigger an autonomous LangGraph agent that researches the web and writes comprehensive reports.",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
 
-# Force the environment/config to load on startup so it fails fast if keys are missing
-@app.on_event("startup")
-async def startup_event():
-    get_config()
-    obs_client.log("Research Agent Service started")
+@app.get("/health")
+def health():
+    return {"status": "ok"}
 
 class ResearchRequest(BaseModel):
     topic: str = Field(..., description="The broad subject or specific question you want researched.", example="What are the top 3 biggest AI news stories from March 2026?")

@@ -189,7 +189,15 @@ stop-all:
 # ==============================
 
 test:
-	@$(ACTIVATE) && pytest -q
+	@echo "Running root tests..."
+	@$(ACTIVATE) && python3 -m pytest tests/ -q
+	@for dir in projects/*; do \
+		if [ -d "$$dir/tests" ]; then \
+			project=$$(basename $$dir); \
+			echo "Running $$project tests..."; \
+			PYTHONPATH=$(PWD):$(PWD)/$$dir $(ACTIVATE) && python3 -m pytest $$dir/tests/ -q || exit 1; \
+		fi \
+	done
 
 lint:
 	@$(ACTIVATE) && ruff check .

@@ -26,6 +26,10 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
 @app.post("/ingest")
 async def ingest_document(file: UploadFile = File(...)):
     """

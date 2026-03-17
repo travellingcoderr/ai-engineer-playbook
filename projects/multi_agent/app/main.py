@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from contextlib import asynccontextmanager
 from pydantic import BaseModel
 from packages.core.config import get_config
 from packages.core.observability import ObservabilityClient
@@ -9,16 +10,18 @@ import logging
 logger = logging.getLogger(__name__)
 obs_client = ObservabilityClient(service_name="multi_agent")
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    obs_client.log("Multi-Agent Service started")
+    yield
+
 # Create the standard FastAPI app
 app = FastAPI(
     title="Multi-Agent Orchestrator API",
     description="A LangGraph supervisor system managing a specialized Researcher and Coder team.",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
-
-@app.on_event("startup")
-def startup_event():
-    obs_client.log("Multi-Agent Service started")
 
 # Shared config integration check, matching the RAG system pattern
 try:

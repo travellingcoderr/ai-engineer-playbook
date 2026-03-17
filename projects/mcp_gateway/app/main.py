@@ -1,6 +1,7 @@
 import time
 import json
 from typing import Annotated
+from contextlib import asynccontextmanager
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
@@ -13,11 +14,13 @@ import uuid
 
 obs_client = ObservabilityClient(service_name="mcp_gateway")
 
-app = FastAPI(title="Sample MCP-Style Gateway", version="0.2.0")
 
-@app.on_event("startup")
-def startup_event():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     obs_client.log("MCP Gateway Service started")
+    yield
+
+app = FastAPI(title="Sample MCP-Style Gateway", version="0.2.0", lifespan=lifespan)
 
 class LoginRequest(BaseModel):
     username: str
