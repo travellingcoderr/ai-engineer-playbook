@@ -1,6 +1,7 @@
 import logging
-from typing import Dict, Any
-from app.models.eval_models import EvalType
+from typing import Dict, Any, Union
+from app.models.eval_models import EvalType, CostEvalInput, AccuracyEvalInput
+from packages.core.enums import AIModel
 
 logger = logging.getLogger("eval-factory")
 
@@ -27,44 +28,45 @@ class EvalFactory:
             return BaseEvaluator()
 
 class BaseEvaluator:
-    def evaluate(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    def evaluate(self, data: Any) -> Dict[str, Any]:
         return {"status": "base_eval_executed"}
 
 class CostEvaluator(BaseEvaluator):
     """
     Calculates the financial cost of an LLM request based on token usage.
+    Using strongly-typed CostEvalInput for reliability and extensibility.
     """
-    def evaluate(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    def evaluate(self, data: CostEvalInput) -> Dict[str, Any]:
         # Pricing mapping (typical industry rates)
         pricing = {
-            "gpt-4o": {"input": 0.005, "output": 0.015}, # per 1k tokens
-            "gpt-3.5-turbo": {"input": 0.0005, "output": 0.0015}
+            AIModel.GPT_4O: {"input": 0.005, "output": 0.015}, # per 1k tokens
+            AIModel.GPT_4O_MINI: {"input": 0.00015, "output": 0.0006},
+            AIModel.GPT_3_5_TURBO: {"input": 0.0005, "output": 0.0015},
+            AIModel.CLAUDE_3_5_SONNET: {"input": 0.003, "output": 0.015},
+            AIModel.GEMINI_1_5_PRO: {"input": 0.0035, "output": 0.0105}
         }
         
-        model = data.get("model", "gpt-4o")
-        input_tokens = data.get("input_tokens", 0)
-        output_tokens = data.get("output_tokens", 0)
+        model_pricing = pricing.get(data.model, pricing[AIModel.GPT_4O])
         
-        model_pricing = pricing.get(model, pricing["gpt-4o"])
-        
-        cost = (input_tokens / 1000 * model_pricing["input"]) + \
-               (output_tokens / 1000 * model_pricing["output"])
+        cost = (data.input_tokens / 1000 * model_pricing["input"]) + \
+               (data.output_tokens / 1000 * model_pricing["output"])
         
         return {
-            "model": model,
+            "model": data.model.value,
             "cost_usd": round(cost, 6),
-            "input_tokens": input_tokens,
-            "output_tokens": output_tokens
+            "input_tokens": data.input_tokens,
+            "output_tokens": data.output_tokens
         }
 
 class AccuracyEvaluator(BaseEvaluator):
     """
-    Implements Accuracy checking patterns (e.g., RAGAS or LLM-as-a-Judge).
+    Implements Accuracy checking patterns using AccuracyEvalInput.
     """
-    def evaluate(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    def evaluate(self, data: AccuracyEvalInput) -> Dict[str, Any]:
         # Placeholder for complex accuracy scoring logic
-        logger.info("Performing Accuracy Evaluation (LLM-as-a-Judge Pattern)...")
+        logger.info(f"Performing Accuracy Evaluation (Judge Model: {data.model.value})...")
         return {
             "accuracy_score": 0.85,
-            "method": "semantic_similarity_judge"
+            "method": "semantic_similarity_judge",
+            "evaluated_query": data.query
         }

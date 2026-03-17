@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 from enum import Enum
+from packages.core.enums import AIModel
 
 class EvalType(str, Enum):
     COST = "cost"
@@ -10,8 +11,20 @@ class EvalType(str, Enum):
 class EvalRequest(BaseModel):
     name: str = Field(..., description="Name of the evaluation run")
     project: str = Field(..., description="Project to evaluate (e.g., rag_system)")
-    model: str = Field("gpt-4o", description="Model to use for evaluation")
+    model: AIModel = Field(AIModel.GPT_4O, description="Model to use for evaluation")
     dataset_path: Optional[str] = None
+
+class CostEvalInput(BaseModel):
+    model: AIModel
+    input_tokens: int = 0
+    output_tokens: int = 0
+    provider_metadata: Dict[str, Any] = {}
+
+class AccuracyEvalInput(BaseModel):
+    query: str
+    response: str
+    reference: Optional[str] = None
+    model: AIModel = AIModel.GPT_4O
 
 class EvalResult(BaseModel):
     eval_id: str

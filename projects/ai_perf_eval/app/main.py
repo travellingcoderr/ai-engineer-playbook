@@ -51,14 +51,19 @@ async def run_eval(request: EvalRequest, background_tasks: BackgroundTasks):
     obs.log(f"Received evaluation request: {request.name} for project: {request.project}")
     
     from app.services.eval_factory import EvalFactory
+    from app.models.eval_models import CostEvalInput
     
     # Example logic: Perform a cost evaluation immediately for demonstration
     cost_eval = EvalFactory.get_evaluator(EvalType.COST)
-    results = cost_eval.evaluate({
-        "model": request.model,
-        "input_tokens": 1500,
-        "output_tokens": 500
-    })
+    
+    # Passing strongly typed input object
+    eval_input = CostEvalInput(
+        model=request.model,
+        input_tokens=1500,
+        output_tokens=500
+    )
+    
+    results = cost_eval.evaluate(eval_input)
     
     obs.log(f"Evaluation results for {request.name}: {results}")
     return {"status": "completed", "eval_id": f"eval_{int(time.time())}", "results": results}
