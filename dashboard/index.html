@@ -518,6 +518,27 @@
                     </div>
                 </div>
             </div>
+
+            <div class="card" id="card-resilient" data-port="8006"
+                onclick="if(event.target.tagName !== 'BUTTON' && event.target.tagName !== 'A') window.open('http://localhost:8006/docs', '_blank');">
+                <div class="card-header-row">
+                    <div class="icon-wrapper"><span>🛡️</span></div>
+                    <div class="status-badge" id="status-8006">
+                        <div class="status-dot"></div>
+                        <span class="status-text">Checking...</span>
+                    </div>
+                </div>
+                <h2>Resilient AI Gateway</h2>
+                <p>Enterprise-grade routing and failover proxy. Handles regional outages and rate limits with simulation mode.</p>
+                <div class="card-footer">
+                    <div class="port-tag">PORT 8006</div>
+                    <div class="action-container">
+                        <a href="/projects/resilient_gateway/docs/services.md" target="_blank" class="docs-link" title="View Project Docs">📁</a>
+                        <a href="http://localhost:8002/dashboard?service=resilient_gateway" target="_blank" class="obs-link" title="View Observability">📊</a>
+                        <a href="http://localhost:8006/docs" target="_blank" class="docs-link" title="View Swagger API Docs">📖</a>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="footer-note">
@@ -585,7 +606,8 @@
             [8002, 'observe'],
             [8003, 'research'],
             [8004, 'multi'],
-            [8005, 'guardrails']
+            [8005, 'guardrails'],
+            [8006, 'resilient']
         ];
 
         services.forEach(([port, key]) => checkStatus(port, key));

@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  resilient_gateway:
+    build:
+      context: ../../
+      dockerfile: projects/resilient_gateway/Dockerfile
+    ports:
+      - "8006:8006"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app:/app/projects/resilient_gateway
+    networks:
+      - ai_network
+
+networks:
+  ai_network:
+    external: true

@@ -34,6 +34,7 @@ def main():
         "Research Agent": 8003,
         "Multi-Agent": 8004,
         "Guardrails": 8005,
+        "Resilient Gateway": 8006,
         "Dashboard": 8080
     }
 
@@ -48,6 +49,8 @@ def main():
         ("Stop Multi-Agent Team (Docker)", "make stop-docker-multi-agent", "Multi-Agent"),
         ("Start Guardrails (Docker)", "make run-docker-guardrails", "Guardrails"),
         ("Stop Guardrails (Docker)", "make stop-docker-guardrails", "Guardrails"),
+        ("Start Resilient Gateway (Docker)", "make run-docker-resilient-gateway", "Resilient Gateway"),
+        ("Stop Resilient Gateway (Docker)", "make stop-docker-resilient-gateway", "Resilient Gateway"),
         ("Start Observability (Docker)", "make run-docker-observe", "Observability"),
         ("Stop Observability (Docker)", "make stop-docker-observe", "Observability"),
         ("View Observability Logs (Live)", "make tail-observe-logs", "Observability"),

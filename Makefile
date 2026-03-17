@@ -14,6 +14,7 @@ OBS_PORT ?= 8002
 RESEARCH_PORT ?= 8003
 MULTI_AGENT_PORT ?= 8004
 GUARD_PORT ?= 8005
+RESILIENT_GATEWAY_PORT ?= 8006
 DASHBOARD_PORT ?= 8080
 
 # ==============================
@@ -58,7 +59,7 @@ stop-docker-rag:
 	cd projects/rag_system && docker-compose down
 
 # MCP Gateway
-run-gateway:
+run-mcp:
 	@$(ACTIVATE) && PYTHONPATH=$(PWD)/projects/mcp_gateway uvicorn projects.mcp_gateway.app.main:app \
 	--host 127.0.0.1 \
 	--port $(GATEWAY_PORT) \
@@ -137,6 +138,22 @@ stop-docker-guardrails:
 	@echo "Stopping Guardrails Docker containers..."
 	cd projects/guardrails && docker-compose down
 
+# Resilient AI Gateway
+run-resilient-gateway:
+	@$(ACTIVATE) && PYTHONPATH=$(PWD):$(PWD)/projects/resilient_gateway uvicorn projects.resilient_gateway.app.main:app \
+	--host 127.0.0.1 \
+	--port $(RESILIENT_GATEWAY_PORT) \
+	--reload \
+	--reload-dir projects/resilient_gateway
+
+run-docker-resilient-gateway:
+	@echo "Starting Resilient AI Gateway via Docker Compose..."
+	cd projects/resilient_gateway && docker-compose up -d --build
+
+stop-docker-resilient-gateway:
+	@echo "Stopping Resilient AI Gateway Docker containers..."
+	cd projects/resilient_gateway && docker-compose down
+
 # Observability Logs
 tail-observe-logs:
 	@docker logs -f observability_api
@@ -206,6 +223,8 @@ eval:
 	@echo "Running AI Evaluations for RAG System..."
 	@$(ACTIVATE) && PYTHONPATH=$(PWD):$(PWD)/projects/rag_system python3 projects/rag_system/evals/eval_runner.py
 
+# (Duplicate removed as it's now run-resilient-gateway)
+
 clean:
 	rm -rf $(VENV) __pycache__ .pytest_cache rag.pid gateway.pid observe.pid
 
@@ -229,7 +248,7 @@ kill-port:
 kill-rag:
 	@make kill-port PORT=$(RAG_PORT)
 
-kill-gateway:
+kill-mcp:
 	@make kill-port PORT=$(GATEWAY_PORT)
 
 kill-observe:
@@ -247,10 +266,15 @@ kill-dashboard:
 kill-guardrails:
 	@make kill-port PORT=$(GUARD_PORT)
 
+kill-resilient-gateway:
+	@make kill-port PORT=$(RESILIENT_GATEWAY_PORT)
+
 kill-all:
 	@make kill-rag
-	@make kill-gateway
+	@make kill-mcp
 	@make kill-observe
 	@make kill-multi-agent
 	@make kill-dashboard
 	@make kill-research
+	@make kill-resilient-gateway
+	@make kill-guardrails
