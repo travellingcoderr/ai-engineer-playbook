@@ -15,6 +15,7 @@ RESEARCH_PORT ?= 8003
 MULTI_AGENT_PORT ?= 8004
 GUARD_PORT ?= 8005
 RESILIENT_GATEWAY_PORT ?= 8006
+N8N_PORT ?= 5678
 DASHBOARD_PORT ?= 8080
 
 # ==============================
@@ -154,6 +155,16 @@ stop-docker-resilient-gateway:
 	@echo "Stopping Resilient AI Gateway Docker containers..."
 	cd projects/resilient_gateway && docker-compose down
 
+# workflow_orchestrator (n8n)
+run-n8n:
+	@echo "Starting n8n Workflow Orchestrator..."
+	@cd projects/workflow_orchestrator && docker-compose up -d
+	@echo "n8n is running at http://localhost:$(N8N_PORT)"
+
+stop-n8n:
+	@echo "Stopping n8n Workflow Orchestrator..."
+	@cd projects/workflow_orchestrator && docker-compose down
+
 # Observability Logs
 tail-observe-logs:
 	@docker logs -f observability_api
@@ -269,6 +280,9 @@ kill-guardrails:
 kill-resilient-gateway:
 	@make kill-port PORT=$(RESILIENT_GATEWAY_PORT)
 
+kill-n8n:
+	@make kill-port PORT=$(N8N_PORT)
+
 kill-all:
 	@make kill-rag
 	@make kill-mcp
@@ -278,3 +292,4 @@ kill-all:
 	@make kill-research
 	@make kill-resilient-gateway
 	@make kill-guardrails
+	@make kill-n8n

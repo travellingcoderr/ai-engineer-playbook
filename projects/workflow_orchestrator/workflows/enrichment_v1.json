@@ -1,0 +1,63 @@
+{
+  "name": "AI Data Enrichment Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "enrich-ai",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ],
+      "id": "webhook-1"
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "customer_status",
+              "value": "VIP"
+            },
+            {
+              "name": "last_purchase",
+              "value": "MacBook Pro ($2499)"
+            },
+            {
+              "name": "support_tier",
+              "value": "Gold"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Mock CRM Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        450,
+        300
+      ],
+      "id": "set-1"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Mock CRM Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

@@ -35,6 +35,7 @@ def main():
         "Multi-Agent": 8004,
         "Guardrails": 8005,
         "Resilient Gateway": 8006,
+        "n8n Workflow": 5678,
         "Dashboard": 8080
     }
 
@@ -51,6 +52,8 @@ def main():
         ("Stop Guardrails (Docker)", "make stop-docker-guardrails", "Guardrails"),
         ("Start Resilient Gateway (Docker)", "make run-docker-resilient-gateway", "Resilient Gateway"),
         ("Stop Resilient Gateway (Docker)", "make stop-docker-resilient-gateway", "Resilient Gateway"),
+        ("Start n8n (Docker)", "make run-n8n", "n8n Workflow"),
+        ("Stop n8n (Docker)", "make stop-n8n", "n8n Workflow"),
         ("Start Observability (Docker)", "make run-docker-observe", "Observability"),
         ("Stop Observability (Docker)", "make stop-docker-observe", "Observability"),
         ("View Observability Logs (Live)", "make tail-observe-logs", "Observability"),

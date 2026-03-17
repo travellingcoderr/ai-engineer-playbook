@@ -10,6 +10,7 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - PYTHONPATH=/app:/app/projects/resilient_gateway
+      - N8N_WEBHOOK_URL=http://ai_workflow_n8n:5678/webhook/enrich-ai
     networks:
       - ai_network
 

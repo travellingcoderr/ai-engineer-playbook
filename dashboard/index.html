@@ -539,6 +539,26 @@
                     </div>
                 </div>
             </div>
+
+            <!-- n8n Workflow Card -->
+            <div class="card" id="card-n8n" data-port="5678"
+                onclick="if(event.target.tagName !== 'BUTTON' && event.target.tagName !== 'A') window.open('http://localhost:5678', '_blank');">
+                <div class="card-header-row">
+                    <div class="icon-wrapper"><span>🐙</span></div>
+                    <div class="status-badge" id="status-5678">
+                        <div class="status-dot"></div>
+                        <span class="status-text">Checking...</span>
+                    </div>
+                </div>
+                <h2>n8n Workflow</h2>
+                <p>Low-code visually orchestrated AI pipelines.</p>
+                <div class="card-footer">
+                    <div class="port-tag">PORT 5678</div>
+                    <div class="action-container">
+                        <a href="http://localhost:5678" target="_blank" class="docs-link" title="Open n8n">🔗</a>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="footer-note">

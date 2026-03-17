@@ -29,7 +29,8 @@ async def stop_service(service_name: str):
         "observe": {"cmd": "make kill-observe", "fallback": None},
         "research": {"cmd": "make stop-docker-research", "fallback": "make kill-research"},
         "guardrails": {"cmd": "make stop-docker-guardrails", "fallback": "make kill-guardrails"},
-        "resilient": {"cmd": "make stop-docker-resilient-gateway", "fallback": "make kill-resilient-gateway"}
+        "resilient": {"cmd": "make stop-docker-resilient-gateway", "fallback": "make kill-resilient-gateway"},
+        "n8n": {"cmd": "make stop-n8n", "fallback": None}
     }
     
     if service_name not in allowed_services:
