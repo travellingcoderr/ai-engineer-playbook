@@ -232,13 +232,23 @@ run-all:
 # ==============================
 
 stop-all:
-	@echo "Stopping services..."
-
-	@if [ -f rag.pid ]; then kill `cat rag.pid` && rm rag.pid; fi
-	@if [ -f gateway.pid ]; then kill `cat gateway.pid` && rm gateway.pid; fi
-	@if [ -f observe.pid ]; then kill `cat observe.pid` && rm observe.pid; fi
-
-	@echo "All services stopped"
+	@echo "Stopping all Docker services..."
+	@cd projects/rag_system && docker-compose down || true
+	@cd projects/mcp_gateway && docker-compose down || true
+	@cd projects/observability && docker-compose down || true
+	@cd projects/research_agent && docker-compose down || true
+	@cd projects/multi_agent && docker-compose down || true
+	@cd projects/guardrails && docker-compose down || true
+	@cd projects/resilient_gateway && docker-compose down || true
+	@cd projects/workflow_orchestrator && docker-compose down || true
+	@cd projects/ai_perf_eval && docker-compose down || true
+	@cd projects/infrastructure && docker-compose down || true
+	@echo "Stopping local PID-based services..."
+	@if [ -f rag.pid ]; then kill `cat rag.pid` && rm rag.pid || true; fi
+	@if [ -f gateway.pid ]; then kill `cat gateway.pid` && rm gateway.pid || true; fi
+	@if [ -f observe.pid ]; then kill `cat observe.pid` && rm observe.pid || true; fi
+	@make kill-all
+	@echo "All stop commands and port cleanups executed."
 
 # ==============================
 # Utilities
@@ -319,7 +329,8 @@ kill-infra:
 	@make kill-port PORT=$(MONGO_PORT)
 	@make kill-port PORT=$(REDIS_PORT)
 
-kill-all:
+kill-all: kill-rag kill-mcp kill-observe kill-multi-agent kill-dashboard kill-research kill-resilient-gateway kill-guardrails kill-n8n kill-perf-eval kill-infra
+	@echo "All stray ports cleared."
 	@make kill-rag
 	@make kill-mcp
 	@make kill-observe
