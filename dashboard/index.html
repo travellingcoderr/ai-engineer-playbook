@@ -243,18 +243,40 @@
         .docs-link {
             color: var(--text-main);
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 1.2rem;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 5px;
-            opacity: 0.8;
-            transition: opacity 0.3s ease;
+            justify-content: center;
+            width: 35px;
+            height: 35px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.05);
+            transition: all 0.2s ease;
         }
 
         .docs-link:hover {
-            opacity: 1;
-            text-decoration: underline;
+            background: rgba(255,255,255,0.15);
+            transform: scale(1.1);
+        }
+
+        .obs-link {
+            color: var(--accent-1);
+            font-size: 1.2rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 35px;
+            height: 35px;
+            border-radius: 8px;
+            background: rgba(56, 189, 248, 0.1);
+            transition: all 0.2s ease;
+        }
+
+        .obs-link:hover {
+            background: rgba(56, 189, 248, 0.2);
+            transform: scale(1.1);
         }
 
         .card:nth-child(1) { animation-delay: 0.1s; }
@@ -306,8 +328,9 @@
                 <div class="card-footer">
                     <div class="port-tag">PORT 8000</div>
                     <div class="action-container">
-                        <button class="stop-btn" onclick="stopService('rag', 8000, this)">Stop 🛑</button>
-                        <a href="http://localhost:8000/docs" target="_blank" class="docs-link">View Docs ↗</a>
+                        <button class="stop-btn" onclick="stopService('rag', 8000, this)" title="Stop Service">🛑</button>
+                        <a href="http://localhost:8002/dashboard?service=rag_system" target="_blank" class="obs-link" title="View Observability">📊</a>
+                        <a href="http://localhost:8000/docs" target="_blank" class="docs-link" title="View API Docs">📖</a>
                     </div>
                 </div>
             </div>
@@ -325,13 +348,14 @@
                 <div class="card-footer">
                     <div class="port-tag">PORT 8001</div>
                     <div class="action-container">
-                        <button class="stop-btn" onclick="stopService('mcp', 8001, this)">Stop 🛑</button>
-                        <a href="http://localhost:8001/docs" target="_blank" class="docs-link">View Docs ↗</a>
+                        <button class="stop-btn" onclick="stopService('mcp', 8001, this)" title="Stop Service">🛑</button>
+                        <a href="http://localhost:8002/dashboard?service=mcp_gateway" target="_blank" class="obs-link" title="View Observability">📊</a>
+                        <a href="http://localhost:8001/docs" target="_blank" class="docs-link" title="View API Docs">📖</a>
                     </div>
                 </div>
             </div>
 
-            <div class="card" id="card-observe" data-port="8002" onclick="if(event.target.tagName !== 'BUTTON' && event.target.tagName !== 'A') window.open('http://localhost:8002/docs', '_blank');">
+            <div class="card" id="card-observe" data-port="8002" onclick="if(event.target.tagName !== 'BUTTON' && event.target.tagName !== 'A') window.open('http://localhost:8002/dashboard', '_blank');">
                 <div class="card-header-row">
                     <div class="icon-wrapper"><span>📊</span></div>
                     <div class="status-badge" id="status-8002">
@@ -340,12 +364,13 @@
                     </div>
                 </div>
                 <h2>Observability</h2>
-                <p>Monitor LLM traces, latency, costs, and token usage across all deployed agent pipelines.</p>
+                <p>Centralized telemetry collector. Visualize logs, metrics, and traces from all microservices in real-time.</p>
                 <div class="card-footer">
                     <div class="port-tag">PORT 8002</div>
                     <div class="action-container">
-                        <button class="stop-btn" onclick="stopService('observe', 8002, this)">Stop 🛑</button>
-                        <a href="http://localhost:8002/docs" target="_blank" class="docs-link">View Docs ↗</a>
+                        <button class="stop-btn" onclick="stopService('observe', 8002, this)" title="Stop Service">🛑</button>
+                        <a href="http://localhost:8002/dashboard" target="_blank" class="obs-link" title="View Full Dashboard">📊</a>
+                        <a href="http://localhost:8002/docs" target="_blank" class="docs-link" title="View API Docs">📖</a>
                     </div>
                 </div>
             </div>
@@ -363,8 +388,9 @@
                 <div class="card-footer">
                     <div class="port-tag">PORT 8003</div>
                     <div class="action-container">
-                        <button class="stop-btn" onclick="stopService('research', 8003, this)">Stop 🛑</button>
-                        <a href="http://localhost:8003/docs" target="_blank" class="docs-link">View Docs ↗</a>
+                        <button class="stop-btn" onclick="stopService('research', 8003, this)" title="Stop Service">🛑</button>
+                        <a href="http://localhost:8002/dashboard?service=research_agent" target="_blank" class="obs-link" title="View Observability">📊</a>
+                        <a href="http://localhost:8003/docs" target="_blank" class="docs-link" title="View API Docs">📖</a>
                     </div>
                 </div>
             </div>
@@ -382,8 +408,9 @@
                 <div class="card-footer">
                     <div class="port-tag">PORT 8004</div>
                     <div class="action-container">
-                        <button class="stop-btn" onclick="stopService('multi', 8004, this)">Stop 🛑</button>
-                        <a href="http://localhost:8004/docs" target="_blank" class="docs-link">View Docs ↗</a>
+                        <button class="stop-btn" onclick="stopService('multi', 8004, this)" title="Stop Service">🛑</button>
+                        <a href="http://localhost:8002/dashboard?service=multi_agent" target="_blank" class="obs-link" title="View Observability">📊</a>
+                        <a href="http://localhost:8004/docs" target="_blank" class="docs-link" title="View API Docs">📖</a>
                     </div>
                 </div>
             </div>
@@ -401,8 +428,9 @@
                 <div class="card-footer">
                     <div class="port-tag">PORT 8005</div>
                     <div class="action-container">
-                        <button class="stop-btn" onclick="stopService('guardrails', 8005, this)">Stop 🛑</button>
-                        <a href="http://localhost:8005/docs" target="_blank" class="docs-link">View Docs ↗</a>
+                        <button class="stop-btn" onclick="stopService('guardrails', 8005, this)" title="Stop Service">🛑</button>
+                        <a href="http://localhost:8002/dashboard?service=guardrails" target="_blank" class="obs-link" title="View Observability">📊</a>
+                        <a href="http://localhost:8005/docs" target="_blank" class="docs-link" title="View API Docs">📖</a>
                     </div>
                 </div>
             </div>

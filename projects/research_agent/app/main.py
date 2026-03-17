@@ -5,6 +5,11 @@ import uvicorn
 # We import the run function from the agent module
 from projects.research_agent.agent import run
 from packages.core.config import get_config
+from packages.core.observability import ObservabilityClient
+import time
+import uuid
+
+obs_client = ObservabilityClient(service_name="research_agent")
 
 app = FastAPI(
     title="Autonomous Research Agent API",
@@ -16,6 +21,7 @@ app = FastAPI(
 @app.on_event("startup")
 async def startup_event():
     get_config()
+    obs_client.log("Research Agent Service started")
 
 class ResearchRequest(BaseModel):
     topic: str = Field(..., description="The broad subject or specific question you want researched.", example="What are the top 3 biggest AI news stories from March 2026?")
@@ -28,18 +34,28 @@ class ResearchResponse(BaseModel):
 async def perform_research(request: ResearchRequest):
     """
     Triggers the autonomous research agent.
-    This endpoint is synchronous under the hood, so it will block until the research
-    loop is complete (which could take a minute or more).
     """
+    start_time = time.time()
+    trace_id = str(uuid.uuid4())
+    span_id = str(uuid.uuid4())
+    
+    obs_client.log(f"Starting research on: {request.topic}", trace_id=trace_id)
+    
     try:
         # Our run() function calls the LangGraph synchronously for now.
-        # In a massive production system, you'd use Celery/Redis for background tasks.
         final_report = run(request.topic)
+        
+        end_time = time.time()
+        obs_client.metric("research_latency", (end_time - start_time), unit="seconds")
+        obs_client.metric("research_count", 1, unit="count")
+        obs_client.trace("autonomous_research", start_time, end_time, trace_id, span_id)
+        
         return ResearchResponse(
             topic=request.topic,
             report_markdown=final_report
         )
     except Exception as e:
+        obs_client.log(f"Research failed: {str(e)}", level="ERROR", trace_id=trace_id)
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":

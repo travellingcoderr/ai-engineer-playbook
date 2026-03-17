@@ -1,0 +1,16 @@
+services:
+  observability-api:
+    build:
+      context: ../../
+      dockerfile: projects/observability/Dockerfile
+    container_name: observability_api
+    ports:
+      - "${OBS_PORT:-8002}:8002"
+    environment:
+      - OBS_PORT=8002
+    networks:
+      - ai_network
+
+networks:
+  ai_network:
+    external: true

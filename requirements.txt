@@ -33,3 +33,4 @@ pydantic-settings
 
 # Observability / utilities
 python-dotenv
+requests

@@ -1,7 +1,6 @@
-from pydantic_settings import BaseSettings
-from pydantic import Field
+from pydantic import Field, BaseModel
 
-class LLMConfiguration(BaseSettings):
+class LLMConfiguration(BaseModel):
     provider: str = Field(default="openai", description="The LLM provider (e.g., openai, gemini, anthropic)", alias="LLM_PROVIDER")
     model: str = Field(default="gpt-4o", description="The specific model name for the provider", alias="OPENAI_MODEL")
     openai_api_key: str | None = Field(default=None, description="OpenAI API Key", alias="OPENAI_API_KEY")

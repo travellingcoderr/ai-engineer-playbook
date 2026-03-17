@@ -19,8 +19,8 @@ services:
       # Expose the root .env so the shared config loader can still discover it at runtime.
       - ../../.env:/app/.env:ro
     networks:
-      - multi_agent_network
+      - ai_network
 
 networks:
-  multi_agent_network:
-    driver: bridge
+  ai_network:
+    external: true

@@ -14,8 +14,8 @@ services:
     volumes:
       - ../../:/app:ro  # Mount the whole repo as read-only for tools like read_repo_file
     networks:
-      - mcp_network
+      - ai_network
 
 networks:
-  mcp_network:
-    driver: bridge
+  ai_network:
+    external: true

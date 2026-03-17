@@ -11,8 +11,8 @@ services:
     environment:
       - GUARD_PORT=8005
     networks:
-      - mcp_network
+      - ai_network
 
 networks:
-  mcp_network:
-    driver: bridge
+  ai_network:
+    external: true

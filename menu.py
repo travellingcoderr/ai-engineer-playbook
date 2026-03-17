@@ -48,7 +48,9 @@ def main():
         ("Stop Multi-Agent Team (Docker)", "make stop-docker-multi-agent", "Multi-Agent"),
         ("Start Guardrails (Docker)", "make run-docker-guardrails", "Guardrails"),
         ("Stop Guardrails (Docker)", "make stop-docker-guardrails", "Guardrails"),
-        ("Start Observability (Local)", "make run-observe", "Observability"),
+        ("Start Observability (Docker)", "make run-docker-observe", "Observability"),
+        ("Stop Observability (Docker)", "make stop-docker-observe", "Observability"),
+        ("View Observability Logs (Live)", "make tail-observe-logs", "Observability"),
         ("Stop All Services", "make stop-all", None),
         ("Kill All Stray Ports", "make kill-all", None),
         ("Exit", "exit", None),
@@ -69,10 +71,11 @@ def main():
             status_indicator = ""
             if service_name and service_name in status_map:
                 is_running = status_map[service_name]
+                service_port = services.get(service_name, "???")
                 if is_running:
-                    status_indicator = f"{Colors.OKGREEN}[RUNNING]{Colors.ENDC}"
+                    status_indicator = f"{Colors.OKGREEN}[{service_port}]-[RUNNING]{Colors.ENDC}"
                 else:
-                    status_indicator = f"{Colors.GRAY}[OFF]{Colors.ENDC}"
+                    status_indicator = f"{Colors.GRAY}[{service_port}]-[OFF]{Colors.ENDC}"
 
             if label == "Exit":
                 print(f" {Colors.FAIL}[{i}]{Colors.ENDC} {label}")

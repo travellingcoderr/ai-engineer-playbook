@@ -137,6 +137,10 @@ stop-docker-guardrails:
 	@echo "Stopping Guardrails Docker containers..."
 	cd projects/guardrails && docker-compose down
 
+# Observability Logs
+tail-observe-logs:
+	@docker logs -f observability_api
+
 # Dashboard
 run-dashboard:
 	@$(ACTIVATE) && PYTHONPATH=$(PWD) uvicorn dashboard.main:app \

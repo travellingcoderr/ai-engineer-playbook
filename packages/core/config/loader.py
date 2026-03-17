@@ -1,5 +1,4 @@
-from pydantic_settings import BaseSettings
-from pydantic import Field
+from pydantic import Field, BaseModel
 
-class LoaderConfiguration(BaseSettings):
+class LoaderConfiguration(BaseModel):
     strategy: str = Field(default="auto", description="How to load documents (e.g., auto, pdf, markdown)")

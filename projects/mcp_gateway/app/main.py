@@ -9,8 +9,16 @@ from pydantic import BaseModel
 from app.auth import get_role_from_auth_header, create_access_token
 from app.models import ToolRequest, ToolResponse
 from app.tools import invoke_tool
+from packages.core.observability import ObservabilityClient
+import uuid
+
+obs_client = ObservabilityClient(service_name="mcp_gateway")
 
 app = FastAPI(title="Sample MCP-Style Gateway", version="0.2.0")
+
+@app.on_event("startup")
+def startup_event():
+    obs_client.log("MCP Gateway Service started")
 
 class LoginRequest(BaseModel):
     username: str
@@ -51,12 +59,26 @@ def health() -> dict:
 
 @app.post("/tools/invoke", response_model=ToolResponse)
 def call_tool(request: ToolRequest, role: str = Depends(get_role_from_auth_header)) -> ToolResponse:
+    start_time = time.time()
+    trace_id = str(uuid.uuid4())
+    span_id = str(uuid.uuid4())
+    
+    obs_client.log(f"Invoking tool: {request.tool_name} for role: {role}", trace_id=trace_id)
+    
     try:
         result = invoke_tool(role=role, tool_name=request.tool_name, arguments=request.arguments)
+        
+        end_time = time.time()
+        obs_client.metric("tool_invocation_latency", (end_time - start_time), unit="seconds")
+        obs_client.trace(f"tool_{request.tool_name}", start_time, end_time, trace_id, span_id)
+        
         return ToolResponse(ok=True, tool_name=request.tool_name, result=result)
-    except PermissionError as exc:
-        raise HTTPException(status_code=403, detail=str(exc)) from exc
-    except FileNotFoundError as exc:
-        raise HTTPException(status_code=404, detail=str(exc)) from exc
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        obs_client.log(f"Tool invocation failed: {str(exc)}", level="ERROR", trace_id=trace_id)
+        if isinstance(exc, PermissionError):
+            raise HTTPException(status_code=403, detail=str(exc)) from exc
+        if isinstance(exc, FileNotFoundError):
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        if isinstance(exc, ValueError):
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        raise HTTPException(status_code=500, detail=str(exc)) from exc

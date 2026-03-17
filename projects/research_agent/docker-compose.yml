@@ -17,8 +17,8 @@ services:
       - ./app:/app/projects/research_agent/app
       - ./agent.py:/app/projects/research_agent/agent.py
     networks:
-      - research_network
+      - ai_network
 
 networks:
-  research_network:
-    driver: bridge
+  ai_network:
+    external: true
