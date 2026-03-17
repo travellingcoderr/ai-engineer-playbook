@@ -1,8 +1,7 @@
 import requests
 import time
-import os
 import uuid
-from typing import Optional, Dict, Any
+from typing import Optional, Dict
 
 class ObservabilityClient:
     def __init__(self, service_name: str, collector_url: str = "http://observability_api:8002"):
@@ -19,7 +18,7 @@ class ObservabilityClient:
         }
         try:
             requests.post(f"{self.collector_url}/ingest/log", json=payload, timeout=0.5)
-        except:
+        except Exception:
             pass # Fail silently in production, or log to console
 
     def metric(self, name: str, value: float, unit: str = "count", tags: Optional[Dict[str, str]] = None):
@@ -33,7 +32,7 @@ class ObservabilityClient:
         }
         try:
             requests.post(f"{self.collector_url}/ingest/metric", json=payload, timeout=0.5)
-        except:
+        except Exception:
             pass
 
     def trace(self, operation: str, start_time: float, end_time: float, trace_id: str, span_id: str):
@@ -47,5 +46,5 @@ class ObservabilityClient:
         }
         try:
             requests.post(f"{self.collector_url}/ingest/trace", json=payload, timeout=0.5)
-        except:
+        except Exception:
             pass

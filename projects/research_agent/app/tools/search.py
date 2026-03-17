@@ -1,4 +1,3 @@
-from pydantic import Field
 from langchain_core.tools import BaseTool
 from langchain_community.tools.tavily_search import TavilySearchResults
 

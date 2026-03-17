@@ -1,1 +1,1 @@
-from .guard_models import GuardRequest, GuardResponse
+from .guard_models import GuardRequest as GuardRequest, GuardResponse as GuardResponse

@@ -23,7 +23,7 @@ def startup_event():
 # Shared config integration check, matching the RAG system pattern
 try:
     settings = get_config()
-except Exception as e:
+except Exception:
     logger.exception("FAILED TO LOAD SHARED APP CONFIG")
 
 class TaskRequest(BaseModel):

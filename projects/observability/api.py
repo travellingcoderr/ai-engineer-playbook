@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from app.models.obs_models import LogEntry, MetricEntry, TraceSpan
 from app.services.factory import ObservabilityFactory
@@ -63,7 +63,7 @@ async def get_telemetry():
                     data["metrics"].append(entry)
                 elif entry_type == "trace":
                     data["traces"].append(entry)
-            except:
+            except Exception:
                 continue
     return data
 

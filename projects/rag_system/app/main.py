@@ -1,13 +1,12 @@
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import RedirectResponse
+from fastapi import FastAPI, HTTPException, UploadFile, File
 import os
+import tempfile
 from contextlib import asynccontextmanager
-
-from app.services.rag import RAGService
-
-from packages.core.observability import ObservabilityClient
 import time
 import uuid
+
+from app.services.rag import RAGService
+from packages.core.observability import ObservabilityClient
 
 # Create a global instances to hold our services
 rag_service = None
@@ -23,10 +22,9 @@ async def lifespan(app: FastAPI):
     # Cleanup on shutdown if necessary
     rag_service = None
 
-app = FastAPI(lifespan=lifespan)
 
-from fastapi import UploadFile, File
-import tempfile
+
+app = FastAPI(lifespan=lifespan)
 
 @app.post("/ingest")
 async def ingest_document(file: UploadFile = File(...)):

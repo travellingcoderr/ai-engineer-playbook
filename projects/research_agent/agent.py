@@ -1,4 +1,3 @@
-from typing import Dict, Any
 
 def run(topic: str) -> str:
     """

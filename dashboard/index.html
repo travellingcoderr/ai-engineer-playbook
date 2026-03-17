@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -99,7 +100,8 @@
             overflow: hidden;
             animation: fadeInUp 0.6s ease-out backwards;
             color: inherit;
-            cursor: pointer; /* Makes entire tile visually clickable */
+            cursor: pointer;
+            /* Makes entire tile visually clickable */
         }
 
         .card:hover {
@@ -108,11 +110,30 @@
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
         }
 
-        .card:nth-child(1):hover { box-shadow: 0 20px 40px rgba(56, 189, 248, 0.15); border-color: var(--accent-1); }
-        .card:nth-child(2):hover { box-shadow: 0 20px 40px rgba(129, 140, 248, 0.15); border-color: var(--accent-2); }
-        .card:nth-child(3):hover { box-shadow: 0 20px 40px rgba(244, 114, 182, 0.15); border-color: var(--accent-3); }
-        .card:nth-child(4):hover { box-shadow: 0 20px 40px rgba(52, 211, 153, 0.15); border-color: var(--accent-4); }
-        .card:nth-child(5):hover { box-shadow: 0 20px 40px rgba(251, 191, 36, 0.15); border-color: #fbbf24; }
+        .card:nth-child(1):hover {
+            box-shadow: 0 20px 40px rgba(56, 189, 248, 0.15);
+            border-color: var(--accent-1);
+        }
+
+        .card:nth-child(2):hover {
+            box-shadow: 0 20px 40px rgba(129, 140, 248, 0.15);
+            border-color: var(--accent-2);
+        }
+
+        .card:nth-child(3):hover {
+            box-shadow: 0 20px 40px rgba(244, 114, 182, 0.15);
+            border-color: var(--accent-3);
+        }
+
+        .card:nth-child(4):hover {
+            box-shadow: 0 20px 40px rgba(52, 211, 153, 0.15);
+            border-color: var(--accent-4);
+        }
+
+        .card:nth-child(5):hover {
+            box-shadow: 0 20px 40px rgba(251, 191, 36, 0.15);
+            border-color: #fbbf24;
+        }
 
         .card-header-row {
             display: flex;
@@ -132,11 +153,30 @@
             background: rgba(255, 255, 255, 0.05);
         }
 
-        .card:nth-child(1) .icon-wrapper { color: var(--accent-1); background: rgba(56, 189, 248, 0.1); }
-        .card:nth-child(2) .icon-wrapper { color: var(--accent-2); background: rgba(129, 140, 248, 0.1); }
-        .card:nth-child(3) .icon-wrapper { color: var(--accent-3); background: rgba(244, 114, 182, 0.1); }
-        .card:nth-child(4) .icon-wrapper { color: var(--accent-4); background: rgba(52, 211, 153, 0.1); }
-        .card:nth-child(5) .icon-wrapper { color: #fbbf24; background: rgba(251, 191, 36, 0.1); }
+        .card:nth-child(1) .icon-wrapper {
+            color: var(--accent-1);
+            background: rgba(56, 189, 248, 0.1);
+        }
+
+        .card:nth-child(2) .icon-wrapper {
+            color: var(--accent-2);
+            background: rgba(129, 140, 248, 0.1);
+        }
+
+        .card:nth-child(3) .icon-wrapper {
+            color: var(--accent-3);
+            background: rgba(244, 114, 182, 0.1);
+        }
+
+        .card:nth-child(4) .icon-wrapper {
+            color: var(--accent-4);
+            background: rgba(52, 211, 153, 0.1);
+        }
+
+        .card:nth-child(5) .icon-wrapper {
+            color: #fbbf24;
+            background: rgba(251, 191, 36, 0.1);
+        }
 
         .status-badge {
             display: flex;
@@ -158,7 +198,7 @@
             box-shadow: 0 0 8px var(--status-offline);
             transition: all 0.3s ease;
         }
-        
+
         .status-badge.online .status-dot {
             background: var(--status-online);
             box-shadow: 0 0 10px var(--status-online);
@@ -167,6 +207,7 @@
         .status-text {
             color: var(--text-secondary);
         }
+
         .status-badge.online .status-text {
             color: var(--text-main);
         }
@@ -190,14 +231,14 @@
             justify-content: space-between;
             align-items: center;
             margin-top: auto;
-            border-top: 1px solid rgba(255,255,255,0.05);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
             padding-top: 20px;
         }
 
         .port-tag {
             display: inline-flex;
             align-items: center;
-            background: rgba(255,255,255, 0.1);
+            background: rgba(255, 255, 255, 0.1);
             padding: 6px 12px;
             border-radius: 20px;
             font-size: 0.85rem;
@@ -222,9 +263,10 @@
             cursor: pointer;
             transition: all 0.2s ease;
             font-family: inherit;
-            display: none; /* Initially hidden until online */
+            display: none;
+            /* Initially hidden until online */
         }
-        
+
         .card.is-online .stop-btn {
             display: block;
         }
@@ -233,7 +275,7 @@
             background: rgba(239, 68, 68, 0.2);
             transform: scale(1.05);
         }
-        
+
         .stop-btn.stopping {
             opacity: 0.5;
             cursor: not-allowed;
@@ -251,12 +293,12 @@
             width: 35px;
             height: 35px;
             border-radius: 8px;
-            background: rgba(255,255,255,0.05);
+            background: rgba(255, 255, 255, 0.05);
             transition: all 0.2s ease;
         }
 
         .docs-link:hover {
-            background: rgba(255,255,255,0.15);
+            background: rgba(255, 255, 255, 0.15);
             transform: scale(1.1);
         }
 
@@ -279,20 +321,48 @@
             transform: scale(1.1);
         }
 
-        .card:nth-child(1) { animation-delay: 0.1s; }
-        .card:nth-child(2) { animation-delay: 0.2s; }
-        .card:nth-child(3) { animation-delay: 0.3s; }
-        .card:nth-child(4) { animation-delay: 0.4s; }
-        .card:nth-child(5) { animation-delay: 0.5s; }
+        .card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .card:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .card:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .card:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+        .card:nth-child(5) {
+            animation-delay: 0.5s;
+        }
 
         @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-30px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .footer-note {
@@ -305,17 +375,20 @@
         }
     </style>
 </head>
+
 <body>
     <div class="ambient-glow"></div>
-    
+
     <div class="container">
         <header class="header">
             <h1>AI Engineer Playbook</h1>
-            <p class="subtitle">Your central command center. Access the native interactive Swagger documentation for all running Docker microservices.</p>
+            <p class="subtitle">AI Playbook command center. Swagger and Observability for all running Docker
+                microservices.</p>
         </header>
 
         <div class="grid">
-            <div class="card" id="card-rag" data-port="8000" onclick="if(event.target.tagName !== 'BUTTON' && event.target.tagName !== 'A') window.open('http://localhost:8000/docs', '_blank');">
+            <div class="card" id="card-rag" data-port="8000"
+                onclick="if(event.target.tagName !== 'BUTTON' && event.target.tagName !== 'A') window.open('http://localhost:8000/docs', '_blank');">
                 <div class="card-header-row">
                     <div class="icon-wrapper"><span>🧠</span></div>
                     <div class="status-badge" id="status-8000">
@@ -324,18 +397,20 @@
                     </div>
                 </div>
                 <h2>RAG System</h2>
-                <p>Retrieval-Augmented Generation system. Ingest documents and query the indexed vector database natively.</p>
+                <p>Retrieval-Augmented Generation system. Ingest documents and query the indexed vector database
+                    natively.</p>
                 <div class="card-footer">
                     <div class="port-tag">PORT 8000</div>
                     <div class="action-container">
-                        <button class="stop-btn" onclick="stopService('rag', 8000, this)" title="Stop Service">🛑</button>
+                        <a href="/projects/rag_system/docs/services.md" target="_blank" class="docs-link" title="View Project Docs">📁</a>
                         <a href="http://localhost:8002/dashboard?service=rag_system" target="_blank" class="obs-link" title="View Observability">📊</a>
-                        <a href="http://localhost:8000/docs" target="_blank" class="docs-link" title="View API Docs">📖</a>
+                        <a href="http://localhost:8000/docs" target="_blank" class="docs-link" title="View Swagger API Docs">📖</a>
                     </div>
                 </div>
             </div>
 
-            <div class="card" id="card-mcp" data-port="8001" onclick="if(event.target.tagName !== 'BUTTON' && event.target.tagName !== 'A') window.open('http://localhost:8001/docs', '_blank');">
+            <div class="card" id="card-mcp" data-port="8001"
+                onclick="if(event.target.tagName !== 'BUTTON' && event.target.tagName !== 'A') window.open('http://localhost:8001/docs', '_blank');">
                 <div class="card-header-row">
                     <div class="icon-wrapper"><span>🔌</span></div>
                     <div class="status-badge" id="status-8001">
@@ -344,18 +419,20 @@
                     </div>
                 </div>
                 <h2>MCP Gateway</h2>
-                <p>Micro-service Control Proxy. Handles routing, authentication, and standardization for model-tool interactions.</p>
+                <p>Micro-service Control Proxy. Handles routing, authentication, and standardization for model-tool
+                    interactions.</p>
                 <div class="card-footer">
                     <div class="port-tag">PORT 8001</div>
                     <div class="action-container">
-                        <button class="stop-btn" onclick="stopService('mcp', 8001, this)" title="Stop Service">🛑</button>
+                        <a href="/projects/mcp_gateway/docs/services.md" target="_blank" class="docs-link" title="View Project Docs">📁</a>
                         <a href="http://localhost:8002/dashboard?service=mcp_gateway" target="_blank" class="obs-link" title="View Observability">📊</a>
-                        <a href="http://localhost:8001/docs" target="_blank" class="docs-link" title="View API Docs">📖</a>
+                        <a href="http://localhost:8001/docs" target="_blank" class="docs-link" title="View Swagger API Docs">📖</a>
                     </div>
                 </div>
             </div>
 
-            <div class="card" id="card-observe" data-port="8002" onclick="if(event.target.tagName !== 'BUTTON' && event.target.tagName !== 'A') window.open('http://localhost:8002/dashboard', '_blank');">
+            <div class="card" id="card-observe" data-port="8002"
+                onclick="if(event.target.tagName !== 'BUTTON' && event.target.tagName !== 'A') window.open('http://localhost:8002/dashboard', '_blank');">
                 <div class="card-header-row">
                     <div class="icon-wrapper"><span>📊</span></div>
                     <div class="status-badge" id="status-8002">
@@ -364,18 +441,20 @@
                     </div>
                 </div>
                 <h2>Observability</h2>
-                <p>Centralized telemetry collector. Visualize logs, metrics, and traces from all microservices in real-time.</p>
+                <p>Centralized telemetry collector. Visualize logs, metrics, and traces from all microservices in
+                    real-time.</p>
                 <div class="card-footer">
                     <div class="port-tag">PORT 8002</div>
                     <div class="action-container">
-                        <button class="stop-btn" onclick="stopService('observe', 8002, this)" title="Stop Service">🛑</button>
+                        <a href="/projects/observability/docs/services.md" target="_blank" class="docs-link" title="View Project Docs">📁</a>
                         <a href="http://localhost:8002/dashboard" target="_blank" class="obs-link" title="View Full Dashboard">📊</a>
-                        <a href="http://localhost:8002/docs" target="_blank" class="docs-link" title="View API Docs">📖</a>
+                        <a href="http://localhost:8002/docs" target="_blank" class="docs-link" title="View Swagger API Docs">📖</a>
                     </div>
                 </div>
             </div>
 
-            <div class="card" id="card-research" data-port="8003" onclick="if(event.target.tagName !== 'BUTTON' && event.target.tagName !== 'A') window.open('http://localhost:8003/docs', '_blank');">
+            <div class="card" id="card-research" data-port="8003"
+                onclick="if(event.target.tagName !== 'BUTTON' && event.target.tagName !== 'A') window.open('http://localhost:8003/docs', '_blank');">
                 <div class="card-header-row">
                     <div class="icon-wrapper"><span>🕵️</span></div>
                     <div class="status-badge" id="status-8003">
@@ -384,18 +463,20 @@
                     </div>
                 </div>
                 <h2>Research Agent</h2>
-                <p>Autonomous LangGraph agent. Provide a topic and it autonomously searches, scrapes, and synthesizes a final report.</p>
+                <p>Autonomous LangGraph agent. Provide a topic and it autonomously searches, scrapes, and synthesizes a
+                    final report.</p>
                 <div class="card-footer">
                     <div class="port-tag">PORT 8003</div>
                     <div class="action-container">
-                        <button class="stop-btn" onclick="stopService('research', 8003, this)" title="Stop Service">🛑</button>
+                        <a href="/projects/research_agent/docs/services.md" target="_blank" class="docs-link" title="View Project Docs">📁</a>
                         <a href="http://localhost:8002/dashboard?service=research_agent" target="_blank" class="obs-link" title="View Observability">📊</a>
-                        <a href="http://localhost:8003/docs" target="_blank" class="docs-link" title="View API Docs">📖</a>
+                        <a href="http://localhost:8003/docs" target="_blank" class="docs-link" title="View Swagger API Docs">📖</a>
                     </div>
                 </div>
             </div>
 
-            <div class="card" id="card-multi" data-port="8004" onclick="if(event.target.tagName !== 'BUTTON' && event.target.tagName !== 'A') window.open('http://localhost:8004/docs', '_blank');">
+            <div class="card" id="card-multi" data-port="8004"
+                onclick="if(event.target.tagName !== 'BUTTON' && event.target.tagName !== 'A') window.open('http://localhost:8004/docs', '_blank');">
                 <div class="card-header-row">
                     <div class="icon-wrapper"><span>👥</span></div>
                     <div class="status-badge" id="status-8004">
@@ -404,18 +485,20 @@
                     </div>
                 </div>
                 <h2>Multi-Agent Team</h2>
-                <p>LangGraph Supervisor orchestrator managing specialized Researcher and Coder workers using shared context.</p>
+                <p>LangGraph Supervisor orchestrator managing specialized Researcher and Coder workers using shared
+                    context.</p>
                 <div class="card-footer">
                     <div class="port-tag">PORT 8004</div>
                     <div class="action-container">
-                        <button class="stop-btn" onclick="stopService('multi', 8004, this)" title="Stop Service">🛑</button>
+                        <a href="/projects/multi_agent/docs/services.md" target="_blank" class="docs-link" title="View Project Docs">📁</a>
                         <a href="http://localhost:8002/dashboard?service=multi_agent" target="_blank" class="obs-link" title="View Observability">📊</a>
-                        <a href="http://localhost:8004/docs" target="_blank" class="docs-link" title="View API Docs">📖</a>
+                        <a href="http://localhost:8004/docs" target="_blank" class="docs-link" title="View Swagger API Docs">📖</a>
                     </div>
                 </div>
             </div>
 
-            <div class="card" id="card-guardrails" data-port="8005" onclick="if(event.target.tagName !== 'BUTTON' && event.target.tagName !== 'A') window.open('http://localhost:8005/docs', '_blank');">
+            <div class="card" id="card-guardrails" data-port="8005"
+                onclick="if(event.target.tagName !== 'BUTTON' && event.target.tagName !== 'A') window.open('http://localhost:8005/docs', '_blank');">
                 <div class="card-header-row">
                     <div class="icon-wrapper"><span>🛡️</span></div>
                     <div class="status-badge" id="status-8005">
@@ -424,13 +507,14 @@
                     </div>
                 </div>
                 <h2>LLM Guardrails</h2>
-                <p>Security & Compliance layer. Inspect prompts for injection, PII, and secrets before they reach the model.</p>
+                <p>Security & Compliance layer. Inspect prompts for injection, PII, and secrets before they reach the
+                    model.</p>
                 <div class="card-footer">
                     <div class="port-tag">PORT 8005</div>
                     <div class="action-container">
-                        <button class="stop-btn" onclick="stopService('guardrails', 8005, this)" title="Stop Service">🛑</button>
+                        <a href="/projects/guardrails/docs/services.md" target="_blank" class="docs-link" title="View Project Docs">📁</a>
                         <a href="http://localhost:8002/dashboard?service=guardrails" target="_blank" class="obs-link" title="View Observability">📊</a>
-                        <a href="http://localhost:8005/docs" target="_blank" class="docs-link" title="View API Docs">📖</a>
+                        <a href="http://localhost:8005/docs" target="_blank" class="docs-link" title="View Swagger API Docs">📖</a>
                     </div>
                 </div>
             </div>
@@ -446,10 +530,10 @@
         async function stopService(serviceName, port, btnElement) {
             btnElement.classList.add('stopping');
             btnElement.textContent = 'Stopping...';
-            
+
             try {
                 const res = await fetch(`/api/stop/${serviceName}`, { method: 'POST' });
-                if(!res.ok) {
+                if (!res.ok) {
                     const errorData = await res.json();
                     console.error("Failed to stop service remotely:", errorData);
                     alert("Failed to stop: " + (errorData.detail || "Unknown error"));
@@ -457,12 +541,12 @@
             } catch (e) {
                 console.error("Error connecting to Dashboard Server API.");
             }
-            
+
             setTimeout(() => {
                 btnElement.classList.remove('stopping');
                 btnElement.textContent = 'Stop 🛑';
             }, 3000);
-            
+
             checkStatus(port, serviceName);
         }
 
@@ -471,14 +555,14 @@
             const badge = document.getElementById(`status-${port}`);
             const card = document.getElementById(`card-${serviceKey}`);
             const statusText = badge.querySelector('.status-text');
-            
+
             try {
                 // Poll the FastAPI docs endpoint via unauthenticated requests
-                await fetch(`http://localhost:${port}/docs?t=${new Date().getTime()}`, { 
+                await fetch(`http://localhost:${port}/docs?t=${new Date().getTime()}`, {
                     mode: 'no-cors',
                     cache: 'no-store'
                 });
-                
+
                 if (!badge.classList.contains('online')) {
                     badge.classList.add('online');
                     statusText.textContent = 'Online';
@@ -496,18 +580,19 @@
 
         // Tuples of [TargetPort, ServiceId]
         const services = [
-            [8000, 'rag'], 
-            [8001, 'mcp'], 
-            [8002, 'observe'], 
+            [8000, 'rag'],
+            [8001, 'mcp'],
+            [8002, 'observe'],
             [8003, 'research'],
             [8004, 'multi'],
             [8005, 'guardrails']
         ];
-        
+
         services.forEach(([port, key]) => checkStatus(port, key));
         setInterval(() => {
             services.forEach(([port, key]) => checkStatus(port, key));
         }, 3000);
     </script>
 </body>
+
 </html>

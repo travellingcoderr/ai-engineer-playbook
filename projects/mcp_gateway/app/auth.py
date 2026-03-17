@@ -3,7 +3,7 @@ import os
 from typing import Annotated
 
 import jwt
-from fastapi import Header, HTTPException, Depends
+from fastapi import HTTPException, Depends
 from fastapi.security import OAuth2PasswordBearer
 
 # Use a static secret for demo purposes, in production load from ENV

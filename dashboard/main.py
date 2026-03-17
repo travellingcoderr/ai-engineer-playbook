@@ -1,9 +1,14 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
 import subprocess
 import os
 
 app = FastAPI(title="Command Center Dashboard")
+
+# Mount the projects directory to serve documentation
+repo_root = os.path.dirname(os.path.dirname(__file__))
+app.mount("/projects", StaticFiles(directory=os.path.join(repo_root, "projects")), name="projects")
 
 # Read the HTML file once on startup
 HTML_FILE_PATH = os.path.join(os.path.dirname(__file__), "index.html")
@@ -36,7 +41,7 @@ async def stop_service(service_name: str):
         repo_root = os.path.dirname(os.path.dirname(__file__))
         
         # Try primary stop command (Docker)
-        result = subprocess.run(
+        subprocess.run(
             config["cmd"], 
             shell=True, 
             cwd=repo_root, 

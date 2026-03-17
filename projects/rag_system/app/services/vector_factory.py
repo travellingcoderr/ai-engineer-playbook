@@ -1,4 +1,3 @@
-import os
 from langchain_core.embeddings import Embeddings
 from langchain_core.vectorstores import VectorStore
 

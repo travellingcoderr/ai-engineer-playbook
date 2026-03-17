@@ -1,9 +1,8 @@
-from typing import List, Dict, Any, Optional
+from typing import List
 from langchain_core.documents import Document
-from langchain_core.prompts import PromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
-from qdrant_client.http.models import Filter, FieldCondition, MatchValue
 
 from packages.core.config import get_config
 from packages.core.llm_factory import LLMFactory
@@ -75,6 +74,10 @@ class RAGService:
         """
         Takes a user question, retrieves context, and returns the LLM's answer.
         """
+        # Helper to format documents
+        def format_docs(docs):
+            return "\n\n".join(doc.page_content for doc in docs)
+
         # Create a basic prompt template
         system_prompt = (
             "You are an assistant for question-answering tasks. "
@@ -89,11 +92,14 @@ class RAGService:
             ("human", "{input}"),
         ])
         
-        # Create the chains
-        question_answer_chain = create_stuff_documents_chain(self.llm, prompt)
         retriever = self.vector_store.as_retriever(search_kwargs={"k": 3})
-        rag_chain = create_retrieval_chain(retriever, question_answer_chain)
         
-        # Execute
-        response = rag_chain.invoke({"input": question})
-        return response["answer"]
+        # LCEL Chain
+        rag_chain = (
+            {"context": retriever | format_docs, "input": RunnablePassthrough()}
+            | prompt
+            | self.llm
+            | StrOutputParser()
+        )
+        
+        return rag_chain.invoke(question)

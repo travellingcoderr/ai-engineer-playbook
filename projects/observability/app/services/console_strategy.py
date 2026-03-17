@@ -1,4 +1,3 @@
-import json
 from .base import IngestionStrategy
 from ..models.obs_models import LogEntry, MetricEntry, TraceSpan
 
