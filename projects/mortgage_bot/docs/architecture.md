@@ -1,7 +1,7 @@
 # Mortgage Bot Architecture
 
 ## Overview
-`Mortgage Bot` (formerly `saga-ai`) is a mortgage-focused AI support and knowledge system. It mimics the advanced AI orchestration found in `EPM-CORE-API` but is built with a modern Python/React stack for scalability and ease of use.
+`Mortgage Bot` is a mortgage-focused AI support and knowledge system. It mimics the advanced AI orchestration found in `EPM-CORE-API` but is built with a modern Python/React stack for scalability and ease of use.
 
 ## Technical Stack
 - **Frontend**: React 18, Vite, TailwindCSS (for modern UI).

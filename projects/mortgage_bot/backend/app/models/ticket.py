@@ -20,7 +20,12 @@ class Ticket(TicketBase, table=True):
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
     resolved_at: Optional[datetime] = None
-    context: dict = Field(default={}, sa_column=Column(JSON))
+    context: dict = Field(default_factory=dict, sa_column=Column(JSON))
 
 class TicketCreate(TicketBase):
     pass
+
+class TicketCreateResponse(SQLModel):
+    success: bool
+    ticket_id: Optional[uuid.UUID] = None
+    message: str

@@ -1,4 +1,4 @@
-# saga-ai Database Schema
+# mortgage-bot Database Schema
 
 -- Enable pgvector extension
 CREATE EXTENSION IF NOT EXISTS vector;
@@ -46,6 +46,24 @@ CREATE TABLE IF NOT EXISTS knowledge_chunks (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Loans Table
+CREATE TABLE IF NOT EXISTS loans (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    loan_id TEXT NOT NULL UNIQUE,
+    borrower_name TEXT NOT NULL,
+    property_address TEXT,
+    loan_type TEXT,
+    loan_amount DOUBLE PRECISION,
+    status TEXT NOT NULL DEFAULT 'new',
+    milestone TEXT NOT NULL DEFAULT 'application',
+    assigned_officer TEXT,
+    external_loan_id TEXT,
+    source_system TEXT NOT NULL DEFAULT 'internal',
+    metadata JSONB DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Support Tickets Table
 CREATE TABLE IF NOT EXISTS support_tickets (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -81,5 +99,7 @@ CREATE TABLE IF NOT EXISTS support_comments (
 
 -- Indexes for search
 CREATE INDEX IF NOT EXISTS idx_knowledge_chunks_embedding ON knowledge_chunks USING ivfflat (embedding vector_cosine_ops);
+CREATE INDEX IF NOT EXISTS idx_loans_loan_id ON loans(loan_id);
+CREATE INDEX IF NOT EXISTS idx_loans_status ON loans(status);
 CREATE INDEX IF NOT EXISTS idx_support_tickets_status ON support_tickets(status);
 CREATE INDEX IF NOT EXISTS idx_support_tickets_user_id ON support_tickets(user_id);

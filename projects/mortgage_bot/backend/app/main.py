@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from .api import tickets, knowledge
+from .api import tickets, knowledge, loans
 from .database import init_db
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -14,7 +14,7 @@ async def lifespan(app: FastAPI):
     init_db()
     yield
 
-app = FastAPI(title="saga-ai API", lifespan=lifespan)
+app = FastAPI(title="mortgage-bot API", lifespan=lifespan)
 
 # Add CORS middleware
 app.add_middleware(
@@ -40,6 +40,7 @@ async def observability_middleware(request, call_next):
     return response
 
 app.include_router(tickets.router, prefix="/api/tickets", tags=["Tickets"])
+app.include_router(loans.router, prefix="/api/loans", tags=["Loans"])
 app.include_router(knowledge.router, prefix="/api/knowledge", tags=["Knowledge"])
 
 @app.get("/health")
