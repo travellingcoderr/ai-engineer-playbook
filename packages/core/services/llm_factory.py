@@ -1,5 +1,6 @@
 import os
 from langchain_core.language_models.chat_models import BaseChatModel
+from langchain_core.embeddings import Embeddings
 from ..config import get_config
 
 class LLMFactory:
@@ -51,6 +52,36 @@ class LLMFactory:
             return LLMFactory._create_gemini(model_name, key)
         else:
             raise ValueError(f"Unsupported LLM provider: {provider}")
+
+    @staticmethod
+    def create_embeddings(provider: str = None, model_name: str = None, **kwargs) -> Embeddings:
+        """
+        Creates and returns a LangChain Embeddings instance.
+        """
+        try:
+            settings = get_config()
+        except Exception:
+            settings = None
+
+        llm_settings = getattr(settings, "llm", None) if settings else None
+        
+        provider = provider or (
+            getattr(llm_settings, "provider", None)
+            or getattr(settings, "llm_provider", None)
+            or "openai"
+        )
+        provider = provider.lower().strip() if provider else "openai"
+
+        if provider == "openai":
+            from langchain_openai import OpenAIEmbeddings
+            model = model_name or "text-embedding-3-small"
+            key = kwargs.get("openai_api_key") or (
+                getattr(llm_settings, "openai_api_key", None)
+                or getattr(settings, "openai_api_key", None)
+            )
+            return OpenAIEmbeddings(model=model, openai_api_key=key)
+        else:
+            raise ValueError(f"Unsupported Embeddings provider: {provider}")
 
     @staticmethod
     def _create_openai(model_name: str, api_key: str | None, base_url: str | None = None) -> BaseChatModel:

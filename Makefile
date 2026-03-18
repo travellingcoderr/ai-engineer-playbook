@@ -18,6 +18,8 @@ RESILIENT_GATEWAY_PORT ?= 8006
 N8N_PORT ?= 5678
 PERF_EVAL_PORT ?= 8007
 DASHBOARD_PORT ?= 8080
+MORTGAGE_BOT_API_PORT ?= 8008
+MORTGAGE_BOT_FRONTEND_PORT ?= 5173
 
 # Infrastructure Ports
 QDRANT_PORT ?= 6333
@@ -184,8 +186,22 @@ stop-docker-perf-eval:
 	@echo "Stopping AI Performance & Evaluation in Docker..."
 	@cd projects/ai_perf_eval && docker-compose down
 
+# Mortgage Bot (formerly SAGA AI)
+run-mortgage-bot:
+	@echo "Starting Mortgage Bot services..."
+	@cd projects/mortgage_bot && docker-compose up -d --build
+	@echo "Mortgage Bot API: http://localhost:$(MORTGAGE_BOT_API_PORT)"
+	@echo "Mortgage Bot Frontend: http://localhost:$(MORTGAGE_BOT_FRONTEND_PORT)"
+
+stop-mortgage-bot:
+	@echo "Stopping Mortgage Bot services..."
+	@cd projects/mortgage_bot && docker-compose down
+
 # Infrastructure (Qdrant, Mongo, Redis)
 run-infra:
+	@echo "Checking for ai_network..."
+	@docker network inspect ai_network >/dev/null 2>&1 || \
+		(echo "Creating ai_network..." && docker network create ai_network)
 	@echo "Starting Shared Infrastructure (Qdrant, Mongo, Redis)..."
 	@cd projects/infrastructure && docker-compose up -d
 
@@ -227,6 +243,18 @@ run-all:
 
 	@echo "All services started"
 
+run-all-ordered:
+	@echo "🚀 Starting all AI services in dependency order..."
+	@make run-infra
+	@echo "Waiting for infrastructure to be ready..."
+	@sleep 5
+	@make run-docker-observe
+	@make run-docker-rag
+	@make run-docker-gateway
+	@make run-docker-guardrails
+	@make run-mortgage-bot
+	@echo "✅ All services are up and running!"
+
 # ==============================
 # Stop Services
 # ==============================
@@ -243,6 +271,7 @@ stop-all:
 	@cd projects/workflow_orchestrator && docker-compose down || true
 	@cd projects/ai_perf_eval && docker-compose down || true
 	@cd projects/infrastructure && docker-compose down || true
+	@cd projects/mortgage_bot && docker-compose down || true
 	@echo "Stopping local PID-based services..."
 	@if [ -f rag.pid ]; then kill `cat rag.pid` && rm rag.pid || true; fi
 	@if [ -f gateway.pid ]; then kill `cat gateway.pid` && rm gateway.pid || true; fi

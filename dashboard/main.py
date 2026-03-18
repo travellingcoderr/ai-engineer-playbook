@@ -29,6 +29,8 @@ async def serve_dashboard():
         "QDRANT_PORT": 6333,
         "MONGO_PORT": 27017,
         "REDIS_PORT": 6379,
+        "MORTGAGE_BOT_API_PORT": 8008,
+        "MORTGAGE_BOT_FRONTEND_PORT": 3000,
     }
     
     with open(HTML_FILE_PATH, "r") as f:

@@ -631,19 +631,40 @@
                     <div class="port-tag">PORT {{REDIS_PORT}}</div>
                 </div>
             </div>
+
+            <!-- Mortgage Bot Card -->
+            <div class="card" id="card-mortgage" data-port="{{MORTGAGE_BOT_API_PORT}}"
+                onclick="if(event.target.tagName !== 'BUTTON' && event.target.tagName !== 'A') window.open('http://localhost:{{MORTGAGE_BOT_FRONTEND_PORT}}', '_blank');">
+                <div class="card-header-row">
+                    <div class="icon-wrapper"><span>🏠</span></div>
+                    <div class="status-badge" id="status-{{MORTGAGE_BOT_API_PORT}}">
+                        <div class="status-dot"></div>
+                        <span class="status-text">Checking...</span>
+                    </div>
+                </div>
+                <h2>Mortgage Bot</h2>
+                <p>Automated mortgage processing assistant with RAG-powered knowledge retrieval and support ticketing.</p>
+                <div class="card-footer">
+                    <div class="port-tag">API: {{MORTGAGE_BOT_API_PORT}} | UI: {{MORTGAGE_BOT_FRONTEND_PORT}}</div>
+                    <div class="action-container">
+                        <a href="http://localhost:{{MORTGAGE_BOT_FRONTEND_PORT}}" target="_blank" class="docs-link" title="Open Frontend">🖥️</a>
+                        <a href="http://localhost:{{MORTGAGE_BOT_API_PORT}}/docs" target="_blank" class="docs-link" title="View Swagger API Docs">📖</a>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="footer-note">
-            Status checks update every 3 seconds. Use <code>./menu.py</code> to boot services from your terminal!
+            Status checks update every 60 seconds. Use <code>./menu.py</code> to boot services from your terminal!
         </div>
     </div>
-
+ 
     <script>
         // Stop service via backend API
         async function stopService(serviceName, port, btnElement) {
             btnElement.classList.add('stopping');
             btnElement.textContent = 'Stopping...';
-
+ 
             try {
                 const res = await fetch(`/api/stop/${serviceName}`, { method: 'POST' });
                 if (!res.ok) {
@@ -654,28 +675,28 @@
             } catch (e) {
                 console.error("Error connecting to Dashboard Server API.");
             }
-
+ 
             setTimeout(() => {
                 btnElement.classList.remove('stopping');
                 btnElement.textContent = 'Stop 🛑';
             }, 3000);
-
+ 
             checkStatus(port, serviceName);
         }
-
+ 
         // Port polling system
         const checkStatus = async (port, serviceKey) => {
             const badge = document.getElementById(`status-${port}`);
             const card = document.getElementById(`card-${serviceKey}`);
             const statusText = badge.querySelector('.status-text');
-
+ 
             try {
                 // Poll the FastAPI docs endpoint via unauthenticated requests
                 await fetch(`http://localhost:${port}/docs?t=${new Date().getTime()}`, {
                     mode: 'no-cors',
                     cache: 'no-store'
                 });
-
+ 
                 if (!badge.classList.contains('online')) {
                     badge.classList.add('online');
                     statusText.textContent = 'Online';
@@ -690,7 +711,7 @@
                 statusText.textContent = 'Offline';
             }
         };
-
+ 
         // Tuples of [TargetPort, ServiceId]
         const services = [
             [{{RAG_PORT}}, 'rag'],
@@ -704,13 +725,14 @@
             [{{PERF_EVAL_PORT}}, 'perf'],
             [{{QDRANT_PORT}}, 'qdrant'],
             [{{MONGO_PORT}}, 'mongo'],
-            [{{REDIS_PORT}}, 'redis']
+            [{{REDIS_PORT}}, 'redis'],
+            [{{MORTGAGE_BOT_API_PORT}}, 'mortgage']
         ];
-
+ 
         services.forEach(([port, key]) => checkStatus(port, key));
         setInterval(() => {
             services.forEach(([port, key]) => checkStatus(port, key));
-        }, 3000);
+        }, 60000);
     </script>
 </body>
 

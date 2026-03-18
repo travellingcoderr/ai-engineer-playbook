@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
-from packages.core.enums import AIModel
+from packages.core.enums import AIModel, LLMProvider
 
 class LLMRequest(BaseModel):
     prompt: str

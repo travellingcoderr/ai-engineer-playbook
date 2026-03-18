@@ -36,6 +36,21 @@ services:
     networks:
       - ai_network
 
+  # PostgreSQL with pgvector
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: ai_infra_postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=saga_db
+      - POSTGRES_USER=saga_user
+      - POSTGRES_PASSWORD=saga_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - ai_network
+
 networks:
   ai_network:
     external: true
@@ -44,3 +59,4 @@ volumes:
   qdrant_data:
   mongo_data:
   redis_data:
+  postgres_data:

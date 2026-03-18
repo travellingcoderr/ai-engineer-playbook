@@ -1,6 +1,13 @@
 from .llm import LLMConfiguration
 from .embeddings import EmbeddingConfiguration
-from .vector_store import VectorStoreConfiguration
+from .vector_store import (
+    VectorStoreConfiguration,
+    BaseVectorStoreConfig,
+    PGVectorConfig,
+    PineconeConfig,
+    QdrantConfig,
+    ChromaConfig
+)
 from .loader import LoaderConfiguration
 from .splitter import SplitterConfiguration
 from .tools import ToolConfiguration

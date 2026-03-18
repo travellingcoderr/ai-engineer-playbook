@@ -1,0 +1,37 @@
+# Version Control
+.git/
+.gitignore
+
+# Package managers and dependencies
+node_modules/
+.venv/
+env/
+venv/
+bin/
+obj/
+
+# Caches and build artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+.cache/
+dist/
+build/
+.next/
+.serverless/
+.terraform/
+.vagrant/
+.docker/
+
+# Logs
+*.log
+*.pid
+
+# Project-specific large directories
+apps/
+projects/mortgage_bot/uploads/
+projects/mortgage_bot/frontend/node_modules/
+projects/mortgage_bot/frontend/dist/

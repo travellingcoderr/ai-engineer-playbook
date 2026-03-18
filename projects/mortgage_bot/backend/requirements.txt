@@ -1,0 +1,16 @@
+fastapi
+uvicorn
+sqlmodel
+psycopg2-binary
+langchain
+langgraph
+langchain-openai
+langchain-postgres
+redis
+rq
+python-dotenv
+httpx
+pydantic-settings
+python-multipart
+pypdf
+langchain-community

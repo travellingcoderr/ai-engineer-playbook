@@ -1,8 +1,37 @@
+from typing import Optional, Literal
 from pydantic import Field, BaseModel
 from packages.core.enums import VectorStoreProvider
 
+class BaseVectorStoreConfig(BaseModel):
+    """Base configuration for any vector store provider."""
+    provider: VectorStoreProvider
+    collection_name: str
+
+class PGVectorConfig(BaseVectorStoreConfig):
+    provider: Literal[VectorStoreProvider.PGVECTOR] = VectorStoreProvider.PGVECTOR
+    connection_string: Optional[str] = None
+
+class PineconeConfig(BaseVectorStoreConfig):
+    provider: Literal[VectorStoreProvider.PINECONE] = VectorStoreProvider.PINECONE
+    api_key: Optional[str] = None
+    environment: Optional[str] = None
+
+class QdrantConfig(BaseVectorStoreConfig):
+    provider: Literal[VectorStoreProvider.QDRANT] = VectorStoreProvider.QDRANT
+    host: str = "localhost"
+    port: int = 6333 # Default Qdrant port
+
+class ChromaConfig(BaseVectorStoreConfig):
+    provider: Literal[VectorStoreProvider.CHROMA] = VectorStoreProvider.CHROMA
+    host: str = "localhost"
+    port: int = 8000 # Default Chroma port
+
 class VectorStoreConfiguration(BaseModel):
-    provider: VectorStoreProvider = Field(default=VectorStoreProvider.CHROMA, description="The vector store provider (e.g., chroma, qdrant)")
-    collection_name: str = Field(default="rag_collection", description="Collection/Index name in the DB")
-    host: str = Field(default="localhost", description="Host address of the vector database")
-    port: int = Field(default=8000, description="Port number of the vector database")
+    """A unified configuration model for backward compatibility and easy env loading."""
+    provider: VectorStoreProvider = Field(default=VectorStoreProvider.CHROMA)
+    collection_name: str = Field(default="rag_collection")
+    connection_string: Optional[str] = None
+    api_key: Optional[str] = None
+    environment: Optional[str] = None
+    host: str = "localhost"
+    port: int = 8000

@@ -1,0 +1,52 @@
+services:
+  backend:
+    container_name: mortgage_bot_backend
+    build:
+      context: ../..
+      dockerfile: projects/mortgage_bot/backend/Dockerfile
+    ports:
+      - "8008:8000"
+    environment:
+      DATABASE_URL: postgresql://saga_user:saga_password@ai_infra_postgres:5432/saga_db
+      REDIS_URL: redis://ai_infra_redis:6379/0
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      VECTOR_STORE_PROVIDER: pgvector
+      VECTOR_STORE_COLLECTION_NAME: knowledge
+    volumes:
+      - ./uploads:/app/uploads
+    networks:
+      - ai_network
+
+  worker:
+    container_name: mortgage_bot_worker
+    build:
+      context: ../..
+      dockerfile: projects/mortgage_bot/worker/Dockerfile
+    environment:
+      DATABASE_URL: postgresql://saga_user:saga_password@ai_infra_postgres:5432/saga_db
+      REDIS_URL: redis://ai_infra_redis:6379/0
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      VECTOR_STORE_PROVIDER: pgvector
+      VECTOR_STORE_COLLECTION_NAME: knowledge
+    volumes:
+      - ./uploads:/app/uploads
+    networks:
+      - ai_network
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        - VITE_API_URL=http://localhost:8008
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_URL=http://localhost:8008
+    depends_on:
+      - backend
+    networks:
+      - ai_network
+
+networks:
+  ai_network:
+    external: true

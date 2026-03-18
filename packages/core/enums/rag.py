@@ -3,7 +3,8 @@ from enum import Enum
 class VectorStoreProvider(str, Enum):
     CHROMA = "chroma"
     QDRANT = "qdrant"
-    PINCEONE = "pinecone"
+    PINECONE = "pinecone"
+    PGVECTOR = "pgvector"
 
 class EmbeddingProvider(str, Enum):
     OPENAI = "openai"

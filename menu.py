@@ -37,7 +37,9 @@ def main():
         "Resilient Gateway": 8006,
         "n8n Workflow": 5678,
         "AI Perf & Eval": 8007,
-        "Dashboard": 8080
+        "Dashboard": 8080,
+        "Mortgage Bot API": 8008,
+        "Mortgage Bot UI": 5173
     }
 
     options = [
@@ -62,6 +64,11 @@ def main():
         ("Start Observability (Docker)", "make run-docker-observe", "Observability"),
         ("Stop Observability (Docker)", "make stop-docker-observe", "Observability"),
         ("View Observability Logs (Live)", "make tail-observe-logs", "Observability"),
+        ("Start Mortgage Bot (Docker)", "make run-mortgage-bot", "Mortgage Bot API"),
+        ("Stop Mortgage Bot (Docker)", "make stop-mortgage-bot", "Mortgage Bot API"),
+        ("View Bot Backend Logs", "docker logs -f mortgage_bot_backend", "Mortgage Bot API"),
+        ("View Bot Worker Logs", "docker logs -f mortgage_bot_worker", "Mortgage Bot API"),
+        ("Start All Services (Ordered)", "make run-all-ordered", None),
         ("Stop All Services", "make stop-all", None),
         ("Kill All Stray Ports", "make kill-all", None),
         ("Exit", "exit", None),

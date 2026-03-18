@@ -1,5 +1,8 @@
 {
     "python.analysis.extraPaths": [
-        "./projects/rag_system"
-    ]
+        ".",
+        "./projects/rag_system",
+        "./packages"
+    ],
+    "python.defaultInterpreterPath": "./.venv/bin/python"
 }
