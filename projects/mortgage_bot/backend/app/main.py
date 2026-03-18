@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from .api import tickets, knowledge, loans
+from .api import tickets, knowledge, loans, crew
 from .database import init_db
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -42,6 +42,7 @@ async def observability_middleware(request, call_next):
 app.include_router(tickets.router, prefix="/api/tickets", tags=["Tickets"])
 app.include_router(loans.router, prefix="/api/loans", tags=["Loans"])
 app.include_router(knowledge.router, prefix="/api/knowledge", tags=["Knowledge"])
+app.include_router(crew.router, prefix="/api/crew", tags=["CrewAI"])
 
 @app.get("/health")
 async def health():

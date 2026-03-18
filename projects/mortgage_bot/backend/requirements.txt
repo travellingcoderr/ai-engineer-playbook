@@ -14,3 +14,4 @@ pydantic-settings
 python-multipart
 pypdf
 langchain-community
+crewai

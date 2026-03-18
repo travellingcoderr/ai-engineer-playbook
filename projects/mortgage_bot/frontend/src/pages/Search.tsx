@@ -16,11 +16,19 @@ type AgentSearchResponse = {
   used_tools: string[];
 };
 
+type CrewSearchResponse = {
+  crew_result: string;
+  loan_id: string | null;
+  query: string;
+};
+
 const Search = () => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [answer, setAnswer] = useState<string | null>(null);
   const [usedTools, setUsedTools] = useState<string[]>([]);
+  const [searchMode, setSearchMode] = useState<'langgraph' | 'crewai'>('langgraph');
+  const [detectedLoanId, setDetectedLoanId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
@@ -38,10 +46,15 @@ const Search = () => {
     setHasSearched(true);
     setAnswer(null);
     setUsedTools([]);
+    setDetectedLoanId(null);
 
     try {
+      const endpoint =
+        searchMode === 'langgraph'
+          ? `${import.meta.env.VITE_API_URL}/api/knowledge/agent-search?query=${encodeURIComponent(query.trim())}`
+          : `${import.meta.env.VITE_API_URL}/api/crew/triage?query=${encodeURIComponent(query.trim())}`;
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/knowledge/agent-search?query=${encodeURIComponent(query.trim())}`,
+        endpoint,
       );
       const result = await response.json();
 
@@ -49,10 +62,19 @@ const Search = () => {
         throw new Error(result?.detail?.message || 'Search request failed.');
       }
 
-      const typedResult = result as AgentSearchResponse;
-      setAnswer(typedResult.answer || null);
-      setUsedTools(Array.isArray(typedResult.used_tools) ? typedResult.used_tools : []);
-      setResults(Array.isArray(typedResult.related_results) ? typedResult.related_results : []);
+      if (searchMode === 'langgraph') {
+        const typedResult = result as AgentSearchResponse;
+        setAnswer(typedResult.answer || null);
+        setUsedTools(Array.isArray(typedResult.used_tools) ? typedResult.used_tools : []);
+        setResults(Array.isArray(typedResult.related_results) ? typedResult.related_results : []);
+        setDetectedLoanId(typedResult.loan_id ?? null);
+      } else {
+        const typedResult = result as CrewSearchResponse;
+        setAnswer(typedResult.crew_result || null);
+        setUsedTools([]);
+        setResults([]);
+        setDetectedLoanId(typedResult.loan_id ?? null);
+      }
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Unknown error while running search.';
@@ -75,6 +97,30 @@ const Search = () => {
       </div>
 
       <form onSubmit={handleSearch} className="max-w-3xl">
+        <div className="mb-4 flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={() => setSearchMode('langgraph')}
+            className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+              searchMode === 'langgraph'
+                ? 'bg-slate-900 text-white'
+                : 'bg-white text-slate-700 border border-slate-200 hover:border-slate-300'
+            }`}
+          >
+            LangGraph
+          </button>
+          <button
+            type="button"
+            onClick={() => setSearchMode('crewai')}
+            className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+              searchMode === 'crewai'
+                ? 'bg-slate-900 text-white'
+                : 'bg-white text-slate-700 border border-slate-200 hover:border-slate-300'
+            }`}
+          >
+            CrewAI
+          </button>
+        </div>
         <div className="flex flex-col sm:flex-row gap-3">
           <input
             type="text"
@@ -104,14 +150,16 @@ const Search = () => {
       <div className="mt-8 space-y-4">
         {loading && (
           <div className="rounded-2xl border border-slate-200 bg-white px-5 py-6 text-slate-500 shadow-sm">
-            Running LangGraph search with MCP tools and knowledge retrieval...
+            {searchMode === 'langgraph'
+              ? 'Running LangGraph search with MCP tools and knowledge retrieval...'
+              : 'Running CrewAI mortgage triage flow...'}
           </div>
         )}
 
         {!loading && answer && (
           <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 shadow-sm">
             <div className="text-xs font-semibold uppercase tracking-wide text-emerald-600">
-              Agent Answer
+              {searchMode === 'langgraph' ? 'Agent Answer' : 'CrewAI Answer'}
             </div>
             <p className="mt-2 text-slate-800">{answer}</p>
           </div>
@@ -124,29 +172,46 @@ const Search = () => {
             </div>
             <div className="mt-3 space-y-2 text-sm text-slate-700">
               <div>
-                Search path: <span className="font-semibold">LangGraph ReAct agent</span>
-              </div>
-              <div>
-                MCP tools called:{' '}
+                Search path:{' '}
                 <span className="font-semibold">
-                  {usedTools.length > 0 ? 'Yes' : 'No'}
+                  {searchMode === 'langgraph' ? 'LangGraph ReAct agent' : 'CrewAI multi-agent crew'}
                 </span>
               </div>
-              {usedTools.length > 0 && (
-                <div className="flex flex-wrap gap-2 pt-1">
-                  {usedTools.map((toolName) => (
-                    <span
-                      key={toolName}
-                      className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-700"
-                    >
-                      {toolName}
-                    </span>
-                  ))}
+              {detectedLoanId && (
+                <div>
+                  Loan detected: <span className="font-semibold">{detectedLoanId}</span>
                 </div>
               )}
-              {usedTools.length === 0 && (
+              {searchMode === 'langgraph' && (
+                <>
+                  <div>
+                    MCP tools called:{' '}
+                    <span className="font-semibold">
+                      {usedTools.length > 0 ? 'Yes' : 'No'}
+                    </span>
+                  </div>
+                  {usedTools.length > 0 && (
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      {usedTools.map((toolName) => (
+                        <span
+                          key={toolName}
+                          className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-700"
+                        >
+                          {toolName}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {usedTools.length === 0 && (
+                    <div className="text-slate-500">
+                      The agent answered without invoking additional MCP or knowledge tools.
+                    </div>
+                  )}
+                </>
+              )}
+              {searchMode === 'crewai' && (
                 <div className="text-slate-500">
-                  The agent answered without invoking additional MCP or knowledge tools.
+                  CrewAI gathered mortgage context first and then ran role-based agent collaboration for the final answer.
                 </div>
               )}
             </div>
@@ -155,17 +220,20 @@ const Search = () => {
 
         {!loading && hasSearched && !answer && results.length === 0 && !error && (
           <div className="rounded-2xl border border-slate-200 bg-white px-5 py-6 text-slate-500 shadow-sm">
-            The agent did not find a useful answer or related results.
+            {searchMode === 'langgraph'
+              ? 'The agent did not find a useful answer or related results.'
+              : 'The CrewAI flow did not return a useful answer.'}
           </div>
         )}
 
-        {!loading && results.length > 0 && (
+        {!loading && searchMode === 'langgraph' && results.length > 0 && (
           <div className="text-sm font-semibold text-slate-500 uppercase tracking-wide">
             Supporting Results
           </div>
         )}
 
         {!loading &&
+          searchMode === 'langgraph' &&
           results.map((result, index) => (
             <div
               key={`${result.type}-${index}-${result.title}`}
