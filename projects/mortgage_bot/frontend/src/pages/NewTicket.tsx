@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 type Message = {
   type: 'success' | 'error';
@@ -16,10 +17,12 @@ type HelpResponse = {
   message: string;
   recommended_result: HelpResult | null;
   related_results: HelpResult[];
+  used_tools: string[];
   has_match: boolean;
 };
 
 const NewTicket = () => {
+  const navigate = useNavigate();
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [loanNumber, setLoanNumber] = useState('');
@@ -32,16 +35,56 @@ const NewTicket = () => {
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<Message | null>(null);
   const [createdTicketId, setCreatedTicketId] = useState<string | null>(null);
+  const [showCreateConfirmation, setShowCreateConfirmation] = useState(false);
 
-  const handleSearch = async () => {
-    if (!query.trim()) {
-      setMessage({ type: 'error', text: 'Describe the issue before requesting instant help.' });
+  const createTicket = async (status: 'open' | 'resolved') => {
+    const payload = {
+      user_id: userEmail.trim().toLowerCase(),
+      user_email: userEmail.trim(),
+      user_name: userName.trim(),
+      subject: subject.trim(),
+      description: query.trim(),
+      category,
+      severity,
+      status,
+      loan_id: loanNumber.trim() || null,
+    };
+
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tickets/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const result = await response.json();
+    if (!response.ok) {
+      throw new Error(result?.detail?.message || result?.message || 'Ticket creation failed.');
+    }
+
+    return result as { ticket_id?: string | null };
+  };
+
+  const validateForm = () => {
+    if (!userName || !userEmail || !subject || !query) {
+      setMessage({ type: 'error', text: 'Name, email, subject, and issue description are required.' });
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleInstantHelp = async () => {
+    if (!validateForm()) {
       return;
     }
 
     setHelpLoading(true);
     setMessage(null);
+    setCreatedTicketId(null);
     setAiSuggestion(null);
+    setShowCreateConfirmation(false);
 
     const searchParams = new URLSearchParams({
       issue: query.trim(),
@@ -61,7 +104,7 @@ const NewTicket = () => {
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/knowledge/assist?${searchParams.toString()}`,
+        `${import.meta.env.VITE_API_URL}/api/knowledge/agent-assist?${searchParams.toString()}`,
       );
       const result: HelpResponse = await response.json();
 
@@ -70,6 +113,7 @@ const NewTicket = () => {
       }
 
       setAiSuggestion(result);
+      setShowCreateConfirmation(true);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Unknown error while requesting instant help.';
@@ -82,8 +126,12 @@ const NewTicket = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!userName || !userEmail || !subject || !query) {
-      setMessage({ type: 'error', text: 'Name, email, subject, and issue description are required.' });
+    if (!validateForm()) {
+      return;
+    }
+
+    if (!showCreateConfirmation) {
+      await handleInstantHelp();
       return;
     }
 
@@ -91,46 +139,42 @@ const NewTicket = () => {
     setMessage(null);
     setCreatedTicketId(null);
 
-    const payload = {
-      user_id: userEmail.trim().toLowerCase(),
-      user_email: userEmail.trim(),
-      user_name: userName.trim(),
-      subject: subject.trim(),
-      description: query.trim(),
-      category,
-      severity,
-      status: 'open',
-      loan_id: loanNumber.trim() || null,
-    };
-
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tickets/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        const errorMessage =
-          result?.detail?.message || result?.message || 'Ticket creation failed.';
-        setMessage({ type: 'error', text: errorMessage });
-        return;
-      }
-
+      const result = await createTicket('open');
       setCreatedTicketId(result.ticket_id ?? null);
       setMessage({ type: 'success', text: 'Ticket created successfully.' });
       setSubject('');
       setQuery('');
       setLoanNumber('');
       setAiSuggestion(null);
+      setShowCreateConfirmation(false);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Unknown error while connecting to the server.';
       setMessage({ type: 'error', text: `Failed to connect to the server: ${errorMessage}` });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleHelped = async () => {
+    if (!validateForm()) {
+      return;
+    }
+
+    setSubmitting(true);
+    setMessage(null);
+    setCreatedTicketId(null);
+
+    try {
+      const result = await createTicket('resolved');
+      setCreatedTicketId(result.ticket_id ?? null);
+      setMessage({ type: 'success', text: 'Issue resolved and ticket closed successfully.' });
+      setTimeout(() => navigate('/'), 1000);
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : 'Unknown error while resolving the issue.';
+      setMessage({ type: 'error', text: errorMessage });
     } finally {
       setSubmitting(false);
     }
@@ -248,24 +292,19 @@ const NewTicket = () => {
 
           <div className="flex flex-col sm:flex-row gap-4">
             <button
-              type="button"
-              onClick={handleSearch}
-              disabled={helpLoading}
-              className={`px-5 py-3 rounded-xl font-semibold transition ${
-                helpLoading ? 'bg-gray-300 text-gray-600 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'
-              }`}
-            >
-              {helpLoading ? 'AI is thinking...' : 'Get Instant Help'}
-            </button>
-
-            <button
               type="submit"
-              disabled={submitting}
+              disabled={submitting || helpLoading}
               className={`px-5 py-3 rounded-xl font-semibold transition ${
-                submitting ? 'bg-gray-400 text-white cursor-not-allowed' : 'bg-slate-900 text-white hover:bg-slate-800'
+                submitting || helpLoading ? 'bg-gray-400 text-white cursor-not-allowed' : 'bg-slate-900 text-white hover:bg-slate-800'
               }`}
             >
-              {submitting ? 'Creating Ticket...' : 'Create Ticket'}
+              {helpLoading
+                ? 'Checking Instant Help...'
+                : submitting
+                  ? 'Creating Ticket...'
+                  : showCreateConfirmation
+                    ? 'Still Create Ticket'
+                    : 'Create Ticket'}
             </button>
           </div>
 
@@ -305,9 +344,49 @@ const NewTicket = () => {
                 </div>
               )}
 
+              <div className="mt-4 rounded-xl border border-blue-100 bg-white/80 p-4">
+                <div className="text-xs font-semibold uppercase tracking-wide text-blue-500">
+                  Agent Trace
+                </div>
+                <div className="mt-3 space-y-2 text-sm text-slate-700">
+                  <div>
+                    Search path: <span className="font-semibold">LangGraph ReAct agent</span>
+                  </div>
+                  <div>
+                    MCP tools called:{' '}
+                    <span className="font-semibold">
+                      {aiSuggestion.used_tools.length > 0 ? 'Yes' : 'No'}
+                    </span>
+                  </div>
+                  {aiSuggestion.used_tools.length > 0 && (
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      {aiSuggestion.used_tools.map((toolName) => (
+                        <span
+                          key={toolName}
+                          className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700"
+                        >
+                          {toolName}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
               <p className="mt-3 text-sm text-blue-800">
-                If this does not solve the issue, submit the form above to create a real support ticket.
+                Review these suggestions first. If they do not solve the issue, use the button above to continue creating the ticket.
               </p>
+
+              <div className="mt-4 flex flex-col sm:flex-row gap-3">
+                <button
+                  type="button"
+                  onClick={handleHelped}
+                  disabled={submitting}
+                  className="px-4 py-2 rounded-xl bg-white text-blue-800 border border-blue-200 font-semibold hover:bg-blue-100 transition"
+                >
+                  {submitting ? 'Closing Ticket...' : 'This Helped'}
+                </button>
+              </div>
             </div>
           )}
         </form>

@@ -24,7 +24,25 @@ def seed_loans():
             assigned_officer="Mia Rodriguez",
             external_loan_id="LOS-9001",
             source_system="mock-los",
-            additional_metadata={"fico_band": "740+", "occupancy": "primary"},
+            additional_metadata={
+                "fico_band": "740+",
+                "occupancy": "primary",
+                "borrower_profile": {
+                    "email": "ava.thompson@example.com",
+                    "phone": "704-555-0101",
+                    "employment_status": "W-2 salaried",
+                    "first_time_homebuyer": False,
+                },
+                "conditions": [
+                    {"name": "Updated bank statements", "status": "open", "owner": "borrower"},
+                    {"name": "Signed intent to proceed", "status": "cleared", "owner": "loan officer"},
+                ],
+                "milestone_history": [
+                    {"milestone": "application", "status": "completed", "date": "2026-03-01"},
+                    {"milestone": "processing", "status": "completed", "date": "2026-03-05"},
+                    {"milestone": "underwriting", "status": "current", "date": "2026-03-16"},
+                ],
+            },
         ),
         Loan(
             loan_id="LN-1002",
@@ -37,7 +55,26 @@ def seed_loans():
             assigned_officer="Daniel Kim",
             external_loan_id="LOS-9002",
             source_system="mock-los",
-            additional_metadata={"fico_band": "680-719", "occupancy": "primary"},
+            additional_metadata={
+                "fico_band": "680-719",
+                "occupancy": "primary",
+                "borrower_profile": {
+                    "email": "noah.patel@example.com",
+                    "phone": "813-555-0117",
+                    "employment_status": "Self-employed",
+                    "first_time_homebuyer": True,
+                },
+                "conditions": [
+                    {"name": "Appraisal review", "status": "open", "owner": "underwriting"},
+                    {"name": "Year-to-date P&L", "status": "open", "owner": "borrower"},
+                    {"name": "VOD", "status": "cleared", "owner": "processing"},
+                ],
+                "milestone_history": [
+                    {"milestone": "application", "status": "completed", "date": "2026-02-26"},
+                    {"milestone": "processing", "status": "completed", "date": "2026-03-04"},
+                    {"milestone": "appraisal", "status": "current", "date": "2026-03-14"},
+                ],
+            },
         ),
         Loan(
             loan_id="LN-1003",
@@ -50,7 +87,26 @@ def seed_loans():
             assigned_officer="Harper Lee",
             external_loan_id="LOS-9003",
             source_system="mock-los",
-            additional_metadata={"fico_band": "720-739", "occupancy": "primary"},
+            additional_metadata={
+                "fico_band": "720-739",
+                "occupancy": "primary",
+                "borrower_profile": {
+                    "email": "sophia.martinez@example.com",
+                    "phone": "512-555-0154",
+                    "employment_status": "Active military",
+                    "first_time_homebuyer": False,
+                },
+                "conditions": [
+                    {"name": "Final CD acknowledgment", "status": "open", "owner": "borrower"},
+                    {"name": "Clear title update", "status": "cleared", "owner": "closing"},
+                ],
+                "milestone_history": [
+                    {"milestone": "application", "status": "completed", "date": "2026-02-20"},
+                    {"milestone": "processing", "status": "completed", "date": "2026-02-27"},
+                    {"milestone": "underwriting", "status": "completed", "date": "2026-03-08"},
+                    {"milestone": "closing", "status": "current", "date": "2026-03-17"},
+                ],
+            },
         ),
     ]
 

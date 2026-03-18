@@ -8,9 +8,19 @@ type SearchResult = {
   metadata: Record<string, string | null>;
 };
 
+type AgentSearchResponse = {
+  answer: string;
+  loan_id: string | null;
+  query: string;
+  related_results: SearchResult[];
+  used_tools: string[];
+};
+
 const Search = () => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
+  const [answer, setAnswer] = useState<string | null>(null);
+  const [usedTools, setUsedTools] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
@@ -26,10 +36,12 @@ const Search = () => {
     setLoading(true);
     setError(null);
     setHasSearched(true);
+    setAnswer(null);
+    setUsedTools([]);
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/knowledge/search?query=${encodeURIComponent(query.trim())}`,
+        `${import.meta.env.VITE_API_URL}/api/knowledge/agent-search?query=${encodeURIComponent(query.trim())}`,
       );
       const result = await response.json();
 
@@ -37,11 +49,16 @@ const Search = () => {
         throw new Error(result?.detail?.message || 'Search request failed.');
       }
 
-      setResults(Array.isArray(result.results) ? result.results : []);
+      const typedResult = result as AgentSearchResponse;
+      setAnswer(typedResult.answer || null);
+      setUsedTools(Array.isArray(typedResult.used_tools) ? typedResult.used_tools : []);
+      setResults(Array.isArray(typedResult.related_results) ? typedResult.related_results : []);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'Unknown error while running search.';
       setError(errorMessage);
+      setAnswer(null);
+      setUsedTools([]);
       setResults([]);
     } finally {
       setLoading(false);
@@ -87,13 +104,64 @@ const Search = () => {
       <div className="mt-8 space-y-4">
         {loading && (
           <div className="rounded-2xl border border-slate-200 bg-white px-5 py-6 text-slate-500 shadow-sm">
-            Searching knowledge base and related tickets...
+            Running LangGraph search with MCP tools and knowledge retrieval...
           </div>
         )}
 
-        {!loading && hasSearched && results.length === 0 && !error && (
+        {!loading && answer && (
+          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 shadow-sm">
+            <div className="text-xs font-semibold uppercase tracking-wide text-emerald-600">
+              Agent Answer
+            </div>
+            <p className="mt-2 text-slate-800">{answer}</p>
+          </div>
+        )}
+
+        {!loading && hasSearched && (
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 shadow-sm">
+            <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Agent Trace
+            </div>
+            <div className="mt-3 space-y-2 text-sm text-slate-700">
+              <div>
+                Search path: <span className="font-semibold">LangGraph ReAct agent</span>
+              </div>
+              <div>
+                MCP tools called:{' '}
+                <span className="font-semibold">
+                  {usedTools.length > 0 ? 'Yes' : 'No'}
+                </span>
+              </div>
+              {usedTools.length > 0 && (
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {usedTools.map((toolName) => (
+                    <span
+                      key={toolName}
+                      className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-700"
+                    >
+                      {toolName}
+                    </span>
+                  ))}
+                </div>
+              )}
+              {usedTools.length === 0 && (
+                <div className="text-slate-500">
+                  The agent answered without invoking additional MCP or knowledge tools.
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {!loading && hasSearched && !answer && results.length === 0 && !error && (
           <div className="rounded-2xl border border-slate-200 bg-white px-5 py-6 text-slate-500 shadow-sm">
-            No matching documents or tickets were found.
+            The agent did not find a useful answer or related results.
+          </div>
+        )}
+
+        {!loading && results.length > 0 && (
+          <div className="text-sm font-semibold text-slate-500 uppercase tracking-wide">
+            Supporting Results
           </div>
         )}
 

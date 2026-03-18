@@ -1,7 +1,11 @@
 from fastapi import APIRouter, UploadFile, File, Depends
+from functools import lru_cache
+import re
 from sqlalchemy import or_
 from sqlmodel import Session, select
-from ..database import get_session
+from langchain_core.messages import AIMessage, HumanMessage
+from ..database import engine, get_session
+from ..langgraph.agent import create_mortgage_bot_agent
 from ..models.knowledge import KnowledgeDocument
 from ..models.ticket import Ticket
 from packages.core.services.rag.rag_service import RAGService
@@ -16,6 +20,11 @@ router = APIRouter()
 redis_conn = Redis.from_url(os.getenv("REDIS_URL", "redis://localhost:6379/0"))
 q = Queue(connection=redis_conn)
 obs_client = ObservabilityClient(service_name="mortgage_bot_backend")
+
+
+@lru_cache(maxsize=1)
+def get_mortgage_bot_agent():
+    return create_mortgage_bot_agent()
 
 
 def _build_search_results(query: str, session: Session) -> list[dict]:
@@ -91,6 +100,47 @@ def _build_help_message(results: list[dict]) -> str:
         f"The closest existing issue is '{top_result['title']}'. "
         "Review the similar ticket details first before creating a new support request."
     )
+
+
+def _extract_loan_id(query: str) -> str:
+    loan_match = re.search(r"\bLN-\d+\b", query, re.IGNORECASE)
+    return loan_match.group(0).upper() if loan_match else ""
+
+
+def _run_agent_query(query: str) -> dict:
+    agent = get_mortgage_bot_agent()
+    loan_id = _extract_loan_id(query)
+    agent_result = agent.invoke(
+        {
+            "messages": [HumanMessage(content=query)],
+            "loan_id": loan_id,
+            "context": {},
+        }
+    )
+    messages = agent_result.get("messages", [])
+    ai_messages = [message for message in messages if isinstance(message, AIMessage)]
+    final_answer = ""
+    used_tools: list[str] = []
+
+    for message in ai_messages:
+        if getattr(message, "tool_calls", None):
+            used_tools.extend(
+                tool_call.get("name", "unknown_tool")
+                for tool_call in message.tool_calls
+            )
+        if isinstance(message.content, str) and message.content.strip():
+            final_answer = message.content
+
+    with Session(engine) as session:
+        related_results = _build_search_results(query, session)[:3]
+
+    return {
+        "query": query,
+        "answer": final_answer,
+        "used_tools": used_tools,
+        "loan_id": loan_id or None,
+        "related_results": related_results,
+    }
 
 @router.post("/upload")
 async def upload_document(
@@ -171,3 +221,39 @@ async def assist_with_issue(
         "related_results": results[:3],
         "has_match": bool(results),
     }
+
+
+@router.get("/agent-assist")
+async def agent_assist_with_issue(
+    issue: str,
+    subject: str | None = None,
+    category: str | None = None,
+    loan_id: str | None = None,
+):
+    query_parts = [subject, issue, category, loan_id]
+    enriched_query = " ".join(part.strip() for part in query_parts if part and part.strip())
+    obs_client.log(
+        f"/api/knowledge/agent-assist called with enriched_query='{enriched_query}'",
+        level=LogLevel.INFO,
+    )
+    agent_output = _run_agent_query(enriched_query)
+
+    return {
+        "query": enriched_query,
+        "message": agent_output["answer"]
+        or "No close matches were found. Create a support ticket so the team can investigate the issue directly.",
+        "recommended_result": agent_output["related_results"][0] if agent_output["related_results"] else None,
+        "related_results": agent_output["related_results"],
+        "used_tools": agent_output["used_tools"],
+        "has_match": bool(agent_output["answer"] or agent_output["related_results"]),
+    }
+
+
+@router.get("/agent-search")
+async def agent_search(query: str):
+    obs_client.log(
+        f"/api/knowledge/agent-search called with query='{query}'",
+        level=LogLevel.INFO,
+    )
+
+    return _run_agent_query(query)
