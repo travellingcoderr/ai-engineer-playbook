@@ -64,6 +64,41 @@ CREATE TABLE IF NOT EXISTS loans (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- LLM Invocation Metrics Table
+CREATE TABLE IF NOT EXISTS llm_invocations (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    trace_id TEXT NOT NULL,
+    request_id TEXT NOT NULL,
+    feature TEXT NOT NULL,
+    workflow_type TEXT NOT NULL,
+    step_name TEXT NOT NULL,
+    model TEXT NOT NULL,
+    provider TEXT NOT NULL,
+    prompt_tokens INTEGER NOT NULL DEFAULT 0,
+    completion_tokens INTEGER NOT NULL DEFAULT 0,
+    total_tokens INTEGER NOT NULL DEFAULT 0,
+    cost_usd DOUBLE PRECISION NOT NULL DEFAULT 0,
+    latency_ms DOUBLE PRECISION NOT NULL DEFAULT 0,
+    success BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Worker Job Tracking Table
+CREATE TABLE IF NOT EXISTS worker_jobs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    job_id TEXT NOT NULL UNIQUE,
+    queue_name TEXT NOT NULL,
+    task_name TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'queued',
+    document_id TEXT,
+    error_message TEXT,
+    payload JSONB DEFAULT '{}',
+    enqueued_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    started_at TIMESTAMP WITH TIME ZONE,
+    completed_at TIMESTAMP WITH TIME ZONE,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Support Tickets Table
 CREATE TABLE IF NOT EXISTS support_tickets (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -99,6 +134,11 @@ CREATE TABLE IF NOT EXISTS support_comments (
 
 -- Indexes for search
 CREATE INDEX IF NOT EXISTS idx_knowledge_chunks_embedding ON knowledge_chunks USING ivfflat (embedding vector_cosine_ops);
+CREATE INDEX IF NOT EXISTS idx_llm_invocations_created_at ON llm_invocations(created_at);
+CREATE INDEX IF NOT EXISTS idx_llm_invocations_feature ON llm_invocations(feature);
+CREATE INDEX IF NOT EXISTS idx_llm_invocations_workflow_type ON llm_invocations(workflow_type);
+CREATE INDEX IF NOT EXISTS idx_worker_jobs_status ON worker_jobs(status);
+CREATE INDEX IF NOT EXISTS idx_worker_jobs_enqueued_at ON worker_jobs(enqueued_at);
 CREATE INDEX IF NOT EXISTS idx_loans_loan_id ON loans(loan_id);
 CREATE INDEX IF NOT EXISTS idx_loans_status ON loans(status);
 CREATE INDEX IF NOT EXISTS idx_support_tickets_status ON support_tickets(status);

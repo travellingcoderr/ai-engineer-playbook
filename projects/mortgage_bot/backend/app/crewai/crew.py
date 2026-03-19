@@ -5,6 +5,7 @@ from ..mcp.get_milestone_history import get_milestone_history
 from ..mcp.list_loan_conditions import list_loan_conditions
 from ..mcp.search_knowledge import search_knowledge
 from packages.core.enums.observability import LogLevel
+from packages.core.services import reset_llm_instrumentation_context, set_llm_instrumentation_context
 from packages.core.services.observability import ObservabilityClient
 from .agents import create_mortgage_triage_agents
 from .tasks import create_mortgage_triage_tasks
@@ -54,7 +55,15 @@ def run_mortgage_issue_triage_crew(query: str) -> dict:
         process=Process.sequential,
         verbose=True,
     )
-    result = crew.kickoff()
+    context_token = set_llm_instrumentation_context(
+        feature="knowledge_search",
+        workflow_type="crewai",
+        step_name="crew_kickoff",
+    )
+    try:
+        result = crew.kickoff()
+    finally:
+        reset_llm_instrumentation_context(context_token)
 
     obs_client.log(
         f"CrewAI triage completed for query='{query}'",

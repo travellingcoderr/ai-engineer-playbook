@@ -12,3 +12,4 @@ class MetricUnit(str, Enum):
     SECONDS = "seconds"
     PERCENT = "percent"
     BYTES = "bytes"
+    USD = "usd"

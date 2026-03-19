@@ -5,6 +5,7 @@ from sqlalchemy import or_
 from sqlmodel import Session, select
 from langchain_core.messages import AIMessage, HumanMessage
 from ..database import engine, get_session
+from ..data.worker_job_repository import WorkerJobRepository
 from ..langgraph.agent import create_mortgage_bot_agent
 from ..models.knowledge import KnowledgeDocument
 from ..models.ticket import Ticket
@@ -14,6 +15,7 @@ from redis import Redis
 from rq import Queue
 import os
 from packages.core.services.observability import ObservabilityClient
+from packages.core.services import reset_llm_instrumentation_context, set_llm_instrumentation_context
 from packages.core.enums.observability import LogLevel
 
 router = APIRouter()
@@ -33,9 +35,16 @@ def _build_search_results(query: str, session: Session) -> list[dict]:
         level=LogLevel.INFO,
     )
     connection_string = os.getenv("DATABASE_URL")
-    rag_service = RAGService(connection_string=connection_string, collection_name="knowledge")
-
-    knowledge_results = rag_service.search(query, k=5)
+    context_token = set_llm_instrumentation_context(
+        feature="knowledge_search",
+        workflow_type="rag_search",
+        step_name="embedding_lookup",
+    )
+    try:
+        rag_service = RAGService(connection_string=connection_string, collection_name="knowledge")
+        knowledge_results = rag_service.search(query, k=5)
+    finally:
+        reset_llm_instrumentation_context(context_token)
 
     ticket_pattern = f"%{query.strip()}%"
     ticket_statement = (
@@ -110,13 +119,21 @@ def _extract_loan_id(query: str) -> str:
 def _run_agent_query(query: str) -> dict:
     agent = get_mortgage_bot_agent()
     loan_id = _extract_loan_id(query)
-    agent_result = agent.invoke(
-        {
-            "messages": [HumanMessage(content=query)],
-            "loan_id": loan_id,
-            "context": {},
-        }
+    context_token = set_llm_instrumentation_context(
+        feature="knowledge_search",
+        workflow_type="langgraph",
+        step_name="agent_reasoning",
     )
+    try:
+        agent_result = agent.invoke(
+            {
+                "messages": [HumanMessage(content=query)],
+                "loan_id": loan_id,
+                "context": {},
+            }
+        )
+    finally:
+        reset_llm_instrumentation_context(context_token)
     messages = agent_result.get("messages", [])
     ai_messages = [message for message in messages if isinstance(message, AIMessage)]
     final_answer = ""
@@ -173,16 +190,23 @@ async def upload_document(
     session.commit()
     
     # 3. Enqueue background task
-    q.enqueue(
+    job = q.enqueue(
         "tasks.ingestion.process_document",
         doc_id=str(doc_id),
         blob_uri=file_path,
         metadata={"title": title}
     )
+    WorkerJobRepository(session).create_job(
+        job_id=job.id,
+        queue_name=q.name,
+        task_name="tasks.ingestion.process_document",
+        document_id=str(doc_id),
+        payload={"blob_uri": file_path, "metadata": {"title": title}},
+    )
     
-    obs_client.log(f"Document {doc_id} queued for processing", level=LogLevel.INFO)
+    obs_client.log(f"Document {doc_id} queued for processing as job {job.id}", level=LogLevel.INFO)
     
-    return {"doc_id": str(doc_id), "status": "queued"}
+    return {"doc_id": str(doc_id), "status": "queued", "job_id": job.id}
 
 @router.get("/search")
 async def search_knowledge(query: str, session: Session = Depends(get_session)):

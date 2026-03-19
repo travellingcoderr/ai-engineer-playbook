@@ -1,5 +1,29 @@
+from packages.core.services.llm_factory import LLMFactory
+
+
 def create_mortgage_triage_agents():
     from crewai import Agent
+
+    intake_llm = LLMFactory.create_llm(
+        instrument=True,
+        component="crewai",
+        operation="intake_analyst",
+    )
+    loan_ops_llm = LLMFactory.create_llm(
+        instrument=True,
+        component="crewai",
+        operation="loan_ops_specialist",
+    )
+    guideline_llm = LLMFactory.create_llm(
+        instrument=True,
+        component="crewai",
+        operation="guideline_researcher",
+    )
+    resolution_llm = LLMFactory.create_llm(
+        instrument=True,
+        component="crewai",
+        operation="resolution_writer",
+    )
 
     intake_analyst = Agent(
         role="Mortgage Intake Analyst",
@@ -8,6 +32,7 @@ def create_mortgage_triage_agents():
             "You specialize in mortgage support intake. You identify the actual issue, "
             "normalize the wording, and prepare the case for downstream specialists."
         ),
+        llm=intake_llm,
         verbose=True,
     )
 
@@ -18,6 +43,7 @@ def create_mortgage_triage_agents():
             "You work in mortgage operations and understand loan milestones, conditions, "
             "underwriting blockers, and how to move files forward."
         ),
+        llm=loan_ops_llm,
         verbose=True,
     )
 
@@ -28,6 +54,7 @@ def create_mortgage_triage_agents():
             "You are a mortgage knowledge specialist who can connect operational issues "
             "to the most relevant internal guidance and policy context."
         ),
+        llm=guideline_llm,
         verbose=True,
     )
 
@@ -38,6 +65,7 @@ def create_mortgage_triage_agents():
             "You write concise support responses that combine operational facts and guidance "
             "into something an internal support team can act on."
         ),
+        llm=resolution_llm,
         verbose=True,
     )
 

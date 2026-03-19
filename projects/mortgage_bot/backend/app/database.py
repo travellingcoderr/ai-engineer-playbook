@@ -124,8 +124,10 @@ def seed_loans():
 
 def init_db():
     # Import models here to ensure they are registered with SQLModel.metadata
+    from .models.llm_invocation import LLMInvocation
     from .models.ticket import Ticket
     from .models.loan import Loan
+    from .models.worker_job import WorkerJob
     from .models.knowledge import KnowledgeDocument, KnowledgeChunk
     
     # Ensure pgvector extension is enabled

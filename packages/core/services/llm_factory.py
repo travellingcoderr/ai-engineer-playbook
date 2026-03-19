@@ -2,6 +2,7 @@ import os
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.embeddings import Embeddings
 from ..config import get_config
+from .llm_instrumentation import LLMInstrumentation
 
 class LLMFactory:
     """
@@ -33,6 +34,9 @@ class LLMFactory:
             or getattr(settings, "openai_model", None)
             or "gpt-4o"
         )
+        instrument = kwargs.pop("instrument", False)
+        component = kwargs.pop("component", "unknown_component")
+        operation = kwargs.pop("operation", "unknown_operation")
         
         if provider == "openai":
             key = kwargs.get("openai_api_key") or (
@@ -43,15 +47,27 @@ class LLMFactory:
                 getattr(llm_settings, "openai_api_base", None)
                 or getattr(settings, "openai_api_base", None)
             )
-            return LLMFactory._create_openai(model_name, key, base_url)
+            llm = LLMFactory._create_openai(model_name, key, base_url)
         elif provider == "gemini":
             key = kwargs.get("gemini_api_key") or (
                 getattr(llm_settings, "gemini_api_key", None)
                 or getattr(settings, "gemini_api_key", None)
             )
-            return LLMFactory._create_gemini(model_name, key)
+            llm = LLMFactory._create_gemini(model_name, key)
         else:
             raise ValueError(f"Unsupported LLM provider: {provider}")
+
+        if instrument:
+            instrumentation = LLMInstrumentation(
+                service_name="llm_runtime",
+                provider=provider,
+                model_name=model_name,
+                component=component,
+                operation=operation,
+            )
+            return instrumentation.wrap(llm)
+
+        return llm
 
     @staticmethod
     def create_embeddings(provider: str = None, model_name: str = None, **kwargs) -> Embeddings:
@@ -71,6 +87,9 @@ class LLMFactory:
             or "openai"
         )
         provider = provider.lower().strip() if provider else "openai"
+        instrument = kwargs.pop("instrument", False)
+        component = kwargs.pop("component", "unknown_component")
+        operation = kwargs.pop("operation", "unknown_operation")
 
         if provider == "openai":
             from langchain_openai import OpenAIEmbeddings
@@ -79,7 +98,17 @@ class LLMFactory:
                 getattr(llm_settings, "openai_api_key", None)
                 or getattr(settings, "openai_api_key", None)
             )
-            return OpenAIEmbeddings(model=model, openai_api_key=key)
+            embeddings = OpenAIEmbeddings(model=model, openai_api_key=key)
+            if instrument:
+                instrumentation = LLMInstrumentation(
+                    service_name="llm_runtime",
+                    provider=provider,
+                    model_name=model,
+                    component=component,
+                    operation=operation,
+                )
+                return instrumentation.wrap_embeddings(embeddings)
+            return embeddings
         else:
             raise ValueError(f"Unsupported Embeddings provider: {provider}")
 

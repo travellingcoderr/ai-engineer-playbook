@@ -16,7 +16,11 @@ class AgentState(TypedDict):
 
 def create_mortgage_bot_agent():
     tools = MCP_TOOLS
-    llm = LLMFactory.create_llm().bind_tools(tools)
+    llm = LLMFactory.create_llm(
+        instrument=True,
+        component="langgraph_agent",
+        operation="reason_step",
+    ).bind_tools(tools)
     
     workflow = StateGraph(AgentState)
     

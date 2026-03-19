@@ -3,6 +3,8 @@ import Dashboard from './pages/Dashboard';
 import NewTicket from './pages/NewTicket';
 import Search from './pages/Search';
 import DocumentUpload from './pages/DocumentUpload';
+import Instrumentation from './pages/Instrumentation';
+import Jobs from './pages/Jobs';
 
 const App = () => {
   return (
@@ -18,6 +20,8 @@ const App = () => {
             <Link to="/new-ticket" className="block px-6 py-3 hover:bg-slate-800 transition">New Ticket</Link>
             <Link to="/upload" className="block px-6 py-3 hover:bg-slate-800 transition">Document Upload</Link>
             <Link to="/search" className="block px-6 py-3 hover:bg-slate-800 transition">Search Knowledge</Link>
+            <Link to="/jobs" className="block px-6 py-3 hover:bg-slate-800 transition">Jobs</Link>
+            <Link to="/instrumentation" className="block px-6 py-3 hover:bg-slate-800 transition">Instrumentation</Link>
           </nav>
           <div className="p-6 border-t border-slate-800 text-sm text-slate-400">
             Powered by LangGraph ReAct
@@ -31,6 +35,8 @@ const App = () => {
             <Route path="/new-ticket" element={<NewTicket />} />
             <Route path="/upload" element={<DocumentUpload />} />
             <Route path="/search" element={<Search />} />
+            <Route path="/jobs" element={<Jobs />} />
+            <Route path="/instrumentation" element={<Instrumentation />} />
           </Routes>
         </div>
       </div>

@@ -16,9 +16,12 @@ class RAGService:
         self.vector_store = self._get_vector_store()
 
     def _get_embeddings(self):
-        # reuse LLMFactory logic or similar for embeddings
-        from langchain_openai import OpenAIEmbeddings
-        return OpenAIEmbeddings(model="text-embedding-3-small")
+        return LLMFactory.create_embeddings(
+            model_name="text-embedding-3-small",
+            instrument=True,
+            component="rag_service",
+            operation="embedding_generation",
+        )
 
     def _get_vector_store(self):
         from packages.core.services.vector_factory import VectorStoreFactory
