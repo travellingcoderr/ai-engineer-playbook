@@ -229,6 +229,12 @@ gyani/sr_manager.md
 *.tfstate.*
 crash.log
 *.tfplan
-*tfvars
+tfplan
+*.tfvars
+*.tfvars.json
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraform.lock.hcl
 !*example*tfvars
-projects/research_agent/deploy/azure/terraform/tfplan
