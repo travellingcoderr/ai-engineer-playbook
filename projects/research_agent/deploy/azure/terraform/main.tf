@@ -109,6 +109,13 @@ resource "azurerm_role_assignment" "github_actions_contributor_rg" {
   scope                = azurerm_resource_group.this.id
 }
 
+resource "azurerm_role_assignment" "github_actions_reader_subscription" {
+  count                = var.enable_github_actions_role_assignments ? 1 : 0
+  principal_id         = data.azuread_service_principal.github_actions[0].object_id
+  role_definition_name = "Reader"
+  scope                = "/subscriptions/${var.azure_subscription_id}"
+}
+
 resource "azurerm_role_assignment" "github_actions_acr_push" {
   count                = var.enable_github_actions_role_assignments ? 1 : 0
   principal_id         = data.azuread_service_principal.github_actions[0].object_id

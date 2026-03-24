@@ -9,3 +9,5 @@ aks_namespace         = "research-agent-dev"
 key_vault_name        = "kv-research-agent-dev007"
 enable_app_routing    = true
 enable_keyvault_csi   = true
+github_actions_client_id               = "c63e2e49-74ba-419b-a601-c6e4113ed604"
+enable_github_actions_role_assignments = true

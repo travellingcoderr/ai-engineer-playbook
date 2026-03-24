@@ -202,6 +202,7 @@ Recommended auth mode:
 - GitHub OIDC with `azure/login@v2`
 
 If the workflow shows `No subscriptions found`, the federated identity is trusted but the Entra application still lacks Azure RBAC on your subscription or resource group. This Terraform setup can now assign:
+- `Reader` on the Azure subscription
 - `Contributor` on the project resource group
 - `AcrPush` on the project ACR
 - `AcrPull` on the project ACR
