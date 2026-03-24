@@ -1,0 +1,88 @@
+# GitHub Secrets Setup
+# | Secret Name                  | Required For                | Example / Default Value               | Notes |
+# |-----------------------------|-----------------------------|---------------------------------------|-------|
+# | AZURE_CLIENT_ID             | `azure/login@v2`           | `11111111-1111-1111-1111-111111111111` | App registration / federated identity client ID |
+# | AZURE_TENANT_ID             | `azure/login@v2`           | `22222222-2222-2222-2222-222222222222` | Azure Entra tenant ID |
+# | AZURE_SUBSCRIPTION_ID       | `azure/login@v2`           | `33333333-3333-3333-3333-333333333333` | Azure subscription ID |
+# | ACR_NAME                    | `az acr build`             | `researchagentacr12345`               | Registry name only, no `.azurecr.io` suffix |
+# | AKS_RESOURCE_GROUP          | `Azure/aks-set-context@v4` | `rg-research-agent-dev`               | Resource group containing the AKS cluster |
+# | AKS_NAME                    | `Azure/aks-set-context@v4` | `aks-research-agent-dev`              | AKS cluster name |
+# | KEY_VAULT_NAME              | Helm deploy                | `kv-research-agent-dev-12345`         | Azure Key Vault name |
+# | AKS_KEYVAULT_CSI_CLIENT_ID  | Helm deploy                | `44444444-4444-4444-4444-444444444444` | Client ID of the AKS Key Vault CSI managed identity |
+# | RESEARCH_AGENT_HOST         | Helm ingress               | `research-agent.example.com`          | Public DNS host for ingress |
+# | RESEARCH_AGENT_TLS_SECRET_NAME | Helm ingress            | `research-agent-tls`                  | Existing Kubernetes TLS secret name in the target namespace |
+#
+# Workflow defaults from `env:`:
+# - IMAGE_NAME=`research-agent`
+# - HELM_RELEASE_NAME=`research-agent`
+# - AKS_NAMESPACE=`research-agent`
+#
+name: research-agent-aks
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "projects/research_agent/**"
+      - ".github/workflows/research-agent-aks.yml"
+
+env:
+  IMAGE_NAME: research-agent
+  HELM_RELEASE_NAME: research-agent
+  AKS_NAMESPACE: research-agent
+  AZURE_CORE_OUTPUT: none
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Build and push image to ACR
+        run: |
+          az acr build \
+            --registry "${{ secrets.ACR_NAME }}" \
+            --image "${IMAGE_NAME}:${GITHUB_SHA}" \
+            --file projects/research_agent/Dockerfile \
+            .
+
+      - name: Set AKS context
+        uses: Azure/aks-set-context@v4
+        with:
+          resource-group: ${{ secrets.AKS_RESOURCE_GROUP }}
+          cluster-name: ${{ secrets.AKS_NAME }}
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4.3.0
+
+      - name: Deploy with Helm
+        run: |
+          helm upgrade --install "${HELM_RELEASE_NAME}" \
+            ./deploy/helm/charts/fastapi-service \
+            --namespace "${AKS_NAMESPACE}" \
+            --create-namespace \
+            -f ./projects/research_agent/deploy/azure/values.yaml \
+            --set image.repository="${{ secrets.ACR_NAME }}.azurecr.io/${IMAGE_NAME}" \
+            --set image.tag="${GITHUB_SHA}" \
+            --set ingress.enabled=true \
+            --set ingress.host="${{ secrets.RESEARCH_AGENT_HOST }}" \
+            --set ingress.tls.enabled=true \
+            --set ingress.tls.secretName="${{ secrets.RESEARCH_AGENT_TLS_SECRET_NAME }}" \
+            --set keyVault.enabled=true \
+            --set keyVault.name="${{ secrets.KEY_VAULT_NAME }}" \
+            --set keyVault.tenantId="${{ secrets.AZURE_TENANT_ID }}" \
+            --set keyVault.userAssignedIdentityID="${{ secrets.AKS_KEYVAULT_CSI_CLIENT_ID }}"

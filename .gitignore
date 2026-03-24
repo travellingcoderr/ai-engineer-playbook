@@ -213,3 +213,21 @@ __marimo__/
 # apps
 apps/
 projects/mortgage_bot/uploads/Sample-Loan-Estimate.pdf
+gyani/ai_architect.md
+gyani/certification_path_azure.md
+gyani/job_search_fast_track.md
+gyani/lead_developer.md
+gyani/principal_developer.md
+gyani/README.md
+gyani/resume_sathish_gajula_rewrite.md
+gyani/software_engineering_manager.md
+gyani/sr_manager.md
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+*.tfplan
+*tfvars
+!*example*tfvars

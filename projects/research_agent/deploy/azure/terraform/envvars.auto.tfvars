@@ -1,0 +1,11 @@
+azure_subscription_id = "db909f94-f59e-4ca4-acad-e2839e7af5f4"  # BhargaviSub
+resource_group_name   = "rg-research-agent-dev"
+location              = "eastus"
+acr_name              = "researchagentacrdev"
+aks_name              = "aks-research-agent-dev"
+aks_node_count        = 1
+aks_vm_size           = "standard_dc2as_v5"
+aks_namespace         = "research-agent-dev"
+key_vault_name        = "kv-research-agent-dev007"
+enable_app_routing    = true
+enable_keyvault_csi   = true

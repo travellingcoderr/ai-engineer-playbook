@@ -1,0 +1,59 @@
+nameOverride: "research-agent"
+fullnameOverride: "research-agent"
+
+replicaCount: 1
+
+image:
+  repository: example.azurecr.io/research-agent
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8003
+
+containerPort: 8003
+
+env:
+  RESEARCH_PORT: "8003"
+
+secretEnv: []
+
+ingress:
+  enabled: false
+  className: webapprouting.kubernetes.azure.com
+  annotations: {}
+  host: research-agent.example.com
+  path: /
+  pathType: Prefix
+  tls:
+    enabled: false
+    secretName: research-agent-tls
+
+keyVault:
+  enabled: false
+  name: ""
+  tenantId: ""
+  useVMManagedIdentity: true
+  userAssignedIdentityID: ""
+  mountPath: /mnt/secrets-store
+  secrets: []
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+livenessProbe:
+  path: /health
+  initialDelaySeconds: 20
+  periodSeconds: 15
+
+readinessProbe:
+  path: /health
+  initialDelaySeconds: 10
+  periodSeconds: 10
