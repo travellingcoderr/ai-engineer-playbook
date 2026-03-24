@@ -10,6 +10,11 @@
 
 data "azurerm_client_config" "current" {}
 
+data "azuread_service_principal" "github_actions" {
+  count     = var.enable_github_actions_role_assignments ? 1 : 0
+  client_id = var.github_actions_client_id
+}
+
 locals {
   common_tags = {
     Scope = "Beta"
@@ -95,4 +100,25 @@ resource "azurerm_role_assignment" "aks_keyvault_certificate_user" {
   principal_id         = azurerm_kubernetes_cluster.this.key_vault_secrets_provider[0].secret_identity[0].object_id
   role_definition_name = "Key Vault Certificate User"
   scope                = azurerm_key_vault.this.id
+}
+
+resource "azurerm_role_assignment" "github_actions_contributor_rg" {
+  count                = var.enable_github_actions_role_assignments ? 1 : 0
+  principal_id         = data.azuread_service_principal.github_actions[0].object_id
+  role_definition_name = "Contributor"
+  scope                = azurerm_resource_group.this.id
+}
+
+resource "azurerm_role_assignment" "github_actions_acr_push" {
+  count                = var.enable_github_actions_role_assignments ? 1 : 0
+  principal_id         = data.azuread_service_principal.github_actions[0].object_id
+  role_definition_name = "AcrPush"
+  scope                = azurerm_container_registry.this.id
+}
+
+resource "azurerm_role_assignment" "github_actions_acr_pull" {
+  count                = var.enable_github_actions_role_assignments ? 1 : 0
+  principal_id         = data.azuread_service_principal.github_actions[0].object_id
+  role_definition_name = "AcrPull"
+  scope                = azurerm_container_registry.this.id
 }

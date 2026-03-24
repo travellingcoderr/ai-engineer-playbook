@@ -17,3 +17,7 @@ output "aks_namespace" {
 output "key_vault_name" {
   value = azurerm_key_vault.this.name
 }
+
+output "github_actions_role_assignment_enabled" {
+  value = var.enable_github_actions_role_assignments
+}

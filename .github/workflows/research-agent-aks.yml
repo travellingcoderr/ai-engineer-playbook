@@ -31,7 +31,7 @@ on:
 env:
   IMAGE_NAME: research-agent
   HELM_RELEASE_NAME: research-agent
-  AKS_NAMESPACE: research-agent
+  AKS_NAMESPACE: research-agent-dev
   AZURE_CORE_OUTPUT: none
 
 jobs:

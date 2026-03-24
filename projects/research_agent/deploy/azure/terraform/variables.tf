@@ -57,3 +57,15 @@ variable "enable_keyvault_csi" {
   description = "Enable AKS Azure Key Vault CSI add-on"
   default     = true
 }
+
+variable "github_actions_client_id" {
+  type        = string
+  description = "Client ID of the GitHub Actions Entra application used by azure/login"
+  default     = ""
+}
+
+variable "enable_github_actions_role_assignments" {
+  type        = bool
+  description = "Whether to assign Azure RBAC roles to the GitHub Actions Entra application"
+  default     = false
+}

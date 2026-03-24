@@ -19,6 +19,7 @@ The reusable Helm chart used by this project lives globally at:
 - `terraform/`: Terraform-based infrastructure for this project
 - `values.yaml`: project-specific values for the global FastAPI Helm chart
 - `architecture.md`: ingress, egress, and network diagram
+- `github-federated-credential.main.json.example`: GitHub OIDC federated credential template for the `main` branch
 
 ## Recommendation
 
@@ -96,6 +97,10 @@ Then build and deploy:
 ./projects/research_agent/deploy/azure/scripts/build-and-push(2).sh
 ./projects/research_agent/deploy/azure/scripts/deploy(4).sh
 ```
+
+If you want Terraform to assign GitHub Actions access too:
+- set `github_actions_client_id` to the same value you use for `AZURE_CLIENT_ID`
+- set `enable_github_actions_role_assignments = true`
 
 ## Default Azure Resources
 
@@ -195,6 +200,11 @@ Required GitHub repository secrets:
 
 Recommended auth mode:
 - GitHub OIDC with `azure/login@v2`
+
+If the workflow shows `No subscriptions found`, the federated identity is trusted but the Entra application still lacks Azure RBAC on your subscription or resource group. This Terraform setup can now assign:
+- `Contributor` on the project resource group
+- `AcrPush` on the project ACR
+- `AcrPull` on the project ACR
 
 ## Useful Commands
 
