@@ -69,3 +69,9 @@ variable "enable_github_actions_role_assignments" {
   description = "Whether to assign Azure RBAC roles to the GitHub Actions Entra application"
   default     = false
 }
+
+variable "key_vault_secrets_officer_object_ids" {
+  type        = list(string)
+  description = "Object IDs that should be allowed to create and manage secrets in the project Key Vault"
+  default     = []
+}

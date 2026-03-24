@@ -68,12 +68,13 @@ keyVault:
   userAssignedIdentityID: ""
   mountPath: /mnt/secrets-store
   secrets:
-    # This maps the Key Vault secret named `OPENAI_API_KEY` into the pod env var `OPENAI_API_KEY`.
+    # Azure Key Vault secret names cannot use underscores, so `objectName` uses a hyphenated name.
+    # This still maps into the pod env var `OPENAI_API_KEY`.
     # It will be synced into the Kubernetes Secret `research-agent-kv-secrets`.
-    - objectName: OPENAI_API_KEY
+    - objectName: openai-api-key
       secretKey: OPENAI_API_KEY
     # This maps the Tavily API key for the search tool into the pod env var `TAVILY_API_KEY`.
-    - objectName: TAVILY_API_KEY
+    - objectName: tavily-api-key
       secretKey: TAVILY_API_KEY
 
 # Pod resource requests and limits.

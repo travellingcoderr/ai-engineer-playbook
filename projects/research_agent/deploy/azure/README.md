@@ -102,6 +102,10 @@ If you want Terraform to assign GitHub Actions access too:
 - set `github_actions_client_id` to the same value you use for `AZURE_CLIENT_ID`
 - set `enable_github_actions_role_assignments = true`
 
+If you want Terraform to assign Key Vault secret write access too:
+- set `key_vault_secrets_officer_object_ids` to the Entra object IDs of the users, groups, or service principals that should be allowed to create/update secrets in this vault
+- this is separate from the AKS CSI identity, which only needs read access at runtime
+
 ## Default Azure Resources
 
 The scripts and Terraform create:
@@ -111,6 +115,11 @@ The scripts and Terraform create:
 - ACR attachment to AKS
 - Azure Key Vault
 - Kubernetes namespace for this app
+- Azure RBAC role assignments for:
+  - AKS to pull from ACR
+  - AKS to read Key Vault secrets
+  - GitHub Actions to access Azure resources, if enabled
+  - designated secret administrators to write Key Vault secrets, if configured
 
 ## Typical End-to-End Flow
 
@@ -151,6 +160,11 @@ Typical flow:
 5. The pod mounts `/mnt/secrets-store`
 6. The chart syncs the value to `research-agent-kv-secrets`
 7. The deployment reads it into env vars
+
+Why there are multiple Key Vault roles:
+- the AKS Key Vault CSI identity needs read access so pods can consume secrets at runtime
+- a human user or CI admin identity needs write access to create and rotate secrets in the vault
+- GitHub Actions does not need Key Vault secret write access for this deployment flow unless you explicitly want the workflow to manage secrets too
 
 ## Ingress And TLS
 

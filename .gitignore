@@ -231,3 +231,4 @@ crash.log
 *.tfplan
 *tfvars
 !*example*tfvars
+projects/research_agent/deploy/azure/terraform/tfplan

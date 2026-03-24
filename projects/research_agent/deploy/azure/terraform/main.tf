@@ -102,6 +102,13 @@ resource "azurerm_role_assignment" "aks_keyvault_certificate_user" {
   scope                = azurerm_key_vault.this.id
 }
 
+resource "azurerm_role_assignment" "key_vault_secrets_officer" {
+  for_each             = toset(var.key_vault_secrets_officer_object_ids)
+  principal_id         = each.value
+  role_definition_name = "Key Vault Secrets Officer"
+  scope                = azurerm_key_vault.this.id
+}
+
 resource "azurerm_role_assignment" "github_actions_contributor_rg" {
   count                = var.enable_github_actions_role_assignments ? 1 : 0
   principal_id         = data.azuread_service_principal.github_actions[0].object_id
