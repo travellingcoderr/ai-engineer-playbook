@@ -87,6 +87,20 @@ jobs:
 
       - name: Deploy with Helm
         run: |
+          # Base config comes from:
+          # - ./projects/research_agent/deploy/azure/values.yaml
+          #
+          # CI/CD overrides these values at deploy time via --set:
+          # - image.repository
+          # - image.tag
+          # - ingress.enabled
+          # - ingress.host
+          # - ingress.tls.enabled
+          # - ingress.tls.secretName
+          # - keyVault.enabled
+          # - keyVault.name
+          # - keyVault.tenantId
+          # - keyVault.userAssignedIdentityID
           helm upgrade --install "${HELM_RELEASE_NAME}" \
             ./deploy/helm/charts/fastapi-service \
             --namespace "${AKS_NAMESPACE}" \

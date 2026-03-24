@@ -1,25 +1,50 @@
+# Release naming for Kubernetes resources.
+# This keeps the deployment, service, and secret names stable and easy to find.
 nameOverride: "research-agent"
 fullnameOverride: "research-agent"
 
+# Number of application pod replicas to run.
+# Start with 1 for dev/test and increase later with autoscaling if needed.
 replicaCount: 1
 
+# Container image settings.
+# The workflow overrides `repository` and `tag` at deploy time with the ACR image and Git SHA.
 image:
   repository: example.azurecr.io/research-agent
   tag: latest
   pullPolicy: IfNotPresent
 
+# Internal Kubernetes service settings.
+# `ClusterIP` keeps the app private inside the cluster and lets ingress handle public traffic.
 service:
   type: ClusterIP
   port: 80
   targetPort: 8003
 
+# Port exposed by the FastAPI container.
 containerPort: 8003
 
+# Plain environment variables passed directly to the container.
+# These are safe for non-secret config only.
 env:
+  # FastAPI service port used by the container command.
   RESEARCH_PORT: "8003"
+  # Shared app config defaults to OpenAI unless overridden.
+  LLM_PROVIDER: "openai"
+  # Model selection for the research agent LLM.
+  OPENAI_MODEL: "gpt-4o-mini"
+  # Search provider selection used by the tool factory.
+  SEARCH_PROVIDER: "tavily"
+  # Operational settings for app behavior and logs.
+  APP_ENV: "dev"
+  LOG_LEVEL: "INFO"
 
+# Existing Kubernetes Secret references.
+# Use this only if you already manage secrets directly in Kubernetes.
 secretEnv: []
 
+# Ingress configuration for external HTTP/HTTPS access.
+# The GitHub workflow currently enables this and sets host/TLS values during deploy.
 ingress:
   enabled: false
   className: webapprouting.kubernetes.azure.com
@@ -31,6 +56,10 @@ ingress:
     enabled: false
     secretName: research-agent-tls
 
+# Azure Key Vault CSI configuration.
+# When enabled, AKS mounts Key Vault content into the pod and can also sync selected values
+# into a Kubernetes Secret that the deployment reads as environment variables.
+# The workflow overrides `enabled`, `name`, `tenantId`, and `userAssignedIdentityID`.
 keyVault:
   enabled: false
   name: ""
@@ -38,8 +67,17 @@ keyVault:
   useVMManagedIdentity: true
   userAssignedIdentityID: ""
   mountPath: /mnt/secrets-store
-  secrets: []
+  secrets:
+    # This maps the Key Vault secret named `OPENAI_API_KEY` into the pod env var `OPENAI_API_KEY`.
+    # It will be synced into the Kubernetes Secret `research-agent-kv-secrets`.
+    - objectName: OPENAI_API_KEY
+      secretKey: OPENAI_API_KEY
+    # This maps the Tavily API key for the search tool into the pod env var `TAVILY_API_KEY`.
+    - objectName: TAVILY_API_KEY
+      secretKey: TAVILY_API_KEY
 
+# Pod resource requests and limits.
+# Keep these small for dev and raise them after you observe real memory/CPU usage.
 resources:
   requests:
     cpu: 250m
@@ -48,11 +86,15 @@ resources:
     cpu: 500m
     memory: 512Mi
 
+# Liveness probe checks whether the app is still healthy.
+# Kubernetes will restart the container if this endpoint fails repeatedly.
 livenessProbe:
   path: /health
   initialDelaySeconds: 20
   periodSeconds: 15
 
+# Readiness probe checks whether the app is ready to serve traffic.
+# Kubernetes will not route traffic to the pod until this succeeds.
 readinessProbe:
   path: /health
   initialDelaySeconds: 10
