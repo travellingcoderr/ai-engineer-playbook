@@ -4,7 +4,7 @@
 # | AZURE_CLIENT_ID             | `azure/login@v2`           | `11111111-1111-1111-1111-111111111111` | App registration / federated identity client ID |
 # | AZURE_TENANT_ID             | `azure/login@v2`           | `22222222-2222-2222-2222-222222222222` | Azure Entra tenant ID |
 # | AZURE_SUBSCRIPTION_ID       | `azure/login@v2`           | `33333333-3333-3333-3333-333333333333` | Azure subscription ID |
-# | ACR_NAME                    | `az acr build`             | `researchagentacr12345`               | Registry name only, no `.azurecr.io` suffix |
+# | ACR_NAME                    | Docker push / ACR login    | `researchagentacr12345`               | Registry name only, no `.azurecr.io` suffix |
 # | AKS_RESOURCE_GROUP          | `Azure/aks-set-context@v4` | `rg-research-agent-dev`               | Resource group containing the AKS cluster |
 # | AKS_NAME                    | `Azure/aks-set-context@v4` | `aks-research-agent-dev`              | AKS cluster name |
 # | KEY_VAULT_NAME              | Helm deploy                | `kv-research-agent-dev-12345`         | Azure Key Vault name |
@@ -52,13 +52,29 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      - name: Prepare research-agent build context
+        run: |
+          BUILD_CONTEXT="${RUNNER_TEMP}/research-agent-build"
+          mkdir -p "${BUILD_CONTEXT}/projects/research_agent"
+          cp requirements.txt "${BUILD_CONTEXT}/requirements.txt"
+          cp pyproject.toml "${BUILD_CONTEXT}/pyproject.toml"
+          cp -R packages "${BUILD_CONTEXT}/packages"
+          cp -R projects/research_agent/app "${BUILD_CONTEXT}/projects/research_agent/app"
+          cp projects/research_agent/agent.py "${BUILD_CONTEXT}/projects/research_agent/agent.py"
+          echo "BUILD_CONTEXT=${BUILD_CONTEXT}" >> "$GITHUB_ENV"
+
+      - name: Login Docker to ACR
+        run: |
+          az acr login --name "${{ secrets.ACR_NAME }}"
+
       - name: Build and push image to ACR
         run: |
-          az acr build \
-            --registry "${{ secrets.ACR_NAME }}" \
-            --image "${IMAGE_NAME}:${GITHUB_SHA}" \
-            --file projects/research_agent/Dockerfile \
-            .
+          docker build \
+            -f "${GITHUB_WORKSPACE}/projects/research_agent/Dockerfile" \
+            -t "${{ secrets.ACR_NAME }}.azurecr.io/${IMAGE_NAME}:${GITHUB_SHA}" \
+            "${BUILD_CONTEXT}"
+
+          docker push "${{ secrets.ACR_NAME }}.azurecr.io/${IMAGE_NAME}:${GITHUB_SHA}"
 
       - name: Set AKS context
         uses: Azure/aks-set-context@v4
