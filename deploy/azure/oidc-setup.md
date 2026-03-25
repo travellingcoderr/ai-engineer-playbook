@@ -72,3 +72,19 @@ It does not grant Azure access by itself.
 The Azure Entra application still needs Azure RBAC, for example:
 - subscription-level access for first-time Terraform backend bootstrap
 - project-level access for ACR, AKS, and Key Vault related deployment work
+
+## Bootstrap Limitation
+
+Terraform can look up the GitHub Actions service principal from the application client ID and assign Azure RBAC to it.
+
+However, Terraform cannot solve the first login failure for the same GitHub identity if that identity has no Azure access yet.
+
+Why:
+- `azure/login@v2` must succeed before the workflow can run Terraform
+- if the identity has no subscription access, the workflow stops before Terraform starts
+
+So the first subscription-level access still has to come from:
+- a one-time manual Azure role assignment by an admin
+- or a different already-authorized bootstrap identity
+
+After that, Terraform can manage the ongoing RBAC for the GitHub identity.

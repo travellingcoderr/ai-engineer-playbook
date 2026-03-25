@@ -32,9 +32,16 @@ resource "azurerm_role_assignment" "key_vault_secrets_officer" {
 }
 
 resource "azurerm_role_assignment" "github_actions_reader_subscription" {
-  count                = var.enable_github_actions_role_assignments ? 1 : 0
+  count                = var.enable_github_actions_role_assignments && !var.enable_github_actions_subscription_contributor ? 1 : 0
   principal_id         = data.azuread_service_principal.github_actions[0].object_id
   role_definition_name = "Reader"
+  scope                = "/subscriptions/${var.azure_subscription_id}"
+}
+
+resource "azurerm_role_assignment" "github_actions_contributor_subscription" {
+  count                = var.enable_github_actions_role_assignments && var.enable_github_actions_subscription_contributor ? 1 : 0
+  principal_id         = data.azuread_service_principal.github_actions[0].object_id
+  role_definition_name = "Contributor"
   scope                = "/subscriptions/${var.azure_subscription_id}"
 }
 

@@ -192,6 +192,7 @@ jobs:
           enable_keyvault_csi   = true
           github_actions_client_id               = "${{ secrets.AZURE_CLIENT_ID }}"
           enable_github_actions_role_assignments = true
+          enable_github_actions_subscription_contributor = true
           key_vault_secrets_officer_object_ids   = ${KEY_VAULT_SECRETS_OFFICER_OBJECT_IDS_JSON}
           EOF
 

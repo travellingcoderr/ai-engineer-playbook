@@ -38,6 +38,11 @@ variable "enable_github_actions_role_assignments" {
   default = false
 }
 
+variable "enable_github_actions_subscription_contributor" {
+  type    = bool
+  default = false
+}
+
 variable "key_vault_secrets_officer_object_ids" {
   type    = list(string)
   default = []

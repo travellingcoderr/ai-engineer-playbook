@@ -11,4 +11,5 @@ variable "enable_app_routing" { type = bool default = true }
 variable "enable_keyvault_csi" { type = bool default = true }
 variable "github_actions_client_id" { type = string default = "" }
 variable "enable_github_actions_role_assignments" { type = bool default = false }
+variable "enable_github_actions_subscription_contributor" { type = bool default = false }
 variable "key_vault_secrets_officer_object_ids" { type = list(string) default = [] }

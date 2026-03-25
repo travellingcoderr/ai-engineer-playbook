@@ -70,6 +70,12 @@ variable "enable_github_actions_role_assignments" {
   default     = false
 }
 
+variable "enable_github_actions_subscription_contributor" {
+  type        = bool
+  description = "Whether to assign subscription-level Contributor to the GitHub Actions Entra application"
+  default     = false
+}
+
 variable "key_vault_secrets_officer_object_ids" {
   type        = list(string)
   description = "Object IDs that should be allowed to create and manage secrets in the project Key Vault"

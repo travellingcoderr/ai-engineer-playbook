@@ -26,5 +26,6 @@ module "security_rbac" {
   enable_keyvault_csi                    = var.enable_keyvault_csi
   github_actions_client_id               = var.github_actions_client_id
   enable_github_actions_role_assignments = var.enable_github_actions_role_assignments
+  enable_github_actions_subscription_contributor = var.enable_github_actions_subscription_contributor
   key_vault_secrets_officer_object_ids   = var.key_vault_secrets_officer_object_ids
 }
