@@ -58,7 +58,7 @@ ingress:
   enabled: false
   className: webapprouting.kubernetes.azure.com
   annotations: {}
-  host: research-agent.example.com
+  host: research.purpletechllc.com
   path: /
   pathType: Prefix
   tls:

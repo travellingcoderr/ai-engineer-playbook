@@ -9,7 +9,7 @@
 # | AKS_NAME                    | `Azure/aks-set-context@v4` | `aks-research-agent-dev`              | AKS cluster name |
 # | KEY_VAULT_NAME              | Helm deploy                | `kv-research-agent-dev-12345`         | Azure Key Vault name |
 # | AKS_KEYVAULT_CSI_CLIENT_ID  | Helm deploy                | `44444444-4444-4444-4444-444444444444` | Client ID of the AKS Key Vault CSI managed identity |
-# | RESEARCH_AGENT_HOST         | Helm ingress               | `research-agent.example.com`          | Public DNS host for ingress |
+# | RESEARCH_AGENT_HOST         | Helm ingress               | `research.purpletechllc.com`          | Public DNS host for ingress |
 # | RESEARCH_AGENT_TLS_SECRET_NAME | Helm ingress            | `research-agent-tls`                  | Existing Kubernetes TLS secret name in the target namespace |
 #
 # Workflow defaults from `env:`:

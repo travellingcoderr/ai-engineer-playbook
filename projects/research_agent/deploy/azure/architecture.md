@@ -8,7 +8,7 @@ Ingress is traffic coming **into** your application from outside the cluster.
 
 In this deployment, ingress flow is:
 
-1. A client calls `https://research-agent.example.com`
+1. A client calls `https://research.purpletechllc.com`
 2. DNS resolves that hostname to the public IP of the AKS ingress controller
 3. The ingress controller receives the request
 4. TLS terminates there using the configured certificate
@@ -44,7 +44,7 @@ The application usually sits in pods on AKS nodes, and those nodes are attached 
 
 ```mermaid
 flowchart LR
-    U["User / Browser / Client"] --> DNS["DNS: research-agent.example.com"]
+    U["User / Browser / Client"] --> DNS["DNS: research.purpletechllc.com"]
     DNS --> IP["Public IP"]
     IP --> ING["Ingress Controller on AKS\n(TLS terminates here)"]
     ING --> SVC["Kubernetes Service\nClusterIP"]
