@@ -55,14 +55,15 @@ secretEnv: []
 # Ingress configuration for external HTTP/HTTPS access.
 # The GitHub workflow currently enables this and sets host/TLS values during deploy.
 ingress:
-  enabled: false
+  enabled: true
   className: webapprouting.kubernetes.azure.com
-  annotations: {}
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
   host: research.purpletechllc.com
   path: /
   pathType: Prefix
   tls:
-    enabled: false
+    enabled: true
     secretName: research-agent-tls
 
 # Azure Key Vault CSI configuration.

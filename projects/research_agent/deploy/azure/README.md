@@ -20,6 +20,7 @@ The reusable Helm chart used by this project lives globally at:
 - `values.yaml`: project-specific values for the global FastAPI Helm chart
 - `architecture.md`: ingress, egress, and network diagram
 - `github-federated-credential.main.json.example`: GitHub OIDC federated credential template for the `main` branch
+- `cert-manager-letsencrypt-sop.md`: step-by-step HTTPS automation guide using cert-manager and Let's Encrypt
 
 ## Recommendation
 
