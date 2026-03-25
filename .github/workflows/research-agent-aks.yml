@@ -56,11 +56,11 @@ jobs:
         run: |
           BUILD_CONTEXT="${RUNNER_TEMP}/research-agent-build"
           mkdir -p "${BUILD_CONTEXT}/projects/research_agent"
-          cp requirements.txt "${BUILD_CONTEXT}/requirements.txt"
           cp pyproject.toml "${BUILD_CONTEXT}/pyproject.toml"
           cp -R packages "${BUILD_CONTEXT}/packages"
           cp -R projects/research_agent/app "${BUILD_CONTEXT}/projects/research_agent/app"
           cp projects/research_agent/agent.py "${BUILD_CONTEXT}/projects/research_agent/agent.py"
+          cp projects/research_agent/requirements-research-agent.txt "${BUILD_CONTEXT}/projects/research_agent/requirements-research-agent.txt"
           echo "BUILD_CONTEXT=${BUILD_CONTEXT}" >> "$GITHUB_ENV"
 
       - name: Login Docker to ACR

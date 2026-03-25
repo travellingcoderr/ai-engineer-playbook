@@ -7,6 +7,15 @@ fullnameOverride: "research-agent"
 # Start with 1 for dev/test and increase later with autoscaling if needed.
 replicaCount: 1
 
+# Deployment rollout strategy.
+# On a single-node dev cluster, `maxSurge: 0` avoids creating an extra pod during rollout.
+# That prevents failed updates when the node cannot fit both old and new pods at the same time.
+deploymentStrategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxUnavailable: 1
+    maxSurge: 0
+
 # Container image settings.
 # The workflow overrides `repository` and `tag` at deploy time with the ACR image and Git SHA.
 image:
@@ -81,10 +90,10 @@ keyVault:
 # Keep these small for dev and raise them after you observe real memory/CPU usage.
 resources:
   requests:
-    cpu: 250m
-    memory: 256Mi
+    cpu: 100m
+    memory: 192Mi
   limits:
-    cpu: 500m
+    cpu: 300m
     memory: 512Mi
 
 # Liveness probe checks whether the app is still healthy.

@@ -32,6 +32,11 @@ build/
 
 # Project-specific large directories
 apps/
+projects/*/deploy/
+projects/*/docs/
+projects/*/tests/
+projects/*/__pycache__/
+projects/*/app/__pycache__/
 projects/mortgage_bot/uploads/
 projects/mortgage_bot/frontend/node_modules/
 projects/mortgage_bot/frontend/dist/

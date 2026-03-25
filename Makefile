@@ -1,4 +1,4 @@
-.PHONY: env setup install run-rag run-gateway run-observe run-all stop-all test lint clean kill-port kill-rag kill-gateway kill-observe kill-all
+.PHONY: env setup install setup-research install-research run-rag run-gateway run-observe run-all stop-all test lint clean kill-port kill-rag kill-gateway kill-observe kill-all
 
 PYTHON := python3
 VENV := .venv
@@ -46,6 +46,18 @@ setup: env
 	@$(ACTIVATE) && pip install -r requirements.txt
 
 install: setup
+
+# Research Agent only: use the slimmer dependency set for faster local setup
+# when you are working only on projects/research_agent.
+setup-research: env
+	@if [ ! -d "$(VENV)" ]; then \
+		$(PYTHON) -m venv $(VENV); \
+	fi
+	@$(ACTIVATE) && pip install --upgrade pip
+	@$(ACTIVATE) && pip install -r projects/research_agent/requirements-research-agent.txt
+	@$(ACTIVATE) && pip install -e .
+
+install-research: setup-research
 
 # ==============================
 # Run Services

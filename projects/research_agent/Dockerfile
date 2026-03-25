@@ -1,41 +1,40 @@
-# Use official Python runtime as a parent image
-FROM python:3.12-slim
+# Builder stage: install dependencies into a dedicated virtualenv.
+FROM python:3.12-slim AS builder
 
-# Set working directory in the container
 WORKDIR /app
 
-# Install build dependencies
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
-    curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy the requirements file into the container
-# We will assume this Dockerfile is run from ai-engineer-playbook root
-COPY requirements.txt .
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:${PATH}"
 
-# Install dependencies
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy the shared core packages and config
+# Copy only the files required to install Python dependencies.
+COPY projects/research_agent/requirements-research-agent.txt .
 COPY pyproject.toml .
 COPY packages /app/packages
 
-# Install the shared ai-engineer-packages module
-RUN pip install -e .
+RUN pip install --upgrade pip setuptools wheel \
+    && pip install --no-cache-dir -r requirements-research-agent.txt \
+    && pip install --no-cache-dir -e .
 
-# Copy the current directory contents into the container at /app
+# Runtime stage: keep only the runtime interpreter, virtualenv, and app code.
+FROM python:3.12-slim
+
+WORKDIR /app
+
+ENV PATH="/opt/venv/bin:${PATH}"
+ENV PYTHONPATH="/app:/app/projects/research_agent"
+ENV RESEARCH_PORT=8003
+
+COPY --from=builder /opt/venv /opt/venv
+COPY --from=builder /app/packages /app/packages
+COPY --from=builder /app/pyproject.toml /app/pyproject.toml
+
 COPY projects/research_agent/app /app/projects/research_agent/app
 COPY projects/research_agent/agent.py /app/projects/research_agent/agent.py
 
-# Set PYTHONPATH so absolute imports work
-ENV PYTHONPATH="/app:/app/projects/research_agent"
-
-# Set the port the application should run on (defaults to 8003)
-ENV RESEARCH_PORT=8003
-
-# Expose the port the app runs on
 EXPOSE ${RESEARCH_PORT}
 
-# Command to run the application using uvicorn
 CMD ["sh", "-c", "uvicorn projects.research_agent.app.main:app --host 0.0.0.0 --port ${RESEARCH_PORT}"]
