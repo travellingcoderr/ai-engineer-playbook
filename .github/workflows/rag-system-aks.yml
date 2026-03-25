@@ -57,7 +57,8 @@ jobs:
               echo "Missing secret: $1"
               missing=1
             else
-              echo "Secret present: $1"
+              masked="$(printf '%s' "$2" | cut -c1-8)*"
+              echo "Secret present: $1=${masked}"
             fi
           }
 
