@@ -29,14 +29,37 @@ env:
   TFSTATE_CONTAINER: ${{ vars.TFSTATE_CONTAINER || 'tfstate' }}
   KEY_VAULT_SECRETS_OFFICER_OBJECT_IDS_JSON: ${{ vars.KEY_VAULT_SECRETS_OFFICER_OBJECT_IDS_JSON || '[]' }}
 
+  RESEARCH_AGENT_RESOURCE_GROUP: ${{ vars.RESEARCH_AGENT_RESOURCE_GROUP || 'rg-research-agent-dev' }}
+  RESEARCH_AGENT_LOCATION: ${{ vars.RESEARCH_AGENT_LOCATION || 'eastus' }}
+  RESEARCH_AGENT_ACR_NAME: ${{ vars.RESEARCH_AGENT_ACR_NAME || 'researchagentacrdev' }}
+  RESEARCH_AGENT_AKS_NAME: ${{ vars.RESEARCH_AGENT_AKS_NAME || 'aks-research-agent-dev' }}
+  RESEARCH_AGENT_AKS_NODE_COUNT: ${{ vars.RESEARCH_AGENT_AKS_NODE_COUNT || '1' }}
+  RESEARCH_AGENT_AKS_VM_SIZE: ${{ vars.RESEARCH_AGENT_AKS_VM_SIZE || 'Standard_DC2as_v5' }}
+  RESEARCH_AGENT_AKS_NAMESPACE: ${{ vars.RESEARCH_AGENT_AKS_NAMESPACE || 'research-agent-dev' }}
+  RESEARCH_AGENT_KEY_VAULT_NAME: ${{ vars.RESEARCH_AGENT_KEY_VAULT_NAME || 'kv-research-agent-dev007' }}
+  RESEARCH_AGENT_HOST: ${{ vars.RESEARCH_AGENT_HOST || 'research.purpletechllc.com' }}
+  RESEARCH_AGENT_TLS_SECRET_NAME: ${{ vars.RESEARCH_AGENT_TLS_SECRET_NAME || 'research-agent-tls' }}
+  TFSTATE_KEY_RESEARCH_AGENT: ${{ vars.TFSTATE_KEY_RESEARCH_AGENT || 'research-agent-dev.tfstate' }}
+
+  RAG_SYSTEM_RESOURCE_GROUP: ${{ vars.RAG_SYSTEM_RESOURCE_GROUP || 'rg-rag-system-dev' }}
+  RAG_SYSTEM_LOCATION: ${{ vars.RAG_SYSTEM_LOCATION || 'eastus' }}
+  RAG_SYSTEM_ACR_NAME: ${{ vars.RAG_SYSTEM_ACR_NAME || 'ragsystemacrdev' }}
+  RAG_SYSTEM_AKS_NAME: ${{ vars.RAG_SYSTEM_AKS_NAME || 'aks-rag-system-dev' }}
+  RAG_SYSTEM_AKS_NODE_COUNT: ${{ vars.RAG_SYSTEM_AKS_NODE_COUNT || '1' }}
+  RAG_SYSTEM_AKS_VM_SIZE: ${{ vars.RAG_SYSTEM_AKS_VM_SIZE || 'Standard_DC2as_v5' }}
+  RAG_SYSTEM_AKS_NAMESPACE: ${{ vars.RAG_SYSTEM_AKS_NAMESPACE || 'rag-system-dev' }}
+  RAG_SYSTEM_KEY_VAULT_NAME: ${{ vars.RAG_SYSTEM_KEY_VAULT_NAME || 'kv-rag-system-dev001' }}
+  RAG_SYSTEM_HOST: ${{ vars.RAG_SYSTEM_HOST || 'rag.purpletechllc.com' }}
+  RAG_SYSTEM_TLS_SECRET_NAME: ${{ vars.RAG_SYSTEM_TLS_SECRET_NAME || 'rag-system-tls' }}
+  TFSTATE_KEY_RAG_SYSTEM: ${{ vars.TFSTATE_KEY_RAG_SYSTEM || 'rag-system-dev.tfstate' }}
+
 jobs:
   detect-changes:
     runs-on: ubuntu-latest
     permissions:
       contents: read
     outputs:
-      research_agent: ${{ steps.flags.outputs.research_agent }}
-      rag_system: ${{ steps.flags.outputs.rag_system }}
+      matrix: ${{ steps.matrix.outputs.matrix }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -59,66 +82,103 @@ jobs:
               - 'deploy/azure/terraform/modules/**'
               - '.github/workflows/services-aks.yml'
 
-      - name: Resolve workflow targets
-        id: flags
+      - name: Build matrix
+        id: matrix
         run: |
-          research="${{ steps.changes.outputs.research_agent }}"
-          rag="${{ steps.changes.outputs.rag_system }}"
+          services=()
 
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             case "${{ inputs.service }}" in
               all)
-                research=true
-                rag=true
+                services=("research_agent" "rag_system")
                 ;;
               research_agent)
-                research=true
-                rag=false
+                services=("research_agent")
                 ;;
               rag_system)
-                research=false
-                rag=true
+                services=("rag_system")
                 ;;
             esac
+          else
+            if [ "${{ steps.changes.outputs.research_agent }}" = "true" ]; then
+              services+=("research_agent")
+            fi
+            if [ "${{ steps.changes.outputs.rag_system }}" = "true" ]; then
+              services+=("rag_system")
+            fi
           fi
 
-          echo "research_agent=${research}" >> "${GITHUB_OUTPUT}"
-          echo "rag_system=${rag}" >> "${GITHUB_OUTPUT}"
+          if [ ${#services[@]} -eq 0 ]; then
+            echo 'matrix={"include":[]}' >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
 
-  research-agent-terraform:
-    if: needs.detect-changes.outputs.research_agent == 'true'
+          json='{"include":['
+          for i in "${!services[@]}"; do
+            service="${services[$i]}"
+            if [ "$i" -gt 0 ]; then
+              json+=','
+            fi
+            json+="{\"service\":\"${service}\"}"
+          done
+          json+=']}'
+
+          echo "matrix=${json}" >> "${GITHUB_OUTPUT}"
+
+  deploy-service:
     needs: detect-changes
+    if: ${{ fromJson(needs.detect-changes.outputs.matrix).include[0] != null }}
     runs-on: ubuntu-latest
     permissions:
       id-token: write
       contents: read
-    env:
-      IMAGE_NAME: research-agent
-      HELM_RELEASE_NAME: research-agent
-      TF_WORKING_DIR: projects/research_agent/deploy/azure/terraform
-      SERVICE_RESOURCE_GROUP: ${{ vars.RESEARCH_AGENT_RESOURCE_GROUP || 'rg-research-agent-dev' }}
-      SERVICE_LOCATION: ${{ vars.RESEARCH_AGENT_LOCATION || 'eastus' }}
-      SERVICE_ACR_NAME: ${{ vars.RESEARCH_AGENT_ACR_NAME || 'researchagentacrdev' }}
-      SERVICE_AKS_NAME: ${{ vars.RESEARCH_AGENT_AKS_NAME || 'aks-research-agent-dev' }}
-      SERVICE_AKS_NODE_COUNT: ${{ vars.RESEARCH_AGENT_AKS_NODE_COUNT || '1' }}
-      SERVICE_AKS_VM_SIZE: ${{ vars.RESEARCH_AGENT_AKS_VM_SIZE || 'Standard_DC2as_v5' }}
-      SERVICE_AKS_NAMESPACE: ${{ vars.RESEARCH_AGENT_AKS_NAMESPACE || 'research-agent-dev' }}
-      SERVICE_KEY_VAULT_NAME: ${{ vars.RESEARCH_AGENT_KEY_VAULT_NAME || 'kv-research-agent-dev007' }}
-      SERVICE_HOST: ${{ vars.RESEARCH_AGENT_HOST || 'research.purpletechllc.com' }}
-      SERVICE_TLS_SECRET_NAME: ${{ vars.RESEARCH_AGENT_TLS_SECRET_NAME || 'research-agent-tls' }}
-      TFSTATE_KEY: ${{ vars.TFSTATE_KEY_RESEARCH_AGENT || 'research-agent-dev.tfstate' }}
-    outputs:
-      acr_login_server: ${{ steps.tf_outputs.outputs.acr_login_server }}
-      aks_name: ${{ steps.tf_outputs.outputs.aks_name }}
-      aks_namespace: ${{ steps.tf_outputs.outputs.aks_namespace }}
-      resource_group_name: ${{ steps.tf_outputs.outputs.resource_group_name }}
-      key_vault_name: ${{ steps.tf_outputs.outputs.key_vault_name }}
-      aks_keyvault_csi_client_id: ${{ steps.tf_outputs.outputs.aks_keyvault_csi_client_id }}
-      service_host: ${{ steps.tf_outputs.outputs.service_host }}
-      service_tls_secret_name: ${{ steps.tf_outputs.outputs.service_tls_secret_name }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.detect-changes.outputs.matrix) }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Resolve service configuration
+        run: |
+          case "${{ matrix.service }}" in
+            research_agent)
+              echo "IMAGE_NAME=research-agent" >> "${GITHUB_ENV}"
+              echo "HELM_RELEASE_NAME=research-agent" >> "${GITHUB_ENV}"
+              echo "TF_WORKING_DIR=projects/research_agent/deploy/azure/terraform" >> "${GITHUB_ENV}"
+              echo "DOCKERFILE=projects/research_agent/Dockerfile" >> "${GITHUB_ENV}"
+              echo "VALUES_FILE=projects/research_agent/deploy/azure/values.yaml" >> "${GITHUB_ENV}"
+              echo "SERVICE_RESOURCE_GROUP=${RESEARCH_AGENT_RESOURCE_GROUP}" >> "${GITHUB_ENV}"
+              echo "SERVICE_LOCATION=${RESEARCH_AGENT_LOCATION}" >> "${GITHUB_ENV}"
+              echo "SERVICE_ACR_NAME=${RESEARCH_AGENT_ACR_NAME}" >> "${GITHUB_ENV}"
+              echo "SERVICE_AKS_NAME=${RESEARCH_AGENT_AKS_NAME}" >> "${GITHUB_ENV}"
+              echo "SERVICE_AKS_NODE_COUNT=${RESEARCH_AGENT_AKS_NODE_COUNT}" >> "${GITHUB_ENV}"
+              echo "SERVICE_AKS_VM_SIZE=${RESEARCH_AGENT_AKS_VM_SIZE}" >> "${GITHUB_ENV}"
+              echo "SERVICE_AKS_NAMESPACE=${RESEARCH_AGENT_AKS_NAMESPACE}" >> "${GITHUB_ENV}"
+              echo "SERVICE_KEY_VAULT_NAME=${RESEARCH_AGENT_KEY_VAULT_NAME}" >> "${GITHUB_ENV}"
+              echo "SERVICE_HOST=${RESEARCH_AGENT_HOST}" >> "${GITHUB_ENV}"
+              echo "SERVICE_TLS_SECRET_NAME=${RESEARCH_AGENT_TLS_SECRET_NAME}" >> "${GITHUB_ENV}"
+              echo "TFSTATE_KEY=${TFSTATE_KEY_RESEARCH_AGENT}" >> "${GITHUB_ENV}"
+              ;;
+            rag_system)
+              echo "IMAGE_NAME=rag-system" >> "${GITHUB_ENV}"
+              echo "HELM_RELEASE_NAME=rag-system" >> "${GITHUB_ENV}"
+              echo "TF_WORKING_DIR=projects/rag_system/deploy/azure/terraform" >> "${GITHUB_ENV}"
+              echo "DOCKERFILE=projects/rag_system/Dockerfile" >> "${GITHUB_ENV}"
+              echo "VALUES_FILE=projects/rag_system/deploy/azure/values.yaml" >> "${GITHUB_ENV}"
+              echo "SERVICE_RESOURCE_GROUP=${RAG_SYSTEM_RESOURCE_GROUP}" >> "${GITHUB_ENV}"
+              echo "SERVICE_LOCATION=${RAG_SYSTEM_LOCATION}" >> "${GITHUB_ENV}"
+              echo "SERVICE_ACR_NAME=${RAG_SYSTEM_ACR_NAME}" >> "${GITHUB_ENV}"
+              echo "SERVICE_AKS_NAME=${RAG_SYSTEM_AKS_NAME}" >> "${GITHUB_ENV}"
+              echo "SERVICE_AKS_NODE_COUNT=${RAG_SYSTEM_AKS_NODE_COUNT}" >> "${GITHUB_ENV}"
+              echo "SERVICE_AKS_VM_SIZE=${RAG_SYSTEM_AKS_VM_SIZE}" >> "${GITHUB_ENV}"
+              echo "SERVICE_AKS_NAMESPACE=${RAG_SYSTEM_AKS_NAMESPACE}" >> "${GITHUB_ENV}"
+              echo "SERVICE_KEY_VAULT_NAME=${RAG_SYSTEM_KEY_VAULT_NAME}" >> "${GITHUB_ENV}"
+              echo "SERVICE_HOST=${RAG_SYSTEM_HOST}" >> "${GITHUB_ENV}"
+              echo "SERVICE_TLS_SECRET_NAME=${RAG_SYSTEM_TLS_SECRET_NAME}" >> "${GITHUB_ENV}"
+              echo "TFSTATE_KEY=${TFSTATE_KEY_RAG_SYSTEM}" >> "${GITHUB_ENV}"
+              ;;
+          esac
 
       - name: Validate workflow configuration
         run: |
@@ -132,6 +192,7 @@ jobs:
               echo "Secret present: $1=${masked}"
             fi
           }
+
           check_variable() {
             if [ -z "$2" ]; then
               echo "Missing variable: $1"
@@ -140,6 +201,7 @@ jobs:
               echo "Variable $1=$2"
             fi
           }
+
           check_secret "AZURE_CLIENT_ID" "${{ secrets.AZURE_CLIENT_ID }}"
           check_secret "AZURE_TENANT_ID" "${{ secrets.AZURE_TENANT_ID }}"
           check_secret "AZURE_SUBSCRIPTION_ID" "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
@@ -157,9 +219,11 @@ jobs:
           check_variable "TFSTATE_STORAGE_ACCOUNT" "${TFSTATE_STORAGE_ACCOUNT}"
           check_variable "TFSTATE_CONTAINER" "${TFSTATE_CONTAINER}"
           check_variable "TFSTATE_KEY" "${TFSTATE_KEY}"
+
           if [ -z "${TFSTATE_STORAGE_ACCOUNT}" ]; then
             missing=1
           fi
+
           if [ "${missing}" -ne 0 ]; then
             exit 1
           fi
@@ -177,6 +241,7 @@ jobs:
       - name: Bootstrap Terraform backend
         run: |
           az group create --name "${TFSTATE_RESOURCE_GROUP}" --location "${SERVICE_LOCATION}"
+
           az storage account create \
             --name "${TFSTATE_STORAGE_ACCOUNT}" \
             --resource-group "${TFSTATE_RESOURCE_GROUP}" \
@@ -184,14 +249,18 @@ jobs:
             --sku Standard_LRS \
             --allow-blob-public-access false \
             --min-tls-version TLS1_2
+
           TFSTATE_ACCESS_KEY="$(az storage account keys list \
             --resource-group "${TFSTATE_RESOURCE_GROUP}" \
             --account-name "${TFSTATE_STORAGE_ACCOUNT}" \
-            --query '[0].value' --output tsv)"
+            --query '[0].value' \
+            --output tsv)"
+
           az storage container create \
             --name "${TFSTATE_CONTAINER}" \
             --account-name "${TFSTATE_STORAGE_ACCOUNT}" \
             --account-key "${TFSTATE_ACCESS_KEY}"
+
           echo "TFSTATE_ACCESS_KEY=${TFSTATE_ACCESS_KEY}" >> "${GITHUB_ENV}"
 
       - name: Write Terraform input file
@@ -230,379 +299,80 @@ jobs:
         run: terraform -chdir="${TF_WORKING_DIR}" apply -input=false -auto-approve tfplan
 
       - name: Export Terraform outputs
-        id: tf_outputs
         run: |
-          echo "acr_login_server=$(terraform -chdir="${TF_WORKING_DIR}" output -raw acr_login_server)" >> "${GITHUB_OUTPUT}"
-          echo "aks_name=$(terraform -chdir="${TF_WORKING_DIR}" output -raw aks_name)" >> "${GITHUB_OUTPUT}"
-          echo "aks_namespace=$(terraform -chdir="${TF_WORKING_DIR}" output -raw aks_namespace)" >> "${GITHUB_OUTPUT}"
-          echo "resource_group_name=$(terraform -chdir="${TF_WORKING_DIR}" output -raw resource_group_name)" >> "${GITHUB_OUTPUT}"
-          echo "key_vault_name=$(terraform -chdir="${TF_WORKING_DIR}" output -raw key_vault_name)" >> "${GITHUB_OUTPUT}"
-          echo "aks_keyvault_csi_client_id=$(terraform -chdir="${TF_WORKING_DIR}" output -raw aks_keyvault_csi_client_id)" >> "${GITHUB_OUTPUT}"
-          echo "service_host=${SERVICE_HOST}" >> "${GITHUB_OUTPUT}"
-          echo "service_tls_secret_name=${SERVICE_TLS_SECRET_NAME}" >> "${GITHUB_OUTPUT}"
+          echo "TF_ACR_LOGIN_SERVER=$(terraform -chdir="${TF_WORKING_DIR}" output -raw acr_login_server)" >> "${GITHUB_ENV}"
+          echo "TF_AKS_NAME=$(terraform -chdir="${TF_WORKING_DIR}" output -raw aks_name)" >> "${GITHUB_ENV}"
+          echo "TF_AKS_NAMESPACE=$(terraform -chdir="${TF_WORKING_DIR}" output -raw aks_namespace)" >> "${GITHUB_ENV}"
+          echo "TF_RESOURCE_GROUP_NAME=$(terraform -chdir="${TF_WORKING_DIR}" output -raw resource_group_name)" >> "${GITHUB_ENV}"
+          echo "TF_KEY_VAULT_NAME=$(terraform -chdir="${TF_WORKING_DIR}" output -raw key_vault_name)" >> "${GITHUB_ENV}"
+          echo "TF_AKS_KEYVAULT_CSI_CLIENT_ID=$(terraform -chdir="${TF_WORKING_DIR}" output -raw aks_keyvault_csi_client_id)" >> "${GITHUB_ENV}"
 
-  research-agent-acr:
-    if: needs.detect-changes.outputs.research_agent == 'true'
-    needs:
-      - detect-changes
-      - research-agent-terraform
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - name: Azure login
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       - name: Validate ACR access
         run: |
-          ACR_NAME="${{ needs.research-agent-terraform.outputs.acr_login_server }}"
-          ACR_NAME="${ACR_NAME%%.azurecr.io}"
-          az acr show --name "${ACR_NAME}" --resource-group "${{ needs.research-agent-terraform.outputs.resource_group_name }}"
+          ACR_NAME="${TF_ACR_LOGIN_SERVER%%.azurecr.io}"
+          az acr show --name "${ACR_NAME}" --resource-group "${TF_RESOURCE_GROUP_NAME}"
           az acr login --name "${ACR_NAME}"
 
-  research-agent-build:
-    if: needs.detect-changes.outputs.research_agent == 'true'
-    needs:
-      - detect-changes
-      - research-agent-terraform
-      - research-agent-acr
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Azure login
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      - name: Prepare research-agent build context
+      - name: Prepare Docker build context
         run: |
-          BUILD_CONTEXT="${RUNNER_TEMP}/research-agent-build"
-          mkdir -p "${BUILD_CONTEXT}/projects/research_agent"
-          cp pyproject.toml "${BUILD_CONTEXT}/pyproject.toml"
-          cp -R packages "${BUILD_CONTEXT}/packages"
-          cp -R projects/research_agent/app "${BUILD_CONTEXT}/projects/research_agent/app"
-          cp projects/research_agent/agent.py "${BUILD_CONTEXT}/projects/research_agent/agent.py"
-          cp projects/research_agent/requirements-research-agent.txt "${BUILD_CONTEXT}/projects/research_agent/requirements-research-agent.txt"
+          BUILD_CONTEXT="${RUNNER_TEMP}/${{ matrix.service }}-build"
           echo "BUILD_CONTEXT=${BUILD_CONTEXT}" >> "${GITHUB_ENV}"
+
+          case "${{ matrix.service }}" in
+            research_agent)
+              mkdir -p "${BUILD_CONTEXT}/projects/research_agent"
+              cp pyproject.toml "${BUILD_CONTEXT}/pyproject.toml"
+              cp -R packages "${BUILD_CONTEXT}/packages"
+              cp -R projects/research_agent/app "${BUILD_CONTEXT}/projects/research_agent/app"
+              cp projects/research_agent/agent.py "${BUILD_CONTEXT}/projects/research_agent/agent.py"
+              cp projects/research_agent/requirements-research-agent.txt "${BUILD_CONTEXT}/projects/research_agent/requirements-research-agent.txt"
+              ;;
+            rag_system)
+              mkdir -p "${BUILD_CONTEXT}/projects/rag_system"
+              cp pyproject.toml "${BUILD_CONTEXT}/pyproject.toml"
+              cp -R packages "${BUILD_CONTEXT}/packages"
+              cp -R projects/rag_system/app "${BUILD_CONTEXT}/projects/rag_system/app"
+              cp projects/rag_system/requirements-rag-system.txt "${BUILD_CONTEXT}/projects/rag_system/requirements-rag-system.txt"
+              ;;
+          esac
+
       - name: Login Docker to ACR
         run: |
-          ACR_NAME="${{ needs.research-agent-terraform.outputs.acr_login_server }}"
-          ACR_NAME="${ACR_NAME%%.azurecr.io}"
+          ACR_NAME="${TF_ACR_LOGIN_SERVER%%.azurecr.io}"
           az acr login --name "${ACR_NAME}"
+
       - name: Build and push image to ACR
         run: |
-          IMAGE_REF="${{ needs.research-agent-terraform.outputs.acr_login_server }}/research-agent:${GITHUB_SHA}"
+          IMAGE_REF="${TF_ACR_LOGIN_SERVER}/${IMAGE_NAME}:${GITHUB_SHA}"
           docker build \
-            -f "${GITHUB_WORKSPACE}/projects/research_agent/Dockerfile" \
+            -f "${GITHUB_WORKSPACE}/${DOCKERFILE}" \
             -t "${IMAGE_REF}" \
             "${BUILD_CONTEXT}"
           docker push "${IMAGE_REF}"
 
-  research-agent-helm:
-    if: needs.detect-changes.outputs.research_agent == 'true'
-    needs:
-      - detect-changes
-      - research-agent-terraform
-      - research-agent-build
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Azure login
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       - name: Set AKS context
         uses: Azure/aks-set-context@v4
         with:
-          resource-group: ${{ needs.research-agent-terraform.outputs.resource_group_name }}
-          cluster-name: ${{ needs.research-agent-terraform.outputs.aks_name }}
+          resource-group: ${{ env.TF_RESOURCE_GROUP_NAME }}
+          cluster-name: ${{ env.TF_AKS_NAME }}
+
       - name: Install Helm
         uses: azure/setup-helm@v4.3.0
-      - name: Deploy research-agent with Helm
+
+      - name: Deploy service with Helm
         run: |
-          helm upgrade --install "research-agent" \
+          helm upgrade --install "${HELM_RELEASE_NAME}" \
             ./deploy/helm/charts/fastapi-service \
-            --namespace "${{ needs.research-agent-terraform.outputs.aks_namespace }}" \
+            --namespace "${TF_AKS_NAMESPACE}" \
             --create-namespace \
-            -f ./projects/research_agent/deploy/azure/values.yaml \
-            --set image.repository="${{ needs.research-agent-terraform.outputs.acr_login_server }}/research-agent" \
+            -f "./${VALUES_FILE}" \
+            --set image.repository="${TF_ACR_LOGIN_SERVER}/${IMAGE_NAME}" \
             --set image.tag="${GITHUB_SHA}" \
             --set ingress.enabled=true \
-            --set ingress.host="${{ needs.research-agent-terraform.outputs.service_host }}" \
+            --set ingress.host="${SERVICE_HOST}" \
             --set ingress.tls.enabled=true \
-            --set ingress.tls.secretName="${{ needs.research-agent-terraform.outputs.service_tls_secret_name }}" \
+            --set ingress.tls.secretName="${SERVICE_TLS_SECRET_NAME}" \
             --set keyVault.enabled=true \
-            --set keyVault.name="${{ needs.research-agent-terraform.outputs.key_vault_name }}" \
+            --set keyVault.name="${TF_KEY_VAULT_NAME}" \
             --set keyVault.tenantId="${{ secrets.AZURE_TENANT_ID }}" \
-            --set keyVault.userAssignedIdentityID="${{ needs.research-agent-terraform.outputs.aks_keyvault_csi_client_id }}"
-
-  rag-system-terraform:
-    if: needs.detect-changes.outputs.rag_system == 'true'
-    needs: detect-changes
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
-    env:
-      IMAGE_NAME: rag-system
-      HELM_RELEASE_NAME: rag-system
-      TF_WORKING_DIR: projects/rag_system/deploy/azure/terraform
-      SERVICE_RESOURCE_GROUP: ${{ vars.RAG_SYSTEM_RESOURCE_GROUP || 'rg-rag-system-dev' }}
-      SERVICE_LOCATION: ${{ vars.RAG_SYSTEM_LOCATION || 'eastus' }}
-      SERVICE_ACR_NAME: ${{ vars.RAG_SYSTEM_ACR_NAME || 'ragsystemacrdev' }}
-      SERVICE_AKS_NAME: ${{ vars.RAG_SYSTEM_AKS_NAME || 'aks-rag-system-dev' }}
-      SERVICE_AKS_NODE_COUNT: ${{ vars.RAG_SYSTEM_AKS_NODE_COUNT || '1' }}
-      SERVICE_AKS_VM_SIZE: ${{ vars.RAG_SYSTEM_AKS_VM_SIZE || 'Standard_DC2as_v5' }}
-      SERVICE_AKS_NAMESPACE: ${{ vars.RAG_SYSTEM_AKS_NAMESPACE || 'rag-system-dev' }}
-      SERVICE_KEY_VAULT_NAME: ${{ vars.RAG_SYSTEM_KEY_VAULT_NAME || 'kv-rag-system-dev001' }}
-      SERVICE_HOST: ${{ vars.RAG_SYSTEM_HOST || 'rag.purpletechllc.com' }}
-      SERVICE_TLS_SECRET_NAME: ${{ vars.RAG_SYSTEM_TLS_SECRET_NAME || 'rag-system-tls' }}
-      TFSTATE_KEY: ${{ vars.TFSTATE_KEY_RAG_SYSTEM || 'rag-system-dev.tfstate' }}
-    outputs:
-      acr_login_server: ${{ steps.tf_outputs.outputs.acr_login_server }}
-      aks_name: ${{ steps.tf_outputs.outputs.aks_name }}
-      aks_namespace: ${{ steps.tf_outputs.outputs.aks_namespace }}
-      resource_group_name: ${{ steps.tf_outputs.outputs.resource_group_name }}
-      key_vault_name: ${{ steps.tf_outputs.outputs.key_vault_name }}
-      aks_keyvault_csi_client_id: ${{ steps.tf_outputs.outputs.aks_keyvault_csi_client_id }}
-      service_host: ${{ steps.tf_outputs.outputs.service_host }}
-      service_tls_secret_name: ${{ steps.tf_outputs.outputs.service_tls_secret_name }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Validate workflow configuration
-        run: |
-          missing=0
-          check_secret() {
-            if [ -z "$2" ]; then
-              echo "Missing secret: $1"
-              missing=1
-            else
-              masked="$(printf '%s' "$2" | cut -c1-8)*"
-              echo "Secret present: $1=${masked}"
-            fi
-          }
-          check_variable() {
-            if [ -z "$2" ]; then
-              echo "Missing variable: $1"
-              missing=1
-            else
-              echo "Variable $1=$2"
-            fi
-          }
-          check_secret "AZURE_CLIENT_ID" "${{ secrets.AZURE_CLIENT_ID }}"
-          check_secret "AZURE_TENANT_ID" "${{ secrets.AZURE_TENANT_ID }}"
-          check_secret "AZURE_SUBSCRIPTION_ID" "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
-          check_variable "SERVICE_RESOURCE_GROUP" "${SERVICE_RESOURCE_GROUP}"
-          check_variable "SERVICE_LOCATION" "${SERVICE_LOCATION}"
-          check_variable "SERVICE_ACR_NAME" "${SERVICE_ACR_NAME}"
-          check_variable "SERVICE_AKS_NAME" "${SERVICE_AKS_NAME}"
-          check_variable "SERVICE_AKS_NODE_COUNT" "${SERVICE_AKS_NODE_COUNT}"
-          check_variable "SERVICE_AKS_VM_SIZE" "${SERVICE_AKS_VM_SIZE}"
-          check_variable "SERVICE_AKS_NAMESPACE" "${SERVICE_AKS_NAMESPACE}"
-          check_variable "SERVICE_KEY_VAULT_NAME" "${SERVICE_KEY_VAULT_NAME}"
-          check_variable "SERVICE_HOST" "${SERVICE_HOST}"
-          check_variable "SERVICE_TLS_SECRET_NAME" "${SERVICE_TLS_SECRET_NAME}"
-          check_variable "TFSTATE_RESOURCE_GROUP" "${TFSTATE_RESOURCE_GROUP}"
-          check_variable "TFSTATE_STORAGE_ACCOUNT" "${TFSTATE_STORAGE_ACCOUNT}"
-          check_variable "TFSTATE_CONTAINER" "${TFSTATE_CONTAINER}"
-          check_variable "TFSTATE_KEY" "${TFSTATE_KEY}"
-          if [ -z "${TFSTATE_STORAGE_ACCOUNT}" ]; then
-            missing=1
-          fi
-          if [ "${missing}" -ne 0 ]; then
-            exit 1
-          fi
-      - name: Azure login
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-      - name: Bootstrap Terraform backend
-        run: |
-          az group create --name "${TFSTATE_RESOURCE_GROUP}" --location "${SERVICE_LOCATION}"
-          az storage account create \
-            --name "${TFSTATE_STORAGE_ACCOUNT}" \
-            --resource-group "${TFSTATE_RESOURCE_GROUP}" \
-            --location "${SERVICE_LOCATION}" \
-            --sku Standard_LRS \
-            --allow-blob-public-access false \
-            --min-tls-version TLS1_2
-          TFSTATE_ACCESS_KEY="$(az storage account keys list \
-            --resource-group "${TFSTATE_RESOURCE_GROUP}" \
-            --account-name "${TFSTATE_STORAGE_ACCOUNT}" \
-            --query '[0].value' --output tsv)"
-          az storage container create \
-            --name "${TFSTATE_CONTAINER}" \
-            --account-name "${TFSTATE_STORAGE_ACCOUNT}" \
-            --account-key "${TFSTATE_ACCESS_KEY}"
-          echo "TFSTATE_ACCESS_KEY=${TFSTATE_ACCESS_KEY}" >> "${GITHUB_ENV}"
-      - name: Write Terraform input file
-        run: |
-          cat > "${TF_WORKING_DIR}/github.auto.tfvars" <<EOF
-          azure_subscription_id = "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
-          resource_group_name   = "${SERVICE_RESOURCE_GROUP}"
-          location              = "${SERVICE_LOCATION}"
-          acr_name              = "${SERVICE_ACR_NAME}"
-          aks_name              = "${SERVICE_AKS_NAME}"
-          aks_node_count        = ${SERVICE_AKS_NODE_COUNT}
-          aks_vm_size           = "${SERVICE_AKS_VM_SIZE}"
-          aks_namespace         = "${SERVICE_AKS_NAMESPACE}"
-          key_vault_name        = "${SERVICE_KEY_VAULT_NAME}"
-          enable_app_routing    = true
-          enable_keyvault_csi   = true
-          github_actions_client_id               = "${{ secrets.AZURE_CLIENT_ID }}"
-          enable_github_actions_role_assignments = true
-          enable_github_actions_subscription_contributor = true
-          key_vault_secrets_officer_object_ids   = ${KEY_VAULT_SECRETS_OFFICER_OBJECT_IDS_JSON}
-          EOF
-      - name: Terraform init
-        run: |
-          terraform -chdir="${TF_WORKING_DIR}" init -input=false \
-            -backend-config="resource_group_name=${TFSTATE_RESOURCE_GROUP}" \
-            -backend-config="storage_account_name=${TFSTATE_STORAGE_ACCOUNT}" \
-            -backend-config="container_name=${TFSTATE_CONTAINER}" \
-            -backend-config="key=${TFSTATE_KEY}" \
-            -backend-config="access_key=${TFSTATE_ACCESS_KEY}"
-      - name: Terraform plan
-        run: terraform -chdir="${TF_WORKING_DIR}" plan -input=false -out=tfplan
-      - name: Terraform apply
-        run: terraform -chdir="${TF_WORKING_DIR}" apply -input=false -auto-approve tfplan
-      - name: Export Terraform outputs
-        id: tf_outputs
-        run: |
-          echo "acr_login_server=$(terraform -chdir="${TF_WORKING_DIR}" output -raw acr_login_server)" >> "${GITHUB_OUTPUT}"
-          echo "aks_name=$(terraform -chdir="${TF_WORKING_DIR}" output -raw aks_name)" >> "${GITHUB_OUTPUT}"
-          echo "aks_namespace=$(terraform -chdir="${TF_WORKING_DIR}" output -raw aks_namespace)" >> "${GITHUB_OUTPUT}"
-          echo "resource_group_name=$(terraform -chdir="${TF_WORKING_DIR}" output -raw resource_group_name)" >> "${GITHUB_OUTPUT}"
-          echo "key_vault_name=$(terraform -chdir="${TF_WORKING_DIR}" output -raw key_vault_name)" >> "${GITHUB_OUTPUT}"
-          echo "aks_keyvault_csi_client_id=$(terraform -chdir="${TF_WORKING_DIR}" output -raw aks_keyvault_csi_client_id)" >> "${GITHUB_OUTPUT}"
-          echo "service_host=${SERVICE_HOST}" >> "${GITHUB_OUTPUT}"
-          echo "service_tls_secret_name=${SERVICE_TLS_SECRET_NAME}" >> "${GITHUB_OUTPUT}"
-
-  rag-system-acr:
-    if: needs.detect-changes.outputs.rag_system == 'true'
-    needs:
-      - detect-changes
-      - rag-system-terraform
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - name: Azure login
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      - name: Validate ACR access
-        run: |
-          ACR_NAME="${{ needs.rag-system-terraform.outputs.acr_login_server }}"
-          ACR_NAME="${ACR_NAME%%.azurecr.io}"
-          az acr show --name "${ACR_NAME}" --resource-group "${{ needs.rag-system-terraform.outputs.resource_group_name }}"
-          az acr login --name "${ACR_NAME}"
-
-  rag-system-build:
-    if: needs.detect-changes.outputs.rag_system == 'true'
-    needs:
-      - detect-changes
-      - rag-system-terraform
-      - rag-system-acr
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Azure login
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      - name: Prepare rag-system build context
-        run: |
-          BUILD_CONTEXT="${RUNNER_TEMP}/rag-system-build"
-          mkdir -p "${BUILD_CONTEXT}/projects/rag_system"
-          cp pyproject.toml "${BUILD_CONTEXT}/pyproject.toml"
-          cp -R packages "${BUILD_CONTEXT}/packages"
-          cp -R projects/rag_system/app "${BUILD_CONTEXT}/projects/rag_system/app"
-          cp projects/rag_system/requirements-rag-system.txt "${BUILD_CONTEXT}/projects/rag_system/requirements-rag-system.txt"
-          echo "BUILD_CONTEXT=${BUILD_CONTEXT}" >> "${GITHUB_ENV}"
-      - name: Login Docker to ACR
-        run: |
-          ACR_NAME="${{ needs.rag-system-terraform.outputs.acr_login_server }}"
-          ACR_NAME="${ACR_NAME%%.azurecr.io}"
-          az acr login --name "${ACR_NAME}"
-      - name: Build and push image to ACR
-        run: |
-          IMAGE_REF="${{ needs.rag-system-terraform.outputs.acr_login_server }}/rag-system:${GITHUB_SHA}"
-          docker build \
-            -f "${GITHUB_WORKSPACE}/projects/rag_system/Dockerfile" \
-            -t "${IMAGE_REF}" \
-            "${BUILD_CONTEXT}"
-          docker push "${IMAGE_REF}"
-
-  rag-system-helm:
-    if: needs.detect-changes.outputs.rag_system == 'true'
-    needs:
-      - detect-changes
-      - rag-system-terraform
-      - rag-system-build
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Azure login
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      - name: Set AKS context
-        uses: Azure/aks-set-context@v4
-        with:
-          resource-group: ${{ needs.rag-system-terraform.outputs.resource_group_name }}
-          cluster-name: ${{ needs.rag-system-terraform.outputs.aks_name }}
-      - name: Install Helm
-        uses: azure/setup-helm@v4.3.0
-      - name: Deploy rag-system with Helm
-        run: |
-          helm upgrade --install "rag-system" \
-            ./deploy/helm/charts/fastapi-service \
-            --namespace "${{ needs.rag-system-terraform.outputs.aks_namespace }}" \
-            --create-namespace \
-            -f ./projects/rag_system/deploy/azure/values.yaml \
-            --set image.repository="${{ needs.rag-system-terraform.outputs.acr_login_server }}/rag-system" \
-            --set image.tag="${GITHUB_SHA}" \
-            --set ingress.enabled=true \
-            --set ingress.host="${{ needs.rag-system-terraform.outputs.service_host }}" \
-            --set ingress.tls.enabled=true \
-            --set ingress.tls.secretName="${{ needs.rag-system-terraform.outputs.service_tls_secret_name }}" \
-            --set keyVault.enabled=true \
-            --set keyVault.name="${{ needs.rag-system-terraform.outputs.key_vault_name }}" \
-            --set keyVault.tenantId="${{ secrets.AZURE_TENANT_ID }}" \
-            --set keyVault.userAssignedIdentityID="${{ needs.rag-system-terraform.outputs.aks_keyvault_csi_client_id }}"
+            --set keyVault.userAssignedIdentityID="${TF_AKS_KEYVAULT_CSI_CLIENT_ID}"
