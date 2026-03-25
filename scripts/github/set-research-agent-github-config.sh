@@ -67,7 +67,7 @@ fi
 : "${RESEARCH_AGENT_ACR_NAME:=researchagentacrdev}"
 : "${RESEARCH_AGENT_AKS_NAME:=aks-research-agent-dev}"
 : "${RESEARCH_AGENT_AKS_NODE_COUNT:=1}"
-: "${RESEARCH_AGENT_AKS_VM_SIZE:=Standard_B2s}"
+: "${RESEARCH_AGENT_AKS_VM_SIZE:=Standard_DC2as_v5}"
 : "${RESEARCH_AGENT_AKS_NAMESPACE:=research-agent-dev}"
 : "${RESEARCH_AGENT_KEY_VAULT_NAME:=kv-research-agent-dev007}"
 : "${TFSTATE_RESOURCE_GROUP:=rg-tfstate-shared-dev}"

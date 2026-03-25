@@ -4,7 +4,7 @@ variable "location" { type = string }
 variable "acr_name" { type = string }
 variable "aks_name" { type = string }
 variable "aks_node_count" { type = number default = 1 }
-variable "aks_vm_size" { type = string default = "Standard_B2s" }
+variable "aks_vm_size" { type = string default = "Standard_DC2as_v5" }
 variable "aks_namespace" { type = string default = "rag-system-dev" }
 variable "key_vault_name" { type = string }
 variable "enable_app_routing" { type = bool default = true }

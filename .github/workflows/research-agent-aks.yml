@@ -53,7 +53,11 @@ env:
   RESEARCH_AGENT_ACR_NAME: ${{ vars.RESEARCH_AGENT_ACR_NAME || 'researchagentacrdev' }}
   RESEARCH_AGENT_AKS_NAME: ${{ vars.RESEARCH_AGENT_AKS_NAME || 'aks-research-agent-dev' }}
   RESEARCH_AGENT_AKS_NODE_COUNT: ${{ vars.RESEARCH_AGENT_AKS_NODE_COUNT || '1' }}
+<<<<<<< ours
   RESEARCH_AGENT_AKS_VM_SIZE: ${{ vars.RESEARCH_AGENT_AKS_VM_SIZE || 'Standard_B2s' }}
+=======
+  RESEARCH_AGENT_AKS_VM_SIZE: ${{ vars.RESEARCH_AGENT_AKS_VM_SIZE || 'Standard_DC2as_v5' }}
+>>>>>>> theirs
   RESEARCH_AGENT_AKS_NAMESPACE: ${{ vars.RESEARCH_AGENT_AKS_NAMESPACE || 'research-agent-dev' }}
   RESEARCH_AGENT_KEY_VAULT_NAME: ${{ vars.RESEARCH_AGENT_KEY_VAULT_NAME || 'kv-research-agent-dev007' }}
   RESEARCH_AGENT_HOST: ${{ vars.RESEARCH_AGENT_HOST || 'research.purpletechllc.com' }}
@@ -139,6 +143,14 @@ jobs:
             exit 1
           fi
 
+<<<<<<< ours
+=======
+      # For the first time, we need to login with the Azure CLI
+      # The AZURE_CLIENT_ID is the client ID of the GitHub Actions service principal
+      # The AZURE_TENANT_ID is the tenant ID of the Azure subscription
+      # The AZURE_SUBSCRIPTION_ID is the subscription ID of the Azure subscription
+      # AZURE_CLIENT_ID service principal should have Contributor RBAC role on the subscription
+>>>>>>> theirs
       - name: Azure login
         uses: azure/login@v2
         with:

@@ -67,7 +67,7 @@ fi
 : "${RAG_SYSTEM_ACR_NAME:=ragsystemacrdev}"
 : "${RAG_SYSTEM_AKS_NAME:=aks-rag-system-dev}"
 : "${RAG_SYSTEM_AKS_NODE_COUNT:=1}"
-: "${RAG_SYSTEM_AKS_VM_SIZE:=Standard_B2s}"
+: "${RAG_SYSTEM_AKS_VM_SIZE:=Standard_DC2as_v5}"
 : "${RAG_SYSTEM_AKS_NAMESPACE:=rag-system-dev}"
 : "${RAG_SYSTEM_KEY_VAULT_NAME:=kv-rag-system-dev001}"
 : "${TFSTATE_RESOURCE_GROUP:=rg-tfstate-shared-dev}"
