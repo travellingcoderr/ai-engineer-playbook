@@ -1,0 +1,75 @@
+name: <service-name>-aks
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "projects/<service-name>/**"
+      - ".github/workflows/<service-name>-aks.yml"
+
+env:
+  IMAGE_NAME: <service-name>
+  HELM_RELEASE_NAME: <service-name>
+  AKS_NAMESPACE: <service-name>-dev
+  AZURE_CORE_OUTPUT: none
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Prepare build context
+        run: |
+          BUILD_CONTEXT="${RUNNER_TEMP}/<service-name>-build"
+          mkdir -p "${BUILD_CONTEXT}/projects/<service-name>"
+          cp pyproject.toml "${BUILD_CONTEXT}/pyproject.toml"
+          cp -R packages "${BUILD_CONTEXT}/packages"
+          echo "Add project-specific copy commands here"
+
+      - name: Login Docker to ACR
+        run: |
+          az acr login --name "${{ secrets.ACR_NAME }}"
+
+      - name: Build and push image to ACR
+        run: |
+          echo "Add docker build and docker push commands here"
+
+      - name: Set AKS context
+        uses: Azure/aks-set-context@v4
+        with:
+          resource-group: ${{ secrets.AKS_RESOURCE_GROUP }}
+          cluster-name: ${{ secrets.AKS_NAME }}
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4.3.0
+
+      - name: Deploy with Helm
+        run: |
+          helm upgrade --install "${HELM_RELEASE_NAME}" \
+            ./deploy/helm/charts/fastapi-service \
+            --namespace "${AKS_NAMESPACE}" \
+            --create-namespace \
+            -f ./projects/<service-name>/deploy/azure/values.yaml \
+            --set image.repository="${{ secrets.ACR_NAME }}.azurecr.io/${IMAGE_NAME}" \
+            --set image.tag="${GITHUB_SHA}" \
+            --set ingress.enabled=true \
+            --set ingress.host="${{ secrets.<SERVICE_HOST_SECRET> }}" \
+            --set ingress.tls.enabled=true \
+            --set ingress.tls.secretName="${{ secrets.<SERVICE_TLS_SECRET_NAME> }}" \
+            --set keyVault.enabled=true \
+            --set keyVault.name="${{ secrets.KEY_VAULT_NAME }}" \
+            --set keyVault.tenantId="${{ secrets.AZURE_TENANT_ID }}" \
+            --set keyVault.userAssignedIdentityID="${{ secrets.AKS_KEYVAULT_CSI_CLIENT_ID }}"

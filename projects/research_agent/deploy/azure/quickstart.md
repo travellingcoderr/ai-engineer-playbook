@@ -1,6 +1,6 @@
 # Research Agent Azure Quickstart
 
-This is the shortest shell-script path to get `research_agent` deployed to AKS.
+This file documents the GitHub Actions + Terraform path.
 
 ## Prerequisites
 
@@ -14,74 +14,72 @@ Links:
 - <https://kubernetes.io/docs/tasks/tools/install-kubectl/>
 - <https://helm.sh/docs/intro/install/>
 
-## First-Time Setup
+## Preferred Path: GitHub Actions + Terraform
 
-From the repo root:
+Use this when you want Azure resources created by the workflow instead of from your machine.
 
-```bash
-cp projects/research_agent/deploy/azure/.env.example projects/research_agent/deploy/azure/.env
-```
+### 1. Configure GitHub secrets
 
-Edit the file:
+- `AZURE_CLIENT_ID`
+- `AZURE_TENANT_ID`
+- `AZURE_SUBSCRIPTION_ID`
 
-```bash
-open -a TextEdit projects/research_agent/deploy/azure/.env
-```
+### 2. Configure GitHub variables
 
-Log in to Azure:
+- `RESEARCH_AGENT_HOST`
+- `RESEARCH_AGENT_TLS_SECRET_NAME`
+- `RESEARCH_AGENT_RESOURCE_GROUP`
+- `RESEARCH_AGENT_LOCATION`
+- `RESEARCH_AGENT_ACR_NAME`
+- `RESEARCH_AGENT_AKS_NAME`
+- `RESEARCH_AGENT_AKS_NODE_COUNT`
+- `RESEARCH_AGENT_AKS_VM_SIZE`
+- `RESEARCH_AGENT_AKS_NAMESPACE`
+- `RESEARCH_AGENT_KEY_VAULT_NAME`
+- `TFSTATE_RESOURCE_GROUP`
+- `TFSTATE_STORAGE_ACCOUNT`
+- `TFSTATE_CONTAINER`
+- `TFSTATE_KEY`
 
-```bash
-az login
-```
+Optional:
+- `KEY_VAULT_SECRETS_OFFICER_OBJECT_IDS_JSON`
 
-## Run In Order
-
-### 1. Create Azure infrastructure
-
-```bash
-./projects/research_agent/deploy/azure/scripts/create-infra(1).sh
-```
-
-### 2. Build the Docker image and push to ACR
-
-```bash
-./projects/research_agent/deploy/azure/scripts/build-and-push(2).sh
-```
-
-### 3. Create TLS secret for ingress
-
-Only run this if you already have `tls.crt` and `tls.key`.
+Helper script:
 
 ```bash
-./projects/research_agent/deploy/azure/scripts/create-tls-secret(3).sh /path/to/tls.crt /path/to/tls.key
+AZURE_CLIENT_ID="<client-id>" \
+AZURE_TENANT_ID="<tenant-id>" \
+AZURE_SUBSCRIPTION_ID="db909f94-f59e-4ca4-acad-e2839e7af5f4" \
+TFSTATE_STORAGE_ACCOUNT="<globally-unique-storage-account>" \
+./scripts/github/set-research-agent-github-config.sh
 ```
 
-### 4. Deploy to AKS with Helm
+### 3. Push to `main` or run the workflow manually
 
-```bash
-./projects/research_agent/deploy/azure/scripts/deploy(4).sh
+Workflow:
+
+```text
+.github/workflows/research-agent-aks.yml
 ```
 
-## Verify Deployment
+### 4. Let the workflow run in this order
+
+1. bootstrap Terraform backend storage
+2. `terraform init`
+3. `terraform plan`
+4. `terraform apply`
+5. Docker build + push to ACR
+6. Helm deploy to AKS
+
+### 5. Verify
 
 ```bash
 kubectl get pods -n research-agent-dev
-kubectl get svc -n research-agent-dev
 kubectl get ingress -n research-agent-dev
-kubectl logs deploy/research-agent -n research-agent-dev
 ```
 
 ## Typical Next Steps
 
 - Add your app secret to Azure Key Vault
 - Point DNS for `INGRESS_HOST` to the ingress public IP
-- Create a valid TLS secret if you want HTTPS
-
-## If You Want To Skip TLS For Now
-
-You can skip step 3, but then you should disable TLS-related settings in:
-
-- `projects/research_agent/deploy/azure/.env`
-- `projects/research_agent/deploy/azure/values.yaml`
-
-At minimum, make sure the ingress host value is correct for your environment.
+- Follow `cert-manager-letsencrypt-sop.md` to enable trusted HTTPS with automatic renewal

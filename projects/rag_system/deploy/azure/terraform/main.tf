@@ -1,9 +1,3 @@
-locals {
-  common_tags = {
-    Scope = "Beta"
-  }
-}
-
 module "aks_service" {
   source = "../../../../../deploy/azure/terraform/modules/aks_service"
 
@@ -21,5 +15,4 @@ module "aks_service" {
   github_actions_client_id               = var.github_actions_client_id
   enable_github_actions_role_assignments = var.enable_github_actions_role_assignments
   key_vault_secrets_officer_object_ids   = var.key_vault_secrets_officer_object_ids
-  tags                                   = local.common_tags
 }

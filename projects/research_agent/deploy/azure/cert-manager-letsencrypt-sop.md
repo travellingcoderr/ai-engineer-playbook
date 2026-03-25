@@ -139,6 +139,11 @@ ingress:
 
 Then redeploy the Helm release.
 
+For this project, the practical inputs are:
+- host: `research.purpletechllc.com`
+- ingress class: `webapprouting.kubernetes.azure.com`
+- TLS secret name: `research-agent-tls`
+
 ## Step 5: Watch Certificate Issuance
 
 Check these resources:

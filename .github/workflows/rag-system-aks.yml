@@ -1,36 +1,4 @@
-# GitHub Secrets
-# - AZURE_CLIENT_ID
-# - AZURE_TENANT_ID
-# - AZURE_SUBSCRIPTION_ID
-#
-# GitHub Variables
-# - RESEARCH_AGENT_HOST
-# - RESEARCH_AGENT_TLS_SECRET_NAME
-# - RESEARCH_AGENT_RESOURCE_GROUP
-# - RESEARCH_AGENT_LOCATION
-# - RESEARCH_AGENT_ACR_NAME
-# - RESEARCH_AGENT_AKS_NAME
-# - RESEARCH_AGENT_AKS_NODE_COUNT
-# - RESEARCH_AGENT_AKS_VM_SIZE
-# - RESEARCH_AGENT_AKS_NAMESPACE
-# - RESEARCH_AGENT_KEY_VAULT_NAME
-# - TFSTATE_RESOURCE_GROUP
-# - TFSTATE_STORAGE_ACCOUNT
-# - TFSTATE_CONTAINER
-# - TFSTATE_KEY
-# - KEY_VAULT_SECRETS_OFFICER_OBJECT_IDS_JSON
-#
-# Job order:
-# 1. terraform-infra
-# 2. acr-registry
-# 3. docker-build
-# 4. helm-deploy
-#
-# Note:
-# Docker/ACR login does not persist across jobs. The registry job validates ACR access,
-# and the build job logs in again before push.
-#
-name: research-agent-aks
+name: rag-system-aks
 
 on:
   workflow_dispatch:
@@ -38,30 +6,30 @@ on:
     branches:
       - main
     paths:
-      - "projects/research_agent/**"
+      - "projects/rag_system/**"
       - "deploy/helm/**"
       - "deploy/azure/terraform/modules/**"
-      - ".github/workflows/research-agent-aks.yml"
+      - ".github/workflows/rag-system-aks.yml"
 
 env:
-  IMAGE_NAME: research-agent
-  HELM_RELEASE_NAME: research-agent
-  TF_WORKING_DIR: projects/research_agent/deploy/azure/terraform
+  IMAGE_NAME: rag-system
+  HELM_RELEASE_NAME: rag-system
+  TF_WORKING_DIR: projects/rag_system/deploy/azure/terraform
   AZURE_CORE_OUTPUT: none
-  RESEARCH_AGENT_RESOURCE_GROUP: ${{ vars.RESEARCH_AGENT_RESOURCE_GROUP || 'rg-research-agent-dev' }}
-  RESEARCH_AGENT_LOCATION: ${{ vars.RESEARCH_AGENT_LOCATION || 'eastus' }}
-  RESEARCH_AGENT_ACR_NAME: ${{ vars.RESEARCH_AGENT_ACR_NAME || 'researchagentacrdev' }}
-  RESEARCH_AGENT_AKS_NAME: ${{ vars.RESEARCH_AGENT_AKS_NAME || 'aks-research-agent-dev' }}
-  RESEARCH_AGENT_AKS_NODE_COUNT: ${{ vars.RESEARCH_AGENT_AKS_NODE_COUNT || '1' }}
-  RESEARCH_AGENT_AKS_VM_SIZE: ${{ vars.RESEARCH_AGENT_AKS_VM_SIZE || 'Standard_B2s' }}
-  RESEARCH_AGENT_AKS_NAMESPACE: ${{ vars.RESEARCH_AGENT_AKS_NAMESPACE || 'research-agent-dev' }}
-  RESEARCH_AGENT_KEY_VAULT_NAME: ${{ vars.RESEARCH_AGENT_KEY_VAULT_NAME || 'kv-research-agent-dev007' }}
-  RESEARCH_AGENT_HOST: ${{ vars.RESEARCH_AGENT_HOST || 'research.purpletechllc.com' }}
-  RESEARCH_AGENT_TLS_SECRET_NAME: ${{ vars.RESEARCH_AGENT_TLS_SECRET_NAME || 'research-agent-tls' }}
+  RAG_SYSTEM_RESOURCE_GROUP: ${{ vars.RAG_SYSTEM_RESOURCE_GROUP || 'rg-rag-system-dev' }}
+  RAG_SYSTEM_LOCATION: ${{ vars.RAG_SYSTEM_LOCATION || 'eastus' }}
+  RAG_SYSTEM_ACR_NAME: ${{ vars.RAG_SYSTEM_ACR_NAME || 'ragsystemacrdev' }}
+  RAG_SYSTEM_AKS_NAME: ${{ vars.RAG_SYSTEM_AKS_NAME || 'aks-rag-system-dev' }}
+  RAG_SYSTEM_AKS_NODE_COUNT: ${{ vars.RAG_SYSTEM_AKS_NODE_COUNT || '1' }}
+  RAG_SYSTEM_AKS_VM_SIZE: ${{ vars.RAG_SYSTEM_AKS_VM_SIZE || 'Standard_B2s' }}
+  RAG_SYSTEM_AKS_NAMESPACE: ${{ vars.RAG_SYSTEM_AKS_NAMESPACE || 'rag-system-dev' }}
+  RAG_SYSTEM_KEY_VAULT_NAME: ${{ vars.RAG_SYSTEM_KEY_VAULT_NAME || 'kv-rag-system-dev001' }}
+  RAG_SYSTEM_HOST: ${{ vars.RAG_SYSTEM_HOST || 'rag.purpletechllc.com' }}
+  RAG_SYSTEM_TLS_SECRET_NAME: ${{ vars.RAG_SYSTEM_TLS_SECRET_NAME || 'rag-system-tls' }}
   TFSTATE_RESOURCE_GROUP: ${{ vars.TFSTATE_RESOURCE_GROUP || 'rg-tfstate-shared-dev' }}
   TFSTATE_STORAGE_ACCOUNT: ${{ vars.TFSTATE_STORAGE_ACCOUNT }}
   TFSTATE_CONTAINER: ${{ vars.TFSTATE_CONTAINER || 'tfstate' }}
-  TFSTATE_KEY: ${{ vars.TFSTATE_KEY || 'research-agent-dev.tfstate' }}
+  TFSTATE_KEY: ${{ vars.TFSTATE_KEY || 'rag-system-dev.tfstate' }}
   KEY_VAULT_SECRETS_OFFICER_OBJECT_IDS_JSON: ${{ vars.KEY_VAULT_SECRETS_OFFICER_OBJECT_IDS_JSON || '[]' }}
 
 jobs:
@@ -88,12 +56,12 @@ jobs:
             echo "TFSTATE_STORAGE_ACCOUNT GitHub variable is required."
             missing=1
           fi
-          if [ -z "${RESEARCH_AGENT_ACR_NAME}" ]; then
-            echo "RESEARCH_AGENT_ACR_NAME GitHub variable is required."
+          if [ -z "${RAG_SYSTEM_ACR_NAME}" ]; then
+            echo "RAG_SYSTEM_ACR_NAME GitHub variable is required."
             missing=1
           fi
-          if [ -z "${RESEARCH_AGENT_KEY_VAULT_NAME}" ]; then
-            echo "RESEARCH_AGENT_KEY_VAULT_NAME GitHub variable is required."
+          if [ -z "${RAG_SYSTEM_KEY_VAULT_NAME}" ]; then
+            echo "RAG_SYSTEM_KEY_VAULT_NAME GitHub variable is required."
             missing=1
           fi
           if [ "${missing}" -ne 0 ]; then
@@ -114,12 +82,12 @@ jobs:
         run: |
           az group create \
             --name "${TFSTATE_RESOURCE_GROUP}" \
-            --location "${RESEARCH_AGENT_LOCATION}"
+            --location "${RAG_SYSTEM_LOCATION}"
 
           az storage account create \
             --name "${TFSTATE_STORAGE_ACCOUNT}" \
             --resource-group "${TFSTATE_RESOURCE_GROUP}" \
-            --location "${RESEARCH_AGENT_LOCATION}" \
+            --location "${RAG_SYSTEM_LOCATION}" \
             --sku Standard_LRS \
             --allow-blob-public-access false \
             --min-tls-version TLS1_2
@@ -141,14 +109,14 @@ jobs:
         run: |
           cat > "${TF_WORKING_DIR}/github.auto.tfvars" <<EOF
           azure_subscription_id = "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
-          resource_group_name   = "${RESEARCH_AGENT_RESOURCE_GROUP}"
-          location              = "${RESEARCH_AGENT_LOCATION}"
-          acr_name              = "${RESEARCH_AGENT_ACR_NAME}"
-          aks_name              = "${RESEARCH_AGENT_AKS_NAME}"
-          aks_node_count        = ${RESEARCH_AGENT_AKS_NODE_COUNT}
-          aks_vm_size           = "${RESEARCH_AGENT_AKS_VM_SIZE}"
-          aks_namespace         = "${RESEARCH_AGENT_AKS_NAMESPACE}"
-          key_vault_name        = "${RESEARCH_AGENT_KEY_VAULT_NAME}"
+          resource_group_name   = "${RAG_SYSTEM_RESOURCE_GROUP}"
+          location              = "${RAG_SYSTEM_LOCATION}"
+          acr_name              = "${RAG_SYSTEM_ACR_NAME}"
+          aks_name              = "${RAG_SYSTEM_AKS_NAME}"
+          aks_node_count        = ${RAG_SYSTEM_AKS_NODE_COUNT}
+          aks_vm_size           = "${RAG_SYSTEM_AKS_VM_SIZE}"
+          aks_namespace         = "${RAG_SYSTEM_AKS_NAMESPACE}"
+          key_vault_name        = "${RAG_SYSTEM_KEY_VAULT_NAME}"
           enable_app_routing    = true
           enable_keyvault_csi   = true
           github_actions_client_id               = "${{ secrets.AZURE_CLIENT_ID }}"
@@ -223,15 +191,14 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Prepare research-agent build context
+      - name: Prepare rag-system build context
         run: |
-          BUILD_CONTEXT="${RUNNER_TEMP}/research-agent-build"
-          mkdir -p "${BUILD_CONTEXT}/projects/research_agent"
+          BUILD_CONTEXT="${RUNNER_TEMP}/rag-system-build"
+          mkdir -p "${BUILD_CONTEXT}/projects/rag_system"
           cp pyproject.toml "${BUILD_CONTEXT}/pyproject.toml"
           cp -R packages "${BUILD_CONTEXT}/packages"
-          cp -R projects/research_agent/app "${BUILD_CONTEXT}/projects/research_agent/app"
-          cp projects/research_agent/agent.py "${BUILD_CONTEXT}/projects/research_agent/agent.py"
-          cp projects/research_agent/requirements-research-agent.txt "${BUILD_CONTEXT}/projects/research_agent/requirements-research-agent.txt"
+          cp -R projects/rag_system/app "${BUILD_CONTEXT}/projects/rag_system/app"
+          cp projects/rag_system/requirements-rag-system.txt "${BUILD_CONTEXT}/projects/rag_system/requirements-rag-system.txt"
           echo "BUILD_CONTEXT=${BUILD_CONTEXT}" >> "${GITHUB_ENV}"
 
       - name: Login Docker to ACR
@@ -245,10 +212,9 @@ jobs:
         run: |
           IMAGE_REF="${{ needs.terraform-infra.outputs.acr_login_server }}/${IMAGE_NAME}:${GITHUB_SHA}"
           docker build \
-            -f "${GITHUB_WORKSPACE}/projects/research_agent/Dockerfile" \
+            -f "${GITHUB_WORKSPACE}/projects/rag_system/Dockerfile" \
             -t "${IMAGE_REF}" \
             "${BUILD_CONTEXT}"
-
           docker push "${IMAGE_REF}"
           echo "image_ref=${IMAGE_REF}" >> "${GITHUB_OUTPUT}"
 
@@ -286,13 +252,13 @@ jobs:
             ./deploy/helm/charts/fastapi-service \
             --namespace "${{ needs.terraform-infra.outputs.aks_namespace }}" \
             --create-namespace \
-            -f ./projects/research_agent/deploy/azure/values.yaml \
+            -f ./projects/rag_system/deploy/azure/values.yaml \
             --set image.repository="${{ needs.terraform-infra.outputs.acr_login_server }}/${IMAGE_NAME}" \
             --set image.tag="${GITHUB_SHA}" \
             --set ingress.enabled=true \
-            --set ingress.host="${RESEARCH_AGENT_HOST}" \
+            --set ingress.host="${RAG_SYSTEM_HOST}" \
             --set ingress.tls.enabled=true \
-            --set ingress.tls.secretName="${RESEARCH_AGENT_TLS_SECRET_NAME}" \
+            --set ingress.tls.secretName="${RAG_SYSTEM_TLS_SECRET_NAME}" \
             --set keyVault.enabled=true \
             --set keyVault.name="${{ needs.terraform-infra.outputs.key_vault_name }}" \
             --set keyVault.tenantId="${{ secrets.AZURE_TENANT_ID }}" \

@@ -1,0 +1,100 @@
+# Release naming for Kubernetes resources.
+nameOverride: "rag-system"
+fullnameOverride: "rag-system"
+
+# Number of pods.
+replicaCount: 1
+
+# Safer rollout strategy for small dev clusters.
+deploymentStrategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxUnavailable: 1
+    maxSurge: 0
+
+# Image settings overridden by CI/CD at deploy time.
+image:
+  repository: example.azurecr.io/rag-system
+  tag: latest
+  pullPolicy: IfNotPresent
+
+# Internal service wiring. Public traffic should enter through ingress.
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8000
+
+# FastAPI container port.
+containerPort: 8000
+
+# Non-secret runtime configuration.
+env:
+  RAG_PORT: "8000"
+  APP_ENV: "dev"
+  LOG_LEVEL: "INFO"
+  # LLM and embedding configuration.
+  LLM_PROVIDER: "openai"
+  OPENAI_MODEL: "gpt-4o-mini"
+  EMBEDDINGS_PROVIDER: "openai"
+  EMBEDDINGS_MODEL: "text-embedding-3-small"
+  # Vector store configuration for the RAG pipeline.
+  VECTOR_STORE_PROVIDER: "chroma"
+  VECTOR_STORE_COLLECTION_NAME: "rag_collection"
+  VECTOR_STORE_HOST: "chroma.default.svc.cluster.local"
+  VECTOR_STORE_PORT: "8000"
+  # Loader and splitter behavior for ingestion.
+  LOADER_STRATEGY: "auto"
+  SPLITTER_STRATEGY: "recursive"
+  SPLITTER_CHUNK_SIZE: "1000"
+  SPLITTER_CHUNK_OVERLAP: "200"
+
+# Existing Kubernetes Secret references, if any.
+secretEnv: []
+
+# Ingress settings. CI/CD will typically override host and TLS values.
+ingress:
+  enabled: false
+  className: webapprouting.kubernetes.azure.com
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  host: rag.example.com
+  path: /
+  pathType: Prefix
+  tls:
+    enabled: true
+    secretName: rag-system-tls
+
+# Key Vault secret sync. Keep only actual required secrets here.
+keyVault:
+  enabled: false
+  name: ""
+  tenantId: ""
+  useVMManagedIdentity: true
+  userAssignedIdentityID: ""
+  mountPath: /mnt/secrets-store
+  secrets:
+    - objectName: openai-api-key
+      secretKey: OPENAI_API_KEY
+    # Add these only if you switch to secret-backed vector or third-party providers later.
+    # - objectName: pinecone-api-key
+    #   secretKey: PINECONE_API_KEY
+
+# Resource requests for a small dev cluster.
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 1Gi
+
+# Health probes.
+livenessProbe:
+  path: /health
+  initialDelaySeconds: 20
+  periodSeconds: 15
+
+readinessProbe:
+  path: /health
+  initialDelaySeconds: 10
+  periodSeconds: 10

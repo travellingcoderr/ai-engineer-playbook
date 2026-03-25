@@ -1,23 +1,27 @@
 output "resource_group_name" {
-  value = azurerm_resource_group.this.name
+  value = module.aks_service.resource_group_name
 }
 
 output "acr_login_server" {
-  value = azurerm_container_registry.this.login_server
+  value = module.aks_service.acr_login_server
 }
 
 output "aks_name" {
-  value = azurerm_kubernetes_cluster.this.name
+  value = module.aks_service.aks_name
 }
 
 output "aks_namespace" {
-  value = var.aks_namespace
+  value = module.aks_service.aks_namespace
+}
+
+output "aks_keyvault_csi_client_id" {
+  value = module.aks_service.aks_keyvault_csi_client_id
 }
 
 output "key_vault_name" {
-  value = azurerm_key_vault.this.name
+  value = module.aks_service.key_vault_name
 }
 
 output "github_actions_role_assignment_enabled" {
-  value = var.enable_github_actions_role_assignments
+  value = module.aks_service.github_actions_role_assignment_enabled
 }
