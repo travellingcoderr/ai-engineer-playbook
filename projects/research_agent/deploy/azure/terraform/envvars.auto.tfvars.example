@@ -7,11 +7,13 @@ aks_node_count        = 1
 aks_vm_size           = "Standard_DC2as_v5"
 aks_namespace         = "research-agent-dev"
 key_vault_name        = "kv-research-agent-dev-12345"
+enable_rbac_role_assignments = true
 enable_app_routing    = true
 enable_keyvault_csi   = true
 github_actions_client_id = "11111111-1111-1111-1111-111111111111"
 enable_github_actions_role_assignments = true
-enable_github_actions_subscription_contributor = false
+enable_github_actions_subscription_contributor = true
+enable_github_actions_user_access_administrator = true
 key_vault_secrets_officer_object_ids = [
   "22222222-2222-2222-2222-222222222222"
 ]

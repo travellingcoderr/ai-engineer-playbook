@@ -72,6 +72,20 @@ The Azure Entra application still needs Azure RBAC, for example:
 - subscription-level access for first-time Terraform backend bootstrap
 - project-level access for ACR, AKS, and Key Vault related deployment work
 
+## Best Practice Azure Roles For The GitHub App
+
+For this repo's GitHub Actions design, the GitHub OIDC application should ideally have:
+- `Contributor`
+- `User Access Administrator`
+
+Why both are needed:
+- `Contributor` allows resource creation and updates
+- `User Access Administrator` allows Azure RBAC role assignments
+
+That maps directly to the two capabilities the workflow uses:
+- resource creation
+- RBAC assignment
+
 ## Bootstrap Limitation
 
 Terraform can look up the GitHub Actions service principal from the application client ID and assign Azure RBAC to it.
@@ -87,3 +101,41 @@ So the first subscription-level access still has to come from:
 - or a different already-authorized bootstrap identity
 
 After that, Terraform can manage the ongoing RBAC for the GitHub identity.
+
+## Terraform Toggle For RBAC Creation
+
+This repo now supports a Terraform toggle:
+
+```hcl
+enable_rbac_role_assignments = false
+```
+
+Use this when the workflow identity does not have RBAC-admin rights and you want Terraform to:
+- create Azure resources
+- skip all `azurerm_role_assignment` resources
+
+In GitHub Actions, the same behavior can be controlled with the repository variable:
+
+```text
+ENABLE_RBAC_ROLE_ASSIGNMENTS=false
+```
+
+When that toggle is `false`, Terraform skips RBAC creation for:
+- AKS to ACR pull
+- AKS Key Vault read roles
+- GitHub Actions ACR and resource group roles
+- Key Vault secret officer assignments
+
+When RBAC creation is enabled, this repo can also manage the two subscription-level roles for the GitHub app explicitly:
+
+```hcl
+enable_github_actions_subscription_contributor      = true
+enable_github_actions_user_access_administrator     = true
+```
+
+Those map to the GitHub repository variables:
+
+```text
+ENABLE_GITHUB_ACTIONS_SUBSCRIPTION_CONTRIBUTOR=true
+ENABLE_GITHUB_ACTIONS_USER_ACCESS_ADMINISTRATOR=true
+```

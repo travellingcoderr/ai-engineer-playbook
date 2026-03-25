@@ -37,6 +37,11 @@ variable "key_vault_name" {
   type = string
 }
 
+variable "enable_rbac_role_assignments" {
+  type    = bool
+  default = true
+}
+
 variable "enable_app_routing" {
   type    = bool
   default = true
@@ -60,6 +65,11 @@ variable "enable_github_actions_role_assignments" {
 variable "enable_github_actions_subscription_contributor" {
   type    = bool
   default = false
+}
+
+variable "enable_github_actions_user_access_administrator" {
+  type    = bool
+  default = true
 }
 
 variable "key_vault_secrets_officer_object_ids" {

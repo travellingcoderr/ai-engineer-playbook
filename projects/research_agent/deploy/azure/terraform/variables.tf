@@ -58,6 +58,12 @@ variable "enable_keyvault_csi" {
   default     = true
 }
 
+variable "enable_rbac_role_assignments" {
+  type        = bool
+  description = "Whether Terraform should create Azure RBAC role assignments"
+  default     = true
+}
+
 variable "github_actions_client_id" {
   type        = string
   description = "Client ID of the GitHub Actions Entra application used by azure/login"
@@ -74,6 +80,12 @@ variable "enable_github_actions_subscription_contributor" {
   type        = bool
   description = "Whether to assign subscription-level Contributor to the GitHub Actions Entra application"
   default     = false
+}
+
+variable "enable_github_actions_user_access_administrator" {
+  type        = bool
+  description = "Whether to assign subscription-level User Access Administrator to the GitHub Actions Entra application"
+  default     = true
 }
 
 variable "key_vault_secrets_officer_object_ids" {

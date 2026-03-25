@@ -24,8 +24,10 @@ module "security_rbac" {
   aks_kubelet_object_id                  = module.core_infra.aks_kubelet_object_id
   aks_keyvault_csi_object_id             = module.core_infra.aks_keyvault_csi_object_id
   enable_keyvault_csi                    = var.enable_keyvault_csi
+  enable_rbac_role_assignments           = var.enable_rbac_role_assignments
   github_actions_client_id               = var.github_actions_client_id
   enable_github_actions_role_assignments = var.enable_github_actions_role_assignments
   enable_github_actions_subscription_contributor = var.enable_github_actions_subscription_contributor
+  enable_github_actions_user_access_administrator = var.enable_github_actions_user_access_administrator
   key_vault_secrets_officer_object_ids   = var.key_vault_secrets_officer_object_ids
 }
