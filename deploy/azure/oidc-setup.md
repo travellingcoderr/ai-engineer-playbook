@@ -7,8 +7,7 @@ This file explains when the shared federated credential example is used and how 
 GitHub Actions uses OpenID Connect (OIDC) so workflows can log in to Azure without storing a client secret in GitHub.
 
 In this repo, that is the auth model used by:
-- `.github/workflows/research-agent-aks.yml`
-- `.github/workflows/rag-system-aks.yml`
+- `.github/workflows/services-aks.yml`
 
 The shared example JSON lives here:
 - `deploy/azure/github-federated-credential.main.json.example`

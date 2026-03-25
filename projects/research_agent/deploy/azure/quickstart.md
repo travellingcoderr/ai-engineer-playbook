@@ -59,7 +59,7 @@ TFSTATE_STORAGE_ACCOUNT="<globally-unique-storage-account>" \
 Workflow:
 
 ```text
-.github/workflows/research-agent-aks.yml
+.github/workflows/services-aks.yml
 ```
 
 ### 4. Let the workflow run in this order

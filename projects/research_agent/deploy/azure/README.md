@@ -87,7 +87,7 @@ This is the recommended order when you want GitHub Actions to create everything 
    - Terraform backend storage
    - `research_agent` resource names
    - ingress hostname
-3. Push to `main` or run `.github/workflows/research-agent-aks.yml` manually
+3. Push to `main` or run `.github/workflows/services-aks.yml` manually with `service=research_agent`
 4. The workflow bootstraps the Terraform backend in Azure Storage
 5. The workflow runs `terraform init`, `plan`, and `apply`
 6. The workflow reads Terraform outputs for:
@@ -212,7 +212,7 @@ Note:
 ## GitHub Actions
 
 There is a project-specific workflow here:
-- `.github/workflows/research-agent-aks.yml`
+- `.github/workflows/services-aks.yml`
 
 Required GitHub repository secrets:
 - `AZURE_CLIENT_ID`

@@ -36,7 +36,7 @@ TFSTATE_STORAGE_ACCOUNT="<globally-unique-storage-account>" \
 4. Push to `main` or run:
 
 ```bash
-gh workflow run rag-system-aks.yml
+gh workflow run services-aks.yml -f service=rag_system
 ```
 
 5. Verify:

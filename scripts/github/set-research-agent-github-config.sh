@@ -142,5 +142,5 @@ Variables:
   KEY_VAULT_SECRETS_OFFICER_OBJECT_IDS_JSON=${KEY_VAULT_SECRETS_OFFICER_OBJECT_IDS_JSON}
 
 Next:
-  gh workflow run research-agent-aks.yml
+  gh workflow run services-aks.yml -f service=research_agent
 EOF
