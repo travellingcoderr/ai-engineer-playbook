@@ -139,3 +139,22 @@ Those map to the GitHub repository variables:
 ENABLE_GITHUB_ACTIONS_SUBSCRIPTION_CONTRIBUTOR=true
 ENABLE_GITHUB_ACTIONS_USER_ACCESS_ADMINISTRATOR=true
 ```
+
+## Recommended Values When Subscription Roles Are Managed Manually Once
+
+If an Azure admin has already granted the GitHub OIDC application the required subscription-level roles manually, the recommended GitHub repository variable values are:
+
+```text
+ENABLE_RBAC_ROLE_ASSIGNMENTS=true
+ENABLE_GITHUB_ACTIONS_SUBSCRIPTION_ROLE_ASSIGNMENTS=false
+ENABLE_GITHUB_ACTIONS_SUBSCRIPTION_CONTRIBUTOR=false
+ENABLE_GITHUB_ACTIONS_USER_ACCESS_ADMINISTRATOR=false
+```
+
+This keeps Terraform responsible for project-level RBAC such as:
+- AKS to ACR pull
+- AKS Key Vault access
+- project ACR push/pull
+- project resource group access
+
+While avoiding duplicate creation attempts for subscription-level roles that already exist.

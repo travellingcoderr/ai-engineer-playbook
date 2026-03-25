@@ -62,6 +62,11 @@ variable "enable_github_actions_role_assignments" {
   default = false
 }
 
+variable "enable_github_actions_subscription_role_assignments" {
+  type    = bool
+  default = true
+}
+
 variable "enable_github_actions_subscription_contributor" {
   type    = bool
   default = false

@@ -76,6 +76,12 @@ variable "enable_github_actions_role_assignments" {
   default     = false
 }
 
+variable "enable_github_actions_subscription_role_assignments" {
+  type        = bool
+  description = "Whether Terraform should manage subscription-level Azure RBAC roles for the GitHub Actions Entra application"
+  default     = true
+}
+
 variable "enable_github_actions_subscription_contributor" {
   type        = bool
   description = "Whether to assign subscription-level Contributor to the GitHub Actions Entra application"
