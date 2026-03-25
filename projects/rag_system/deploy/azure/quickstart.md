@@ -30,7 +30,7 @@ AZURE_CLIENT_ID="<client-id>" \
 AZURE_TENANT_ID="<tenant-id>" \
 AZURE_SUBSCRIPTION_ID="<subscription-id>" \
 TFSTATE_STORAGE_ACCOUNT="<globally-unique-storage-account>" \
-./scripts/github/set-rag-system-github-config.sh
+./scripts/github/set-service-github-config.sh rag_system
 ```
 
 4. Push to `main` or run:

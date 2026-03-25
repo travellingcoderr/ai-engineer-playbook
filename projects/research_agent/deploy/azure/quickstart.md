@@ -51,7 +51,7 @@ AZURE_CLIENT_ID="<client-id>" \
 AZURE_TENANT_ID="<tenant-id>" \
 AZURE_SUBSCRIPTION_ID="db909f94-f59e-4ca4-acad-e2839e7af5f4" \
 TFSTATE_STORAGE_ACCOUNT="<globally-unique-storage-account>" \
-./scripts/github/set-research-agent-github-config.sh
+./scripts/github/set-service-github-config.sh research_agent
 ```
 
 ### 3. Push to `main` or run the workflow manually
