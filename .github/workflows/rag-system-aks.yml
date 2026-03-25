@@ -52,6 +52,44 @@ jobs:
       - name: Validate workflow configuration
         run: |
           missing=0
+          check_secret() {
+            if [ -z "$2" ]; then
+              echo "Missing secret: $1"
+              missing=1
+            else
+              echo "Secret present: $1"
+            fi
+          }
+
+          check_variable() {
+            if [ -z "$2" ]; then
+              echo "Missing variable: $1"
+              missing=1
+            else
+              echo "Variable $1=$2"
+            fi
+          }
+
+          check_secret "AZURE_CLIENT_ID" "${{ secrets.AZURE_CLIENT_ID }}"
+          check_secret "AZURE_TENANT_ID" "${{ secrets.AZURE_TENANT_ID }}"
+          check_secret "AZURE_SUBSCRIPTION_ID" "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+
+          check_variable "RAG_SYSTEM_RESOURCE_GROUP" "${RAG_SYSTEM_RESOURCE_GROUP}"
+          check_variable "RAG_SYSTEM_LOCATION" "${RAG_SYSTEM_LOCATION}"
+          check_variable "RAG_SYSTEM_ACR_NAME" "${RAG_SYSTEM_ACR_NAME}"
+          check_variable "RAG_SYSTEM_AKS_NAME" "${RAG_SYSTEM_AKS_NAME}"
+          check_variable "RAG_SYSTEM_AKS_NODE_COUNT" "${RAG_SYSTEM_AKS_NODE_COUNT}"
+          check_variable "RAG_SYSTEM_AKS_VM_SIZE" "${RAG_SYSTEM_AKS_VM_SIZE}"
+          check_variable "RAG_SYSTEM_AKS_NAMESPACE" "${RAG_SYSTEM_AKS_NAMESPACE}"
+          check_variable "RAG_SYSTEM_KEY_VAULT_NAME" "${RAG_SYSTEM_KEY_VAULT_NAME}"
+          check_variable "RAG_SYSTEM_HOST" "${RAG_SYSTEM_HOST}"
+          check_variable "RAG_SYSTEM_TLS_SECRET_NAME" "${RAG_SYSTEM_TLS_SECRET_NAME}"
+          check_variable "TFSTATE_RESOURCE_GROUP" "${TFSTATE_RESOURCE_GROUP}"
+          check_variable "TFSTATE_STORAGE_ACCOUNT" "${TFSTATE_STORAGE_ACCOUNT}"
+          check_variable "TFSTATE_CONTAINER" "${TFSTATE_CONTAINER}"
+          check_variable "TFSTATE_KEY" "${TFSTATE_KEY}"
+          check_variable "KEY_VAULT_SECRETS_OFFICER_OBJECT_IDS_JSON" "${KEY_VAULT_SECRETS_OFFICER_OBJECT_IDS_JSON}"
+
           if [ -z "${TFSTATE_STORAGE_ACCOUNT}" ]; then
             echo "TFSTATE_STORAGE_ACCOUNT GitHub variable is required."
             missing=1
