@@ -10,3 +10,7 @@ class GuardCheckType(str, Enum):
     INJECTION = "injection"
     SECRETS = "secrets"
     TOXICITY = "toxicity"
+    SMUGGLING = "smuggling"
+    DOS = "dos"
+    HARMFUL_CONTENT = "harmful_content"
+    MALFORMED_OUTPUT = "malformed_output"

@@ -8,7 +8,10 @@ class GuardRequest(BaseModel):
         GuardCheckType.PII, 
         GuardCheckType.INJECTION, 
         GuardCheckType.SECRETS, 
-        GuardCheckType.TOXICITY
+        GuardCheckType.TOXICITY,
+        GuardCheckType.SMUGGLING,
+        GuardCheckType.DOS,
+        GuardCheckType.HARMFUL_CONTENT
     ]
 
 class GuardResponse(BaseModel):
