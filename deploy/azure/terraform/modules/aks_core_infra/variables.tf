@@ -24,6 +24,11 @@ variable "aks_vm_size" {
   default = "Standard_DC2as_v5"
 }
 
+variable "aks_node_pool_max_surge" {
+  type    = string
+  default = "0"
+}
+
 variable "aks_namespace" {
   type = string
 }

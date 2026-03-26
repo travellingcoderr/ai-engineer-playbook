@@ -7,6 +7,7 @@ module "core_infra" {
   aks_name            = var.aks_name
   aks_node_count      = var.aks_node_count
   aks_vm_size         = var.aks_vm_size
+  aks_node_pool_max_surge = var.aks_node_pool_max_surge
   aks_namespace       = var.aks_namespace
   key_vault_name      = var.key_vault_name
   enable_app_routing  = var.enable_app_routing

@@ -7,6 +7,7 @@ acr_name       = "ragsystemacrdev"
 aks_name       = "aks-rag-system-dev"
 aks_node_count = 1
 aks_vm_size    = "Standard_DC2as_v5"
+aks_node_pool_max_surge = "0"
 aks_namespace  = "rag-system-dev"
 
 key_vault_name      = "kv-rag-system-dev001"

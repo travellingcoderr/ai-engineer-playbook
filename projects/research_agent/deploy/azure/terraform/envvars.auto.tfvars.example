@@ -5,6 +5,7 @@ acr_name              = "researchagentacr12345"
 aks_name              = "aks-research-agent-dev"
 aks_node_count        = 1
 aks_vm_size           = "Standard_DC2as_v5"
+aks_node_pool_max_surge = "0"
 aks_namespace         = "research-agent-dev"
 key_vault_name        = "kv-research-agent-dev-12345"
 enable_rbac_role_assignments = true
