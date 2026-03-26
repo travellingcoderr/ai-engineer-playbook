@@ -6,6 +6,7 @@ fullnameOverride: "rag-system"
 replicaCount: 1
 
 # Safer rollout strategy for small dev clusters.
+# This avoids scheduling a second surge pod during upgrades.
 deploymentStrategy:
   type: RollingUpdate
   rollingUpdate:
@@ -79,14 +80,15 @@ keyVault:
     # - objectName: pinecone-api-key
     #   secretKey: PINECONE_API_KEY
 
-# Resource requests for a small dev cluster.
+# Resource requests for a constrained single-node dev cluster.
+# Keep requests low so AKS system pods and this app can fit on the same node.
 resources:
   requests:
-    cpu: 100m
-    memory: 256Mi
+    cpu: 50m
+    memory: 128Mi
   limits:
-    cpu: 500m
-    memory: 1Gi
+    cpu: 250m
+    memory: 512Mi
 
 # Health probes.
 livenessProbe:

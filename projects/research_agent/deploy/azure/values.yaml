@@ -88,13 +88,14 @@ keyVault:
       secretKey: TAVILY_API_KEY
 
 # Pod resource requests and limits.
-# Keep these small for dev and raise them after you observe real memory/CPU usage.
+# Keep these conservative for a constrained single-node dev cluster so AKS system pods
+# and the app can coexist during normal operation.
 resources:
   requests:
-    cpu: 100m
-    memory: 192Mi
+    cpu: 50m
+    memory: 128Mi
   limits:
-    cpu: 300m
+    cpu: 250m
     memory: 512Mi
 
 # Liveness probe checks whether the app is still healthy.
