@@ -27,7 +27,8 @@ resource "azurerm_kubernetes_cluster" "this" {
     vm_size    = var.aks_vm_size
 
     upgrade_settings {
-      max_surge = var.aks_node_pool_max_surge
+      max_surge       = var.aks_node_pool_max_surge
+      max_unavailable = "1"
     }
   }
 
