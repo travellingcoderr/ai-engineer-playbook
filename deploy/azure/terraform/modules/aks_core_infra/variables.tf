@@ -26,7 +26,7 @@ variable "aks_vm_size" {
 
 variable "aks_node_pool_max_surge" {
   type    = string
-  default = "0"
+  default = "1"
 }
 
 variable "aks_namespace" {

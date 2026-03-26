@@ -38,7 +38,7 @@ variable "aks_vm_size" {
 variable "aks_node_pool_max_surge" {
   type        = string
   description = "AKS node pool max surge used during upgrades"
-  default     = "0"
+  default     = "1"
 }
 
 variable "aks_namespace" {
