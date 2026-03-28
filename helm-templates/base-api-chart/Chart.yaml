@@ -1,0 +1,6 @@
+apiVersion: v2
+name: base-api-chart
+description: A basic API service for demonstrating Kubernetes features.
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

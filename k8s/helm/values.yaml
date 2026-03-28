@@ -1,0 +1,52 @@
+base-api-chart:
+  fullnameOverride: "my-api"
+  replicaCount: 2
+
+  image:
+    repository: k8s-api-service
+    pullPolicy: Always
+    tag: "latest"
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  ingress:
+    enabled: true
+    className: "traefik"
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    hosts:
+      - host: api.purpletechllc.com
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+    tls:
+      - secretName: api-tls
+        hosts:
+          - api.purpletechllc.com
+
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 80
+
+  keyvault:
+    name: "kv-research-agent-dev007"
+    tenantId: "2c206d8b-26d4-40af-ad87-4498355a7b51"
+    clientID: "3630ed2d-b34e-44dd-9b60-7cab5da5a901"
+    secrets:
+      - name: "app-secret"
+        key: "APP_SECRET"
+
+  env:
+    APP_ENV_VAR: "Hello from Kubernetes ConfigMap!"

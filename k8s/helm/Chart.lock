@@ -1,0 +1,6 @@
+dependencies:
+- name: base-api-chart
+  repository: file:///Users/works/Desktop/@sathish/ai_projects/ai-engineer-playbook/helm-templates/base-api-chart
+  version: 0.1.0
+digest: sha256:e29bef474a6b3a11b0cfdadf86f0acf21ac38e75de8b9f81e1656b58c083721c
+generated: "2026-03-27T11:48:41.049273-04:00"
