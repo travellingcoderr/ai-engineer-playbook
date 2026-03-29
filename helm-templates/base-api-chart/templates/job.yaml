@@ -1,0 +1,25 @@
+{{- range .Values.jobs -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "k8s-api-service.fullname" $ }}-{{ .name }}
+  labels:
+    {{- include "k8s-api-service.labels" $ | nindent 4 }}
+spec:
+  template:
+    spec:
+      serviceAccountName: {{ include "k8s-api-service.serviceAccountName" $ }}
+      containers:
+        - name: {{ .name }}
+          image: "{{ if .image }}{{ .image.repository | default $.Values.image.repository }}{{ else }}{{ $.Values.image.repository }}{{ end }}:{{ if .image }}{{ .image.tag | default $.Values.image.tag }}{{ else }}{{ $.Values.image.tag }}{{ end }}"
+          {{- if .command }}
+          command: {{ .command | toYaml | nindent 12 }}
+          {{- end }}
+          {{- with .resources | default $.Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      restartPolicy: OnFailure
+  backoffLimit: 4
+---
+{{- end -}}

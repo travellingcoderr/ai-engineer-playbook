@@ -42,5 +42,39 @@ autoscaling:
 env:
   APP_ENV_VAR: "Hello from Kubernetes ConfigMap!"
 
+# -- Secrets configuration
 secrets:
   APP_SECRET: "SSBoYXZlIGEgc2VjcmV0IDsp" # "I have a secret ;)" in base64
+
+# -- ServiceAccount configuration
+serviceAccount:
+  create: true
+  # -- name of the service account to use. If not set and create is true, a name is generated using the fullname template
+  name: ""
+  annotations: {}
+
+# -- RBAC configuration
+rbac:
+  create: false
+  # -- Rules for the Role (namespace-scoped)
+  rules: []
+  # - apiGroups: [""]
+  #   resources: ["pods"]
+  #   verbs: ["get", "list", "watch"]
+
+# -- Jobs configuration (one-off tasks)
+jobs: []
+# - name: db-migration
+#   image:
+#     repository: migration-tool
+#     tag: v1.0.0
+#   command: ["/bin/sh", "-c", "echo migration logic here"]
+
+# -- CronJobs configuration (scheduled tasks)
+cronjobs: []
+# - name: database-backup
+#   schedule: "0 2 * * *" # Daily at 2 AM
+#   image:
+#     repository: backup-tool
+#     tag: latest
+#   command: ["/bin/sh", "-c", "echo backup logic here"]

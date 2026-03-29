@@ -1,0 +1,27 @@
+{{- range .Values.cronjobs -}}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "k8s-api-service.fullname" $ }}-{{ .name }}
+  labels:
+    {{- include "k8s-api-service.labels" $ | nindent 4 }}
+spec:
+  schedule: "{{ .schedule }}"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: {{ include "k8s-api-service.serviceAccountName" $ }}
+          containers:
+            - name: {{ .name }}
+              image: "{{ if .image }}{{ .image.repository | default $.Values.image.repository }}{{ else }}{{ $.Values.image.repository }}{{ end }}:{{ if .image }}{{ .image.tag | default $.Values.image.tag }}{{ else }}{{ $.Values.image.tag }}{{ end }}"
+              {{- if .command }}
+              command: {{ .command | toYaml | nindent 16 }}
+              {{- end }}
+              {{- with .resources | default $.Values.resources }}
+              resources:
+                {{- toYaml . | nindent 16 }}
+              {{- end }}
+          restartPolicy: OnFailure
+---
+{{- end -}}

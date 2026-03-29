@@ -16,6 +16,7 @@ spec:
       labels:
         {{- include "k8s-api-service.selectorLabels" . | nindent 8 }}
     spec:
+      serviceAccountName: {{ include "k8s-api-service.serviceAccountName" . }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"

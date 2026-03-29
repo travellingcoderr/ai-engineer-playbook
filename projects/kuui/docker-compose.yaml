@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "${PORT_BACKEND}:${PORT_BACKEND}"
+    volumes:
+      - ${HOME}/.kube/config:/root/.kube/config
+    environment:
+      - KUBECONFIG=/root/.kube/config
+      - PORT=${PORT_BACKEND}
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "${PORT_FRONTEND}:${PORT_FRONTEND}"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:${PORT_BACKEND}
+      - PORT=${PORT_FRONTEND}
+    depends_on:
+      - backend
