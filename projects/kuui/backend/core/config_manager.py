@@ -74,3 +74,35 @@ class KubeConfigManager:
             return True
         except Exception:
             return False
+
+    def delete_context(self, context_name: str) -> bool:
+        """
+        Deletes a context from the kubeconfig file.
+        """
+        import yaml
+        import os
+        kube_path = os.getenv("KUBECONFIG") or os.path.expanduser("~/.kube/config")
+        
+        if not os.path.exists(kube_path):
+            return False
+            
+        try:
+            with open(kube_path, 'r') as f:
+                cfg = yaml.safe_load(f)
+            
+            # Filter out the context
+            original_len = len(cfg.get('contexts', []))
+            cfg['contexts'] = [c for c in cfg.get('contexts', []) if c['name'] != context_name]
+            
+            if len(cfg['contexts']) == original_len:
+                return False # Context not found
+                
+            # Save back to file
+            with open(kube_path, 'w') as f:
+                yaml.dump(cfg, f, default_flow_style=False)
+                
+            # Re-initialize the kubernetes client
+            self.load_config()
+            return True
+        except Exception:
+            return False

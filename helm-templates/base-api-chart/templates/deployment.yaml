@@ -41,6 +41,7 @@ spec:
                 configMapKeyRef:
                   name: {{ include "k8s-api-service.fullname" . }}
                   key: APP_ENV_VAR
+            {{- if .Values.keyvault.name }}
             {{- range .Values.keyvault.secrets }}
             - name: {{ .key | default .name }}
               valueFrom:
@@ -48,14 +49,19 @@ spec:
                   name: {{ include "k8s-api-service.fullname" $ }}-kv-sync
                   key: {{ .key | default .name }}
             {{- end }}
+            {{- end }}
           volumeMounts:
+            {{- if .Values.keyvault.name }}
             - name: secrets-store-inline
               mountPath: "/mnt/secrets-store"
               readOnly: true
+            {{- end }}
       volumes:
+        {{- if .Values.keyvault.name }}
         - name: secrets-store-inline
           csi:
             driver: secrets-store.csi.k8s.io
             readOnly: true
             volumeAttributes:
               secretProviderClass: {{ include "k8s-api-service.fullname" . }}-kv
+        {{- end }}

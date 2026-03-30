@@ -7,6 +7,7 @@ services:
       - "${PORT_BACKEND}:${PORT_BACKEND}"
     volumes:
       - ${HOME}/.kube/config:/root/.kube/config
+      - ../../helm-templates:/app/helm-templates
     environment:
       - KUBECONFIG=/root/.kube/config
       - PORT=${PORT_BACKEND}

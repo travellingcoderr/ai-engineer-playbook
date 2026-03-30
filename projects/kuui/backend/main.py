@@ -3,6 +3,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from core.config_manager import KubeConfigManager
 from core.resource_manager import KubeResourceManager
 import os
+import subprocess
+import yaml
+import tempfile
+from pydantic import BaseModel
+from typing import List, Optional, Dict, Any
 
 app = FastAPI(title="KUUI API")
 
@@ -23,6 +28,66 @@ kube_config.load_config()
 def health_check():
     return {"status": "healthy"}
 
+class HelmRenderRequest(BaseModel):
+    values: Dict[str, Any]
+
+@app.post("/helm/render")
+async def render_helm(request: HelmRenderRequest):
+    """
+    Renders the base-api-chart with provided values.
+    """
+    # More robust path discovery: Find 'helm-templates' up the directory tree
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    chart_path = None
+    
+    # Search up to 5 levels for the helm-templates directory
+    search_dir = current_dir
+    for _ in range(5):
+        potential_path = os.path.join(search_dir, "helm-templates", "base-api-chart")
+        if os.path.exists(potential_path):
+            chart_path = potential_path
+            break
+        search_dir = os.path.dirname(search_dir)
+        if search_dir == os.path.dirname(search_dir): # Root reached
+            break
+    
+    if not chart_path:
+        # Fallback to the original logic if walking up fails
+        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+        chart_path = os.path.join(base_dir, "helm-templates", "base-api-chart")
+
+    print(f"DEBUG: Rendering Helm chart using path: {chart_path}")
+    
+    if not os.path.exists(chart_path):
+        raise HTTPException(status_code=404, detail=f"Base chart not found at {chart_path}")
+
+    # Use a temporary file for values
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as tf:
+        yaml.dump(request.values, tf)
+        temp_values_path = tf.name
+
+    try:
+        # Run helm template
+        cmd = ["helm", "template", "preview", chart_path, "-f", temp_values_path]
+        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        return {"manifests": result.stdout}
+    except FileNotFoundError:
+        print("ERROR: 'helm' binary not found in system path")
+        raise HTTPException(
+            status_code=500, 
+            detail="Helm not found. Please ensure Helm is installed in the container."
+        )
+    except subprocess.CalledProcessError as e:
+        error_msg = e.stderr or str(e)
+        print(f"ERROR: Helm rendering failed: {error_msg}")
+        return {"error": error_msg}
+    except Exception as e:
+        print(f"ERROR: Unexpected rendering error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if os.path.exists(temp_values_path):
+            os.remove(temp_values_path)
+
 @app.get("/contexts")
 async def get_contexts():
     return kube_config.get_contexts()
@@ -33,6 +98,13 @@ async def switch_context(name: str):
     if not success:
         raise HTTPException(status_code=400, detail=f"Failed to switch to context: {name}")
     return {"status": "success", "current_context": name}
+
+@app.delete("/contexts/{name}")
+async def delete_context(name: str):
+    success = kube_config.delete_context(name)
+    if not success:
+        raise HTTPException(status_code=400, detail=f"Failed to delete context: {name}")
+    return {"status": "success", "deleted_context": name}
 
 @app.get("/cluster/overview")
 async def get_cluster_overview():
