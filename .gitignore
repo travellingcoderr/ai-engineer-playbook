@@ -242,3 +242,16 @@ override.tf.json
 # KUUI Frontend
 projects/kuui/frontend/.next/
 projects/kuui/frontend/node_modules/
+
+# Nexus
+projects/nexus/src/Nexus.Domain/obj/
+projects/nexus/src/Nexus.Domain/bin/
+projects/nexus/src/Nexus.Application/obj/
+projects/nexus/src/Nexus.Application/bin/
+projects/nexus/src/Nexus.Infrastructure/obj/
+projects/nexus/src/Nexus.Infrastructure/bin/
+projects/nexus/src/Nexus.Api/obj/
+projects/nexus/src/Nexus.Api/bin/
+projects/nexus/src/Nexus.Api/obj/Debug/net8.0/
+projects/nexus/src/Nexus.Api/bin/Debug/net8.0/
+

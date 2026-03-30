@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  nexus-api:
+    image: nexus-api:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5005:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    # If we swap to a real DB, we'd add a dependency here:
+    # depends_on:
+    #   - nexus-db
+
+  # Optional: SQL Server for when you want to move beyond In-Memory
+  # nexus-db:
+  #   image: mcr.microsoft.com/mssql/server:2022-latest
+  #   environment:
+  #     - ACCEPT_EULA=Y
+  #     - MSSQL_SA_PASSWORD=YourStrong!Passw0rd
+  #   ports:
+  #     - "1433:1433"
