@@ -5,6 +5,9 @@ using Microsoft.Extensions.Resilience;
 using Nexus.Domain.Repositories;
 using Nexus.Infrastructure.Data;
 using Nexus.Infrastructure.Repositories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using System;
 using Polly;
 using Polly.Retry;
@@ -35,6 +38,38 @@ namespace Nexus.Infrastructure
                 })
                 .AddTimeout(TimeSpan.FromSeconds(10));
             });
+
+            // --- Security Services (JWT) ---
+            services.AddSecurityServices(configuration);
+
+            return services;
+        }
+
+        private static IServiceCollection AddSecurityServices(this IServiceCollection services, IConfiguration configuration)
+        {
+            var jwtSettings = configuration.GetSection("JwtSettings");
+            var secretKey = jwtSettings.GetValue<string>("SecretKey") ?? "YourSuperSecretKey123!ThatIsAtLeast32CharsLong";
+
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = jwtSettings.GetValue<string>("Issuer") ?? "NexusAPI",
+                    ValidAudience = jwtSettings.GetValue<string>("Audience") ?? "NexusClients",
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
+                };
+            });
+
+            services.AddAuthorization();
 
             return services;
         }

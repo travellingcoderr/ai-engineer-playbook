@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Nexus.Application.DTOs;
 using Nexus.Application.Services;
@@ -5,6 +6,7 @@ using Nexus.Application.Services;
 namespace Nexus.Api.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
     public class TransferController : ControllerBase
     {

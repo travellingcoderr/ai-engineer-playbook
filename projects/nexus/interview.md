@@ -141,4 +141,24 @@ A common interview question for Senior roles is: "What happens during the startu
 
 ---
 
-**Tip for the Interview**: Focus on the *Why*, not just the *What*. "I chose DDD because it keeps the business logic testable and independent of external frameworks like EF Core."
+## 9. 🔐 API Security (JWT & Claims)
+For a Senior role, you must prove you can secure services beyond just "username and password."
+
+### 🧩 JSON Web Tokens (JWT)
+We use **Bearer Authentication**. The client sends a token in the `Authorization` header.
+- **Header**: Signature algorithm (RS256/HS256).
+- **Payload**: User identity and **Claims** (Role: Admin, Email: alice@example.com).
+- **Signature**: Ensures the token hasn't been tampered with.
+
+### 🛡️ Security in Nexus:
+- **Authentication**: Using `Microsoft.AspNetCore.Authentication.JwtBearer`.
+- **Authorization**: The `TransferController` is protected with the `[Authorize]` attribute.
+- **Swapping for Cloud**: In a production Azure environment, I would swap the local issuer for **Azure Entra ID (Active Directory)**. The code remains largely the same; only the `Authority` and `Audience` in `appsettings.json` change.
+
+### 💡 Why JWT over Sessions?
+- **Statelessness**: Essential for **AKS**. When we scale to 10 pods, any pod can validate the token using the public key without needing a shared session database (like Redis).
+- **Decoupling**: The API doesn't need to know *how* the user logged in; it only needs to trust the **Identity Provider's** signature.
+
+---
+
+**Tip for the Interview**: "I chose JWT Bearer authentication because it enables stateless horizontal scaling in Kubernetes. While we use a local issuer for the demo, the architecture is 'Pluggable' and ready for **OpenID Connect** providers like Azure Entra ID."
