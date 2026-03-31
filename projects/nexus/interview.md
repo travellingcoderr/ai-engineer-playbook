@@ -144,11 +144,18 @@ A common interview question for Senior roles is: "What happens during the startu
 ## 9. 🔐 API Security (JWT & Claims)
 For a Senior role, you must prove you can secure services beyond just "username and password."
 
-### 🧩 JSON Web Tokens (JWT)
-We use **Bearer Authentication**. The client sends a token in the `Authorization` header.
-- **Header**: Signature algorithm (RS256/HS256).
-- **Payload**: User identity and **Claims** (Role: Admin, Email: alice@example.com).
-- **Signature**: Ensures the token hasn't been tampered with.
+### 🧩 Authentication vs. Authorization (The "Layman's Terms")
+In the Nexus project, we distinguish these two clearly:
+
+1.  **Authentication (The "Who")**: 
+    *   **Goal**: Prove you are who you say you are.
+    *   **Metaphor**: Showing your **Passport** at the airport.
+    *   **In Nexus**: Done via `POST /api/auth/login` to get a JWT token.
+
+2.  **Authorization (The "What")**:
+    *   **Goal**: Prove you have permission to do a specific action.
+    *   **Metaphor**: Showing your **Boarding Pass** to enter the "First Class Lounge." (Just because you have a passport doesn't mean you can go everywhere).
+    *   **In Nexus**: Enforced by the `[Authorize]` attribute and **claims/roles** inside the JWT.
 
 ### 🛡️ Security in Nexus:
 - **Authentication**: Using `Microsoft.AspNetCore.Authentication.JwtBearer`.
@@ -161,4 +168,23 @@ We use **Bearer Authentication**. The client sends a token in the `Authorization
 
 ---
 
-**Tip for the Interview**: "I chose JWT Bearer authentication because it enables stateless horizontal scaling in Kubernetes. While we use a local issuer for the demo, the architecture is 'Pluggable' and ready for **OpenID Connect** providers like Azure Entra ID."
+## 10. ☁️ Cloud Identity & Secretless Auth (Entra ID)
+In a modern Azure environment, we move away from "Managing Passwords" to "Managing Identities."
+
+### 🔑 Workload Identity Federation (OIDC)
+- **The Old Way**: Storing a `Client Secret` in Azure Key Vault. Risk: Secrets expire or leak.
+- **The New Way**: **Federated Credentials**. We establish a trust relationship between AKS and Entra ID. 
+- **Interview Answer**: "In my production environment, I implement **Workload Identity**. The AKS pod assumes a Managed Identity, which Entra ID recognizes via OIDC. This removes the need for rotating client secrets and significantly hardens our security posture."
+
+### 🌐 Handling External Users (B2C vs. B2B)
+When users are not part of our corporate Azure tenant:
+- **Azure AD B2C**: For public consumers. Allows sign-up with email or social providers (Google/Facebook). It keeps "Customer Data" separate from "Employee Data."
+- **Azure AD B2B**: For partners/vendors. We invite them as **Guest Users**, allowing them to use their own corporate credentials to access our resources.
+
+### 🛡️ Why use Entra ID over a custom DB?
+- **Compliance**: Handles MFA, Conditional Access (e.g., block logins from unknown countries), and Identity Protection automatically.
+- **Standards**: Uses **OpenID Connect (OIDC)** and **OAuth 2.0**, meaning our API doesn't have to reinvent the wheel for security.
+
+---
+
+**Tip for the Interview**: "Authentication is a specialized concern. By delegating it to an Identity Provider like **Microsoft Entra ID**, we focus our efforts on the complex business logic of the Nexus API, while leveraging Microsoft's multi-billion dollar security infrastructure for protection."
