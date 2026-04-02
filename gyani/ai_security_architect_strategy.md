@@ -5,9 +5,9 @@ This document provides a tailored strategy for securing a high-level **AI Securi
 ---
 
 ## 1. The "Golden Thread" – Connecting Your Past to the Role
-Your profile is unique because it blends **Enterprise Compliance (PwC)** with **State-of-the-Art AI Orchestration (EPM/Rocket)**.
+Your profile is unique because it blends **Enterprise Compliance (Purple)** with **State-of-the-Art AI Orchestration (EPM/Rocket)**.
 
-- **PwC (Senior Manager, Compliance Software):** This provides the "Who You Are" foundation (5+ years in security/product roles, communicating with leadership, and structured writing for reviews).
+- **Purple (Senior Manager, Compliance Software):** This provides the "Who You Are" foundation (5+ years in security/product roles, communicating with leadership, and structured writing for reviews).
 - **EPM/Rocket (AI Architect):** This provides the "What You’ll Do" technical edge (LangChain, LangGraph, agentic workflows, and multi-agent systems).
 
 ---
@@ -16,7 +16,7 @@ Your profile is unique because it blends **Enterprise Compliance (PwC)** with **
 
 | Commvault Requirement | Your Specific Proof Point |
 | :--- | :--- |
-| **"Identify and assess security risks associated with AI/ML systems"** | Leveraging your PwC background to conduct threat modeling for agentic workflows (e.g., assessing the risk of tool selection loops in LangGraph). |
+| **"Identify and assess security risks associated with AI/ML systems"** | Leveraging your Purple background to conduct threat modeling for agentic workflows (e.g., assessing the risk of tool selection loops in LangGraph). |
 | **"Mitigate risks such as prompt injection and data leakage"** | Highlighting your implementation of guardrails and policy enforcement for enterprise agents at EPM. |
 | **"Secure AI-related data sources"** | Your deep expertise in Snowflake, Databricks, and Oracle provides the foundation for securing the "training datasets and model artifacts" they mention. |
 | **"Agentic workflows and multi-agent architecture"** | This is your strongest differentiator. You are already an expert in the exact "Nice to Have" tools they listed (LangChain, LangGraph). |
@@ -30,7 +30,7 @@ To "wow" the recruiter for this role, use these specific phrasing patterns:
 - **Instead of:** "Built AI agents using LangChain."
 - **Use:** "Architected secure **agentic workflows** using **LangGraph**, implementing **constraint enforcement** and **policy guardrails** to prevent unauthorized tool execution and prompt injection."
 
-- **Instead of:** "Managed compliance software at PwC."
+- **Instead of:** "Managed compliance software at Purple."
 - **Use:** "Led security architecture and threat modeling for an **enterprise compliance platform**, translating complex regulatory risks into technical controls for distributed data systems."
 
 - **Instead of:** "Expert in SQL and Snowflake."
@@ -90,4 +90,4 @@ In your role as an AI Security Architect, you will need to articulate and defend
 
 ## Next Steps
 1.  **Update your LinkedIn headline:** `AI Security Architect | Enterprise AI Orchestration | LangGraph | Compliance & Risk Management`.
-2.  **Reach out to the hiring manager:** Mention your bridge between PwC compliance and Rocket Mortgage AI labs.
+2.  **Reach out to the hiring manager:** Mention your bridge between Purple compliance and Rocket Mortgage AI labs.
