@@ -61,7 +61,8 @@ const App: React.FC = () => {
       
       const response = await fetch(`http://localhost:3003/api/v1/chat/stream?message=${encodeURIComponent(input)}`);
       const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
+      let decoder = new TextDecoder();
+      let buffer = '';
 
       if (!reader) throw new Error("No reader");
 
@@ -69,12 +70,15 @@ const App: React.FC = () => {
         const { done, value } = await reader.read();
         if (done) break;
 
-        const chunk = decoder.decode(value);
-        const lines = chunk.split('\n');
+        // ACCUMULATE IN BUFFER TO HANDLE PARTIAL LINE CHUNKS
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || ''; // Keep the last (potentially partial) line
 
         for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const dataStr = line.slice(6);
+          const trimmed = line.trim();
+          if (trimmed.startsWith('data: ')) {
+            const dataStr = trimmed.slice(6);
             if (dataStr === '[DONE]') break;
             
             try {
@@ -82,8 +86,11 @@ const App: React.FC = () => {
               if (data.type === 'content') {
                 setMessages(prev => {
                   const newMsgs = [...prev];
-                  const last = newMsgs[newMsgs.length - 1];
-                  last.content += data.delta;
+                  const lastIdx = newMsgs.length - 1;
+                  // IMMUTABLE UPDATE: Clone the object to prevent duplicate rendering
+                  const lastMsg = { ...newMsgs[lastIdx] };
+                  lastMsg.content += data.delta;
+                  newMsgs[lastIdx] = lastMsg;
                   return newMsgs;
                 });
               } else if (data.type === 'tool_start') {
@@ -91,7 +98,9 @@ const App: React.FC = () => {
               } else if (data.type === 'tool_end') {
                 setTrace(prev => [...prev, { role: 'tool', output: data.output }]);
               }
-            } catch (e) { /* ignore parse errors for partial chunks */ }
+            } catch (e) {
+              console.warn("Failed to parse stream chunk:", e);
+            }
           }
         }
       }

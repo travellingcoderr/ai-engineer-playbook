@@ -30,21 +30,33 @@ sequenceDiagram
 
 ---
 
+## 🏆 Final Project Summary
+
+| Feature Area | Technical Stack | Key Capability |
+| :--- | :--- | :--- |
+| **Vector Search** | Azure OpenAI + Qdrant | **Live Retrieval**: Indexes policy booklets for instant search. |
+| **Agentic Core** | LangGraph Orchestrator | **Multi-Step Reasoning**: Chooses between claims & policies. |
+| **Streaming UI** | React + SSE | **Real-Time UX**: Interactive streaming with tool traces. |
+| **Structured Entry** | Mongo + Premium Forms | **Data Lifecycle**: Integrated "Create -> Analyze" flow. |
+
+---
+
 ## 🏗️ Architectural Layers
 
-### 1. Data Ingestion (The Continuous Learner)
-- **Component**: `ingestion/adaptive-chunker.ts`
-- **Function**: Automatically processes insurance manuals. 
-- **Learning**: Configured via **Azure AI Search Indexers** to monitor Blob Storage. When a new benefit booklet is uploaded, the indexer triggers a re-sync, making the AI "learn" the new procedure rules immediately.
+### 1. Data Ingestion (Vector Search)
+- **Component**: `ingestion-service/server.ts`
+- **Technology**: **Qdrant Vector Database**
+- **Function**: Processes insurance manuals (PDFs) into semantic chunks and stores them as 1536-dimensional vectors for RAG retrieval.
 
-### 2. Structured State (The Live Data)
+### 2. Structured State (Claims Database)
 - **Component**: `claim-service/stuck-claim-tool.ts`
-- **Logic**: Instead of searching PDFs for "why is it stuck," this tool provides **direct access to the Claim Database**. It returns the exact error codes and missing document flags that the LLM then explains to the user.
+- **Technology**: **MongoDB**
+- **Logic**: Provides direct access to the live Claim Database. It returns the exact procedure codes, patient names, and status flags used for agentic analysis.
 
 ### 3. Orchestration (The Brain)
-- **Component**: `orchestrator/agent.ts`
-- **Technology**: **LangGraph** messages-state management.
-- **Role**: Routes the user's question to the correct tool. If a user asks about a general procedure, it only hits the PDF cache. If they ask about *their* claim, it hits the Database.
+- **Component**: `orchestrator-service/agent.ts`
+- **Technology**: **LangGraph** (State Management)
+- **Role**: Determines the optimal path to resolve a query by dynamically invoking the Policy Search or Claim Lookup tools.
 
 ---
 
