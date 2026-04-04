@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import dotenv from 'dotenv';
 import { validateEntraToken } from '../common/auth.middleware';
 import { ClaimSnapshotTool } from './stuck-claim-tool';
@@ -8,6 +9,7 @@ import swaggerJsdoc from 'swagger-jsdoc';
 dotenv.config();
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 
 // SWAGGER CONFIGURATION
@@ -38,21 +40,58 @@ const claimTool = new ClaimSnapshotTool();
 
 /**
  * @openapi
+ * /api/v1/claims:
+ *   post:
+ *     summary: Create or update a claim snapshot
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               claimId:
+ *                 type: string
+ *               patientName:
+ *                 type: string
+ *               status:
+ *                 type: string
+ *               procedures:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *     responses:
+ *       200:
+ *         description: Claim saved successfully
+ */
+app.post('/api/v1/claims', validateEntraToken, async (req, res) => {
+  try {
+    const { claimId, patientName, status, procedures } = req.body;
+    if (!claimId) return res.status(400).json({ error: 'Claim ID is required' });
+
+    // UPSERT directly into MongoDB using the tool's logic (or directly via mongoose)
+    const result = await (claimTool as any).upsertClaim({ 
+      id: claimId, 
+      patientName, 
+      status, 
+      procedures 
+    });
+
+    res.json({ message: 'Claim saved successfully', claimId });
+  } catch (error) {
+    console.error('Claim Service Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * @openapi
  * /api/v1/claims/{id}:
  *   get:
  *     summary: Get a structured snapshot of a claim
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: The unique Claim ID (e.g., CLAIM-123)
- *     responses:
- *       200:
- *         description: Claim snapshot retrieved successfully
+...
  */
 app.get('/api/v1/claims/:id', validateEntraToken, async (req, res) => {
   try {

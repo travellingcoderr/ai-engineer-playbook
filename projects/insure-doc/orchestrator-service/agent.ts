@@ -1,21 +1,29 @@
 import { StateGraph, MessagesAnnotation } from '@langchain/langgraph';
 import { ChatOpenAI } from '@langchain/openai';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
-import { ClaimSnapshotTool } from '../claim-service/stuck-claim-tool';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { z } from 'zod';
+import dotenv from 'dotenv';
 
-const claimTool = new ClaimSnapshotTool();
-
-// 1. Define Tools
+dotenv.config();
 const checkClaimStatus = new DynamicStructuredTool({
   name: 'checkClaimStatus',
-  description: 'Use this tool to get the real-time status of a dental claim.',
+  description: 'Use this tool to get the real-time status and analysis of a dental claim, including why it might be stuck.',
   schema: z.object({
     claimId: z.string().describe('The ID of the dental claim (e.g., CLAIM-123)'),
   }),
   func: async ({ claimId }: { claimId: string }) => {
-    return await claimTool.getClaimSnapshot(claimId);
+    try {
+      const claimServiceUrl = process.env.CLAIM_SERVICE_URL || 'http://claim-service:3002';
+      const response = await fetch(`${claimServiceUrl}/api/v1/claims/${claimId}`);
+
+      if (!response.ok) return `Error fetching claim: ${await response.text()}`;
+      
+      const data = await response.json();
+      return JSON.stringify(data, null, 2);
+    } catch (err) {
+      return `Failed to connect to claim service: ${(err as Error).message}`;
+    }
   },
 });
 
@@ -26,7 +34,26 @@ const searchInsurancePolicy = new DynamicStructuredTool({
     query: z.string().describe('The dental procedure or benefit to lookup.'),
   }),
   func: async ({ query }: { query: string }) => {
-    return `Policy lookup for "${query}": Procedural D2740 Porcelain Crowns require pre-operative x-rays.`;
+    try {
+      const ingestionUrl = process.env.INGESTION_URL || 'http://ingestion-service:3001';
+      const response = await fetch(`${ingestionUrl}/api/v1/search`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer mock-token'
+        },
+        body: JSON.stringify({ query })
+      });
+
+      if (!response.ok) return `Error searching policy: ${await response.text()}`;
+      
+      const { results } = await response.json();
+      if (!results?.length) return `No policy found for "${query}".`;
+      
+      return results.map((r: any) => r.text).join('\n---\n');
+    } catch (err) {
+      return `Failed to connect to policy service: ${(err as Error).message}`;
+    }
   },
 });
 
@@ -58,6 +85,13 @@ const workflow = new StateGraph(MessagesAnnotation)
     const model = getModel();
     console.log('🤖 AI Agent Turn: Processing', state.messages.length, 'messages...');
     const result = await model.invoke(state.messages);
+    
+    // DIAGNOSTIC LOGGING
+    console.log('🔄 Raw Model Result:', JSON.stringify({
+      content: result.content,
+      tool_calls: (result as any).tool_calls,
+      finish_reason: (result as any).response_metadata?.finish_reason,
+    }, null, 2));
     
     if ((result as any).tool_calls?.length) {
       console.log('🛠️  AI Identifies Tool Call:', (result as any).tool_calls.map((tc: any) => tc.name).join(', '));

@@ -21,10 +21,7 @@ export interface ClaimState {
  * Local Snapshots are now PERSISTED in MongoDB.
  */
 export class ClaimSnapshotTool {
-  private mockClaims: Map<string, ClaimState> = new Map();
-
   constructor() {
-    this.seedData();
     this.ensureConnected();
   }
 
@@ -35,47 +32,47 @@ export class ClaimSnapshotTool {
     }
   }
 
-  private seedData() {
-    this.mockClaims.set('CLAIM-123', {
-      id: 'CLAIM-123',
-      status: ClaimStatus.STUCK,
-      procedures: [{ code: 'D2740', description: 'Porcelain Crown', toothNumber: 30 }],
-      missingDocuments: ['Pre-operative X-ray (Tooth 30)'],
-      denialReason: 'Pending Clinical Review: Missing required X-ray.',
-      notes: [
-        'Procedure code D2740 requires an X-ray per policy guidelines.',
-        'Sent auto-notification to patient on 2024-03-20.'
-      ]
-    });
-  }
-
-  async getClaimSnapshot(claimId: string): Promise<string> {
+  /**
+   * upsertClaim: Saves a new claim record to MongoDB.
+   */
+  async upsertClaim(data: { id: string; patientName?: string; status: ClaimStatus; procedures: any[] }) {
     await this.ensureConnected();
-    const claimData = this.mockClaims.get(claimId);
+    console.log(`💾 Persisting User-Entered Claim ${data.id} to MongoDB...`);
     
-    if (!claimData) return `Claim ${claimId} not found.`;
-
-    // UPSERT (Persistence)
-    console.log(`💾 Persisting Analysis Snapshot for ${claimId} to MongoDB...`);
-    await ClaimSnapshot.findOneAndUpdate(
-      { claimId: claimData.id },
+    return await ClaimSnapshot.findOneAndUpdate(
+      { claimId: data.id },
       { 
-        status: claimData.status,
-        procedures: claimData.procedures,
-        missingDocuments: claimData.missingDocuments,
-        denialReason: claimData.denialReason,
-        notes: claimData.notes
+        patientName: data.patientName,
+        status: data.status,
+        procedures: data.procedures,
+        updatedAt: new Date()
       },
       { upsert: true, new: true }
     );
+  }
+
+  /**
+   * getClaimSnapshot: Retrieves structured state for the AI.
+   * Checks MongoDB first.
+   */
+  async getClaimSnapshot(claimId: string): Promise<string> {
+    await this.ensureConnected();
+    
+    // 1. Try to find in DB
+    const dbClaim = await ClaimSnapshot.findOne({ claimId });
+    
+    if (!dbClaim) {
+      return `Claim ${claimId} not found in the database. Please ensure it has been created.`;
+    }
 
     return `
-CLAIM SNAPSHOT (${claimData.id})
-Status: ${claimData.status}
-Procedures: ${claimData.procedures.map(p => `${p.description} (${p.code}) on Tooth ${p.toothNumber}`).join(', ')}
-Missing Docs: ${claimData.missingDocuments.join(', ') || 'None'}
-Denial Reason: ${claimData.denialReason || 'N/A'}
-Recent Notes: ${claimData.notes.slice(-1)[0]}
+CLAIM SNAPSHOT (${dbClaim.claimId})
+Patient: ${dbClaim.patientName || 'N/A'}
+Status: ${dbClaim.status}
+Procedures: ${dbClaim.procedures.map(p => `${p.description} (${p.code})`).join(', ')}
+Missing Docs: ${dbClaim.missingDocuments?.join(', ') || 'None identified yet'}
+Denial Reason: ${dbClaim.denialReason || 'Pending analysis'}
+Recent Notes: ${dbClaim.notes?.slice(-1)[0] || 'No notes available'}
     `.trim();
   }
 }

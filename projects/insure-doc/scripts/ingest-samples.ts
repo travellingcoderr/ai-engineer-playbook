@@ -29,7 +29,8 @@ async function ingest() {
         },
         body: JSON.stringify({
           title: policy.title,
-          content: policy.content
+          content: policy.content,
+          headings: []
         })
       });
 

@@ -34,17 +34,68 @@ export class AzureVectorStore implements IVectorStore {
   }
 }
 
+import { QdrantClient } from '@qdrant/js-client-rest';
+
 /**
- * ChromaVectorStore: Implementation for local ChromaDB.
+ * QdrantVectorStore: Implementation for local Qdrant.
  */
-export class ChromaVectorStore implements IVectorStore {
-  // Using a simplified implementation for local dev
+export class QdrantVectorStore implements IVectorStore {
+  private client: QdrantClient;
+  private collectionName: string;
+
+  constructor(url: string, collectionName: string) {
+    this.client = new QdrantClient({ url });
+    this.collectionName = collectionName;
+  }
+
+  private async ensureCollection() {
+    const collections = await this.client.getCollections();
+    const exists = collections.collections.some(c => c.name === this.collectionName);
+    
+    if (!exists) {
+      console.log(`🚀 Creating Qdrant Collection: ${this.collectionName}`);
+      await this.client.createCollection(this.collectionName, {
+        vectors: {
+          size: 1536, // Azure OpenAI standard
+          distance: 'Cosine'
+        }
+      });
+    }
+  }
+
   async uploadDocuments(chunks: RawChunk[], embeddings: number[][], documentId: string) {
-    console.log(`[ChromaDB] Simulating upload of ${chunks.length} chunks for ${documentId}`);
+    await this.ensureCollection();
+    
+    const points = chunks.map((chunk, index) => ({
+      id: crypto.randomUUID(),
+      vector: embeddings[index],
+      payload: {
+        text: chunk.text,
+        documentId: documentId,
+        metadata: chunk.metadata,
+      }
+    }));
+
+    await this.client.upsert(this.collectionName, {
+      wait: true,
+      points
+    });
+    console.log(`✅ Uploaded ${chunks.length} points to Qdrant collection ${this.collectionName}`);
   }
 
   async search(query: string, vector: number[], top = 5) {
-    console.log(`[ChromaDB] Simulating hybrid search for: ${query}`);
-    return { results: [] };
+    await this.ensureCollection();
+    
+    const results = await this.client.search(this.collectionName, {
+      vector,
+      limit: top,
+      with_payload: true
+    });
+
+    return results.map(r => ({
+      text: r.payload?.text,
+      metadata: r.payload?.metadata,
+      score: r.score
+    }));
   }
 }

@@ -3,6 +3,7 @@ import { ClaimStatus } from '../common/types';
 
 export interface IClaimSnapshot extends Document {
   claimId: string;
+  patientName?: string;
   status: ClaimStatus;
   procedures: Array<{
     code: string;
@@ -17,6 +18,7 @@ export interface IClaimSnapshot extends Document {
 
 const ClaimSnapshotSchema: Schema = new Schema({
   claimId: { type: String, required: true, unique: true },
+  patientName: { type: String, default: 'Anonymous' },
   status: { type: String, required: true, enum: Object.values(ClaimStatus) },
   procedures: [{
     code: { type: String, required: true },

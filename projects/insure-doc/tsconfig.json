@@ -19,7 +19,8 @@
     "common/**/*.ts",
     "ingestion-service/**/*.ts",
     "claim-service/**/*.ts",
-    "orchestrator-service/**/*.ts"
+    "orchestrator-service/**/*.ts",
+    "scripts/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

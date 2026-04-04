@@ -10,14 +10,15 @@ services:
     volumes:
       - mongodb_data:/data/db
 
-  # LOCAL CHROMADB
-  chromadb:
-    image: chromadb/chroma:latest
-    container_name: insuredoc-chromadb
+  # LOCAL QDRANT
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: insuredoc-qdrant
     ports:
-      - "8000:8000"
+      - "6333:6333"
+      - "6334:6334"
     volumes:
-      - chroma_data:/chroma/chroma
+      - qdrant_data:/qdrant/storage
 
   # INGESTION SERVICE
   ingestion-service:
@@ -29,7 +30,7 @@ services:
       - "3001:3001"
     env_file: .env
     depends_on:
-      - chromadb
+      - qdrant
     volumes:
       - .:/app
       - /app/node_modules
@@ -68,6 +69,20 @@ services:
       - /app/node_modules
     command: npm run dev:orchestrator
 
+  # FRONTEND SERVICE
+  frontend-service:
+    build:
+      context: ./frontend-service
+      dockerfile: Dockerfile
+    container_name: insuredoc-frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend-service:/app
+      - /app/node_modules
+    depends_on:
+      - orchestrator-service
+
 volumes:
   mongodb_data:
-  chroma_data:
+  qdrant_data:
