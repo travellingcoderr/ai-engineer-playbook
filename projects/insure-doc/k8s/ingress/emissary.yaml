@@ -1,0 +1,41 @@
+# InsureDoc: Emissary Ingress API Gateway
+
+apiVersion: getambassador.io/v3alpha1
+kind: Host
+metadata:
+  name: insuredoc-host
+  namespace: emissary
+spec:
+  hostname: "*" # Replace with actual domain
+  tlsSecret:
+    name: insuredoc-tls-cert # Mounted via Secret Store CSI
+---
+apiVersion: getambassador.io/v3alpha1
+kind: Mapping
+metadata:
+  name: orchestrator-mapping
+  namespace: default
+spec:
+  hostname: "*"
+  prefix: /api/v1/chat
+  service: orchestrator:3003
+---
+apiVersion: getambassador.io/v3alpha1
+kind: Mapping
+metadata:
+  name: ingestion-mapping
+  namespace: default
+spec:
+  hostname: "*"
+  prefix: /api/v1/ingestion
+  service: ingestion:3001
+---
+apiVersion: getambassador.io/v3alpha1
+kind: Mapping
+metadata:
+  name: claim-service-mapping
+  namespace: default
+spec:
+  hostname: "*"
+  prefix: /api/v1/claims
+  service: claim-service:3002

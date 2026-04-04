@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  # LOCAL MONGODB
+  mongodb:
+    image: mongo:latest
+    container_name: insuredoc-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+  # LOCAL CHROMADB
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: insuredoc-chromadb
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+
+  # INGESTION SERVICE
+  ingestion-service:
+    build: 
+      context: .
+      dockerfile: ./ingestion-service/Dockerfile
+    container_name: insuredoc-ingestion
+    ports:
+      - "3001:3001"
+    env_file: .env
+    depends_on:
+      - chromadb
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: npm run dev:ingestion
+
+  # CLAIM SERVICE
+  claim-service:
+    build:
+      context: .
+      dockerfile: ./claim-service/Dockerfile
+    container_name: insuredoc-claim-service
+    ports:
+      - "3002:3002"
+    env_file: .env
+    depends_on:
+      - mongodb
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: npm run dev:claim
+
+  # ORCHESTRATOR SERVICE
+  orchestrator-service:
+    build:
+      context: .
+      dockerfile: ./orchestrator-service/Dockerfile
+    container_name: insuredoc-orchestrator
+    ports:
+      - "3003:3003"
+    env_file: .env
+    depends_on:
+      - ingestion-service
+      - claim-service
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: npm run dev:orchestrator
+
+volumes:
+  mongodb_data:
+  chroma_data:

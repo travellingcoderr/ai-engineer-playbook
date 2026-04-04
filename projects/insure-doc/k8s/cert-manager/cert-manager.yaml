@@ -1,0 +1,35 @@
+# InsureDoc: Cert-Manager with Azure Key Vault
+
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: insuredoc-kv-issuer
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: admin@insuredoc.com # Replace with your email
+    privateKeySecretRef:
+      name: insuredoc-kv-issuer-account-key
+    solvers:
+    - dns01:
+        azureDNS:
+          subscriptionID: var.subscription_id
+          resourceGroupName: var.resource_group
+          hostedZoneName: yourdomain.com
+          # Workload Identity Managed ID
+          managedIdentity:
+            clientID: var.client_id
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: insuredoc-tls-cert
+  namespace: emissary
+spec:
+  secretName: insuredoc-tls-cert
+  issuerRef:
+    name: insuredoc-kv-issuer
+    kind: ClusterIssuer
+  commonName: "*"
+  dnsNames:
+  - "*.yourdomain.com"

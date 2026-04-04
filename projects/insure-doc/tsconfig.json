@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "outDir": "./dist",
+    "baseUrl": ".",
+    "rootDir": ".",
+    "paths": {
+      "common/*": ["common/*"]
+    }
+  },
+  "include": [
+    "common/**/*.ts",
+    "ingestion-service/**/*.ts",
+    "claim-service/**/*.ts",
+    "orchestrator-service/**/*.ts"
+  ],
+  "exclude": ["node_modules"]
+}

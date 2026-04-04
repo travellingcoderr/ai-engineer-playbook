@@ -254,4 +254,9 @@ projects/nexus/src/Nexus.Api/obj/
 projects/nexus/src/Nexus.Api/bin/
 projects/nexus/src/Nexus.Api/obj/Debug/net8.0/
 projects/nexus/src/Nexus.Api/bin/Debug/net8.0/
-
+# InsureDoc Docker
+projects/insure-doc/.env
+projects/insure-doc/node_modules/
+projects/insure-doc/ingestion-service/node_modules/
+projects/insure-doc/claim-service/node_modules/
+projects/insure-doc/orchestrator-service/node_modules/
