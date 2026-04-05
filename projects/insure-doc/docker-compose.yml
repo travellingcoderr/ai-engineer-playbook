@@ -34,7 +34,7 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
-    command: npm run dev:ingestion
+    command: npx ts-node --transpile-only ingestion-service/server.ts
 
   # CLAIM SERVICE
   claim-service:
@@ -50,7 +50,7 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
-    command: npm run dev:claim
+    command: npx ts-node --transpile-only claim-service/server.ts
 
   # ORCHESTRATOR SERVICE
   orchestrator-service:
@@ -67,7 +67,7 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
-    command: npm run dev:orchestrator
+    command: npx ts-node --transpile-only orchestrator-service/server.ts
 
   # FRONTEND SERVICE
   frontend-service:

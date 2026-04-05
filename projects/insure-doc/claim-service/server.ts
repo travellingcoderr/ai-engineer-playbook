@@ -32,8 +32,8 @@ const swaggerOptions = {
   apis: ['./claim-service/**/*.ts'], // Files containing annotations
 };
 
-const swaggerDocs = swaggerJsdoc(swaggerOptions);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+// const swaggerDocs = swaggerJsdoc(swaggerOptions);
+// app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 console.log(`📡 Claim Service initialization (Provider: ${process.env.DB_PROVIDER || 'mock'})`);
 const claimTool = new ClaimSnapshotTool();

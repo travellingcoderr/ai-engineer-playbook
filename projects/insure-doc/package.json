@@ -4,11 +4,13 @@
   "description": "Unified dependency management for InsureDoc microservices.",
   "private": true,
   "scripts": {
-    "dev:ingestion": "ts-node-dev --respawn --transpile-only ingestion-service/server.ts",
-    "dev:claim": "ts-node-dev --respawn --transpile-only claim-service/server.ts",
-    "dev:orchestrator": "ts-node-dev --respawn --transpile-only orchestrator-service/server.ts"
+    "dev:ingestion": "ts-node --transpile-only ingestion-service/server.ts",
+    "dev:claim": "ts-node --transpile-only claim-service/server.ts",
+    "dev:orchestrator": "ts-node --transpile-only orchestrator-service/server.ts"
   },
   "dependencies": {
+    "@azure-rest/ai-document-intelligence": "^1.1.0",
+    "@azure/identity": "^4.13.1",
     "@azure/search-documents": "^11.3.0",
     "@langchain/core": "0.3.58",
     "@langchain/langgraph": "0.2.45",
@@ -23,7 +25,7 @@
     "mongodb": "^6.3.0",
     "mongoose": "^8.2.0",
     "multer": "^2.1.1",
-    "pdf-parse": "^2.4.5",
+    "pdf-parse": "^1.1.1",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.0",
     "zod": "^3.22.4"

@@ -184,6 +184,53 @@ input {
   border-color: var(--primary);
 }
 
+/* Smart Toggle Styles */
+.smart-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 20px;
+  transition: all 0.3s;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+}
+
+.smart-toggle.active {
+  background: var(--primary-glow);
+  border-color: var(--primary);
+  box-shadow: 0 0 15px var(--primary-glow);
+}
+
+.toggle-track {
+  width: 30px;
+  height: 14px;
+  background: #334155;
+  border-radius: 10px;
+  position: relative;
+  transition: background 0.3s;
+}
+
+.smart-toggle.active .toggle-track {
+  background: var(--primary);
+}
+
+.toggle-thumb {
+  width: 10px;
+  height: 10px;
+  background: white;
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.3s;
+}
+
+.smart-toggle.active .toggle-thumb {
+  transform: translateX(16px);
+}
+
 /* Modal Styles */
 .modal-overlay {
   position: fixed;

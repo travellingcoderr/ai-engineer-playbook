@@ -26,6 +26,7 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [trace, setTrace] = useState<any[]>([]);
   const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
+  const [isSmartMode, setIsSmartMode] = useState(false);
   
   // New Claim Form State
   const [newClaim, setNewClaim] = useState({
@@ -119,17 +120,30 @@ const App: React.FC = () => {
     if (!file) return;
 
     setLoading(true);
-    setTrace([{ role: 'system', content: `Ingesting PDF: ${file.name}...` }]);
+    setTrace([{ 
+      role: 'system', 
+      content: isSmartMode ? 'Analyzing Layout with Azure AI Document Intelligence...' : `Ingesting PDF: ${file.name}...` 
+    }]);
 
     const formData = new FormData();
     formData.append('file', file);
 
+    const endpoint = isSmartMode 
+      ? 'http://localhost:3001/api/v1/ingestion/smart-pdf' 
+      : 'http://localhost:3001/api/v1/ingestion/pdf';
+
     try {
-      await axios.post('http://localhost:3001/api/v1/ingestion/pdf', formData);
-      setTrace(prev => [...prev, { role: 'system', content: 'PDF Vectorized Successfully!' }]);
-      setMessages(prev => [...prev, { role: 'assistant', content: `Successfully ingested "${file.name}". I can now answer questions based on this policy!` }]);
+      await axios.post(endpoint, formData);
+      setTrace(prev => [...prev, { 
+        role: 'system', 
+        content: isSmartMode ? 'Azure AI: Markdown Layout Extracted & Indexed!' : 'PDF Vectorized Successfully!' 
+      }]);
+      setMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: `Successfully ingested "${file.name}" ${isSmartMode ? 'using Azure AI Smart Mode' : ''}. I can now answer questions with high-fidelity table data!` 
+      }]);
     } catch (error) {
-      setTrace(prev => [...prev, { role: 'system', content: 'Error during PDF ingestion.' }]);
+      setTrace(prev => [...prev, { role: 'system', content: 'Error during ingestion.' }]);
     } finally {
       setLoading(false);
     }
@@ -164,6 +178,15 @@ const App: React.FC = () => {
           <h1>InsureDoc AI Dashboard</h1>
           
           <div style={{ marginLeft: 'auto', display: 'flex', gap: '12px', alignItems: 'center' }}>
+            <div className={`smart-toggle ${isSmartMode ? 'active' : ''}`} onClick={() => setIsSmartMode(!isSmartMode)}>
+              <div className="toggle-track">
+                <div className="toggle-thumb" />
+              </div>
+              <span style={{ fontSize: '0.7rem', fontWeight: 600, color: isSmartMode ? '#10b981' : 'inherit' }}>
+                SMART INGEST
+              </span>
+            </div>
+            
             <button onClick={() => setIsClaimModalOpen(true)} className="action-btn">
               <ClipboardCheck size={16} /> New Claim
             </button>
@@ -245,11 +268,19 @@ const App: React.FC = () => {
             >
               {step.tool_calls ? <Search className="trace-icon" /> : <ClipboardCheck className="trace-icon" />}
               <div>
-                <div style={{ fontWeight: 600 }}>{step.tool_calls ? 'Tool Identified' : 'Data Retrieved'}</div>
+                <div style={{ fontWeight: 600 }}>
+                  {step.tool_calls ? 'AI Thinking' : 'Context Injected'}
+                </div>
                 <div style={{ opacity: 0.7, fontSize: '0.75rem', marginTop: '4px' }}>
-                  {step.tool_calls?.[0]?.name === 'checkClaimStatus' && "Checking MongoDB Snapshot..."}
-                  {step.tool_calls?.[0]?.name === 'searchInsurancePolicy' && "Searching Qdrant Vector Store..."}
-                  {step.role === 'tool' && "Tool Execution Complete"}
+                  {step.tool_calls?.[0]?.name === 'checkClaimStatus' && "Analyzing Claim Records..."}
+                  {step.tool_calls?.[0]?.name === 'searchInsurancePolicy' && "Retrieving Policy Knowledge..."}
+                  {step.role === 'tool' && (
+                    <span>
+                      {step.output?.includes('|') && step.output?.includes('---') 
+                        ? "✨ High-Fidelity Layout Context (Tables Detected)" 
+                        : "Standard Text Retrieval Complete"}
+                    </span>
+                  )}
                 </div>
               </div>
             </motion.div>

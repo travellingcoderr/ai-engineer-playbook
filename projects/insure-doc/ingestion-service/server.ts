@@ -35,8 +35,8 @@ const swaggerOptions = {
   apis: ['./ingestion-service/**/*.ts'], // Files containing annotations
 };
 
-const swaggerDocs = swaggerJsdoc(swaggerOptions);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+// const swaggerDocs = swaggerJsdoc(swaggerOptions);
+// app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 const chunkingService = new ChunkingService();
 
@@ -160,8 +160,60 @@ app.post('/api/v1/ingestion/pdf', validateEntraToken, upload.single('file'), asy
       pageCount: data.numpages 
     });
   } catch (error) {
-    console.error('PDF Ingestion Error:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * @openapi
+ * /api/v1/ingestion/smart-pdf:
+ *   post:
+ *     summary: Ingest a PDF document using Azure AI Document Intelligence (Prebuilt Layout)
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Smart PDF processed successfully
+ */
+import { DocIntelService } from './doc-intelligence.service';
+const docIntelService = new DocIntelService();
+
+app.post('/api/v1/ingestion/smart-pdf', validateEntraToken, upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+
+    console.log(`🧠 Smart Ingest: Advanced Analyze with Azure AI...`);
+    const content = await docIntelService.extractMarkdown(req.file.buffer);
+    const title = req.file.originalname.replace('.pdf', '');
+
+    if (!content.trim()) throw new Error("Azure AI could not extract content.");
+
+    console.log(`📝 Logic: Preserving Markdown tables in ${content.length} characters...`);
+    const chunks = await chunkingService.chunkDocument(content, title, []);
+    
+    const chunkTexts = chunks.map(c => c.text);
+    const vectorEmbeddings = await embeddings.embedDocuments(chunkTexts);
+    
+    await vectorStore.uploadDocuments(chunks, vectorEmbeddings, title);
+    
+    res.json({ 
+      message: 'Smart PDF processed successfully!', 
+      chunkCount: chunks.length,
+      provider: 'Azure AI Document Intelligence'
+    });
+  } catch (error) {
+    console.error('Smart PDF Ingestion Error:', error);
+    res.status(500).json({ error: 'Internal server error during smart ingestion.' });
   }
 });
 

@@ -297,3 +297,30 @@ await qdrant.upsert('insurance-policies', {
 > **Interviewer Pro-Tip**: This is a great place to talk about **"Confidence Scores."** Document Intelligence provides a confidence score for every field it extracts. A Senior Engineer would implement a "Human-in-the-Loop" trigger: *"If the extraction confidence for the Procedure Code is < 90%, flag this claim for manual review instead of letting the AI process it automatically."*
 
 ---
+
+## 11. Multi-Model Strategy & Azure AI Foundry
+
+### ❓ Question: 
+"Microsoft is pushing **Azure AI Foundry** (formerly AI Studio) to support multi-model access (Llama, Mistral, etc.). Did you consider a multi-model strategy for InsureDoc?"
+
+### 🎙️ The "Senior Engineer" Pitch
+"Azure AI Foundry is a powerful evolution for **Governance and Model Variety**, but for a complex agentic system like InsureDoc, I prioritized **Functional Reliability** over 'Model Diversity.' I chose to stick with the Azure OpenAI-specific resource to ensure the highest fidelity for our tool-calling loops."
+
+#### **Key Talking Points:**
+
+1.  **Specialized Tool-Calling (JSON Mode)**
+    *   "GPT-4o remains the industry gold standard for **Function Calling** and **JSON mode**. While Foundry allows us to swap in models like Llama 3 or Mistral, their performance for complex, structured tool-calls is still less reliable than OpenAI's. In insurance, a 'hallucinated' procedure code is a critical failure."
+
+2.  **Platform Maturity vs. Management Overhead**
+    *   "Foundry is ideal for teams that need built-in **Safety Evaluations** and **Benchmark Tools**. However, for this project, I chose to build a custom LangGraph orchestration layer. This gives us much more granular control over 'State' and 'Loops' than the higher-level 'Agent Service' currently offered in Foundry."
+
+3.  **Future-Proofing for Multi-Modal**
+    *   "Although we currently use OpenAI, our architecture is **provider-agnostic**. Because we use LangChain and LangGraph, we could easily migrate our 'Nodes' to use a different model from the Foundry library if a new model (like o1 or Llama 4) outperforms GPT-4o on dental reasoning in the future."
+
+4.  **Security Boundaries**
+    *   "Azure OpenAI is a highly mature, heavily audited service. By keeping our 'Brain' (LLM) and 'Vision' (DocIntel) within the same core Azure AI resource group, we maintain the tightest possible security boundary for sensitive healthcare data."
+
+> [!TIP]
+> **Interviewer Pro-Tip**: This is your chance to talk about **"Model Governance."** Explain that a Senior Engineer doesn't just pick the 'shiniest' model; they pick the model that best fits the **functional requirements** (reliability, latency, cost) of the specific use case (insurance claims).
+
+---
