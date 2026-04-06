@@ -1,0 +1,10 @@
+azure-ai-projects
+azure-ai-agents
+azure-search-documents
+azure-ai-documentintelligence
+azure-identity
+azure-eventhub
+mcp
+python-dotenv
+pydantic
+openai
