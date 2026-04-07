@@ -37,9 +37,9 @@ async def send_event(event_type, city, severity, details):
         print(f"Type: {event_type} | City: {city} | Severity: {severity}\n")
 
 if __name__ == "__main__":
-    # Example: python scripts/simulate_event.py "Strike" "Miami" 8 "Dock workers strike starting at midnight"
+    # Example: python3 scripts/simulate_event.py "Strike" "Miami" 8 "Dock workers strike starting at midnight"
     if len(sys.argv) < 5:
         print("\n[!] Error: Missing event arguments.")
-        print("Usage: python scripts/simulate_event.py <Type> <City> <Severity> <Details>")
+        print("Usage: python3 scripts/simulate_event.py <Type> <City> <Severity> <Details>")
     else:
         asyncio.run(send_event(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]))

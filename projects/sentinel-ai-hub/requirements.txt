@@ -1,5 +1,5 @@
-azure-ai-projects
-azure-ai-agents
+azure-ai-projects>=2.0.0
+# azure-ai-agents (deprecated, merged into azure-ai-projects v2+)
 azure-search-documents
 azure-ai-documentintelligence
 azure-identity
@@ -8,3 +8,5 @@ mcp
 python-dotenv
 pydantic
 openai
+azure-ai-evaluation
+fpdf2

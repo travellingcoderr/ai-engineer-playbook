@@ -2,8 +2,9 @@ import os
 import logging
 from typing import Optional
 from dotenv import load_dotenv
+from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 from azure.ai.projects import AIProjectClient
-from azure.identity import DefaultAzureCredential
+from openai import OpenAI
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -12,23 +13,30 @@ logger = logging.getLogger(__name__)
 class FoundryProjectManager:
     """
     Central manager for Azure AI Foundry Project interactions.
-    Handles authentication and provides access to Project-level sub-clients.
+    Handles authentication and provides access to Project-level sub-clients 
+    using the SDK v2.0.0+ endpoint-based pattern.
     """
-    def __init__(self, connection_string: Optional[str] = None):
+    def __init__(self, endpoint: Optional[str] = None):
         load_dotenv()
-        self.connection_string = connection_string or os.getenv("AZURE_AI_PROJECT_CONNECTION_STRING")
+        # Loading from new AZURE_AI_PROJECT_ENDPOINT
+        self.endpoint = endpoint or os.getenv("AZURE_AI_PROJECT_ENDPOINT")
         
-        if not self.connection_string:
-            raise ValueError("AZURE_AI_PROJECT_CONNECTION_STRING not found in environment.")
+        if not self.endpoint:
+            logger.error("FAILED to load AZURE_AI_PROJECT_ENDPOINT from .env")
+            raise ValueError("AZURE_AI_PROJECT_ENDPOINT not found in environment.")
 
-        # DefaultAzureCredential works best with 'az login' locally
+        # Verification log
+        masked_endpoint = f"{self.endpoint[:15]}...{self.endpoint[-15:]}"
+        logger.info(f"Connecting to Foundry Project at: {masked_endpoint}")
+        
         self.credential = DefaultAzureCredential()
         
-        self.client = AIProjectClient.from_connection_string(
-            connection_string=self.connection_string,
+        # v2.0.0 Unified Client Initialization
+        self.client = AIProjectClient(
+            endpoint=self.endpoint,
             credential=self.credential
         )
-        logger.info("AIProjectClient initialized successfully.")
+        logger.info("AIProjectClient (v2.0.0) initialized successfully.")
 
     def __enter__(self):
         return self
@@ -37,15 +45,43 @@ class FoundryProjectManager:
         self.client.close()
 
     def get_agents_client(self):
-        """Returns the sub-client for Agent operations."""
+        """Returns the unified Agents operations client."""
         return self.client.agents
+
+    def get_openai_client(self):
+        """
+        Returns an authenticated OpenAI client for runtime inference.
+
+        Prefer the direct Azure OpenAI endpoint when configured because it is the
+        most stable path for model inference. Fall back to the project-scoped
+        Foundry runtime only when no direct endpoint is available.
+        """
+        legacy_api_version = os.getenv("AZURE_AI_AGENTS_API_VERSION")
+        if legacy_api_version:
+            logger.warning(
+                "Ignoring deprecated AZURE_AI_AGENTS_API_VERSION=%s. "
+                "azure-ai-projects now manages the runtime API surface.",
+                legacy_api_version,
+            )
+
+        aoai_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
+        if aoai_endpoint:
+            logger.info("Using direct Azure OpenAI runtime endpoint for inference.")
+            return OpenAI(
+                base_url=f"{aoai_endpoint.rstrip('/')}/openai/v1/",
+                api_key=get_bearer_token_provider(
+                    self.credential,
+                    "https://cognitiveservices.azure.com/.default",
+                ),
+            )
+
+        return self.client.get_openai_client()
 
     def get_search_connection(self):
         """
         Retrieves the connection details for the Azure AI Search service 
         linked to this project.
         """
-        # This is useful if we want to dynamically find the search endpoint
         connections = self.client.connections.list()
         for conn in connections:
             if conn.connection_type == "CognitiveSearch":
@@ -56,6 +92,6 @@ if __name__ == "__main__":
     # Quick test
     try:
         with FoundryProjectManager() as manager:
-            print("Foundry Project Manager is ready.")
+            print("Foundry Project Manager (v2.0.0) is ready.")
     except Exception as e:
         print(f"Error: {e}")

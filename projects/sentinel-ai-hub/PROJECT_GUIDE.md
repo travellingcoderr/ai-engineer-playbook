@@ -206,3 +206,9 @@ MCP is the open standard for connecting LLMs to external systems. Sentinel uses 
  While Sentinel uses **Transformers** (LLMs for text), Diffusion Models (Stable Diffusion, Midjourney) are for **Image/Media Generation**.
  *   **How they work**: They start with a image made of random "noise" and slowly subtract that noise (Denoising) until a clear image emerges.
  *   **Key Concept**: The "Forward Process" adds noise; the "Reverse Process" removes noise based on your text prompt.
+ 
+ ### 7.4 Tokenization & Embeddings: The Math of Azure AI
+ *   **The Tokenizer (`cl100k_base`)**: Before an AI reads text, it breaks it into "tokens" (chunks of characters). We use the **cl100k_base** tokenizer, which is the same one used by GPT-4 and GPT-4o. It is highly efficient at handling a wide range of languages and technical jargon.
+ *   **The Embedding Model (`text-embedding-3-small`)**: This is the "brain" that converts those tokens into a **1536-dimensional vector** (a list of 1,536 numbers). 
+ *   **The Concept of "Vector Distance"**: In Azure AI Search, we find the best SLA match by calculating the mathematical distance between your query's vector and the document's vector. The closer they are in 1,536-dimensional space, the more "semantically similar" they are.
+ *   **Why 1536?**: This specific dimensionality is the gold standard for balancing high-performance retrieval with storage efficiency.

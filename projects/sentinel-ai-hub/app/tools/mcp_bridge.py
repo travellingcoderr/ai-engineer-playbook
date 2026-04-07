@@ -3,6 +3,7 @@ import asyncio
 import json
 import logging
 from typing import List, Dict, Any, Optional
+from contextlib import AsyncExitStack
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 from azure.ai.projects.models import FunctionTool
@@ -19,7 +20,7 @@ class MultiMCPManager:
     def __init__(self):
         self.servers: Dict[str, Dict[str, Any]] = {}
         self.tool_to_server: Dict[str, str] = {}
-        self._exit_stacks: Dict[str, asyncio.ExitStack] = {}
+        self._exit_stacks: Dict[str, AsyncExitStack] = {}
 
     def register_server(self, name: str, command: str, args: List[str], env: Optional[Dict[str, str]] = None):
         """Register a server configuration without connecting yet."""
@@ -44,7 +45,7 @@ class MultiMCPManager:
         for name, config in self.servers.items():
             try:
                 logger.info(f"Connecting to MCP server: {name}...")
-                exit_stack = asyncio.ExitStack()
+                exit_stack = AsyncExitStack()
                 self._exit_stacks[name] = exit_stack
                 
                 read, write = await exit_stack.enter_async_context(stdio_client(config["params"]))

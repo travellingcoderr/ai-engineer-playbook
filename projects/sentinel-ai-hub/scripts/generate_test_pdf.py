@@ -7,15 +7,15 @@ on the fly. Each PDF contains specific disaster protocols that the
 Sentinel AI agents will discover during an event.
 
 USAGE:
-    python scripts/generate_test_pdf.py "<Warehouse>" "<BackupHub>" <DelayLimit> <WeeklyFine>
+    python3 scripts/generate_test_pdf.py "<Warehouse>" "<BackupHub>" <DelayLimit> <WeeklyFine>
 
 EXAMPLE:
-    python scripts/generate_test_pdf.py "Chicago Warehouse" "Detroit-Backup-9" 12 8500
+    python3 scripts/generate_test_pdf.py "Chicago Warehouse" "Detroit-Backup-9" 12 8500
 
 WHAT HAPPENS NEXT:
     1. The PDF is saved in projects/sentinel-ai-hub/pdfs/
-    2. You run 'python scripts/ingest_doc.py <path_to_pdf>' to index it.
-    3. You run 'python scripts/simulate_event.py' to test the AI's response.
+    2. You run 'python3 scripts/ingest_doc.py <path_to_pdf>' to index it.
+    3. You run 'python3 scripts/simulate_event.py' to test the AI's response.
 -------------------------------------------------------------------------
 """
 
@@ -92,7 +92,7 @@ def generate_dynamic_pdf(warehouse_name, hub_name, delay_hours, penalty_amount):
 if __name__ == "__main__":
     if len(sys.argv) < 5:
         print("\n[!] Error: Missing arguments.")
-        print("Usage: python scripts/generate_test_pdf.py <Warehouse> <Hub> <DelayHours> <Penalty>")
+        print("Usage: python3 scripts/generate_test_pdf.py <Warehouse> <Hub> <DelayHours> <Penalty>")
         print("Hint:  Use quotes for multi-word names, e.g. \"Miami Dock\"")
     else:
         generate_dynamic_pdf(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
