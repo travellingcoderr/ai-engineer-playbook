@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  api-bridge:
+    build: ./api_bridge
+    ports:
+      - "8000:8000"
+    environment:
+      - API_KEY=${API_KEY:-your-secure-api-key}
+      - LLM_PROVIDER=${LLM_PROVIDER:-ollama}
+      - DEFAULT_MODEL=${DEFAULT_MODEL:-llama3.2:3b}
+      - OLLAMA_URL=http://ollama:11434
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL:-https://api.openai.com/v1}
+      - RATE_LIMIT_PER_MINUTE=${RATE_LIMIT_PER_MINUTE:-5}
+      - REQUEST_TIMEOUT_SECONDS=${REQUEST_TIMEOUT_SECONDS:-300}
+    depends_on:
+      - ollama
+    networks:
+      - llm-network
+
+  ollama:
+    image: ollama/ollama:latest
+    volumes:
+      - ollama_data:/root/.ollama
+    ports:
+      - "11434:11434"
+    networks:
+      - llm-network
+
+networks:
+  llm-network:
+    driver: bridge
+
+volumes:
+  ollama_data:
